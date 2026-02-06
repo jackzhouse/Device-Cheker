@@ -26,10 +26,14 @@ export default function RootLayout({
           enableSystem
           disableTransitionOnChange
         >
-          <Header />
-          <main className="min-h-screen">
-            {children}
-          </main>
+          <div className="min-h-screen flex flex-col">
+            <Header />
+            <main className="flex-1 items-start py-8">
+              <div className="container mx-auto">
+                {children}
+              </div>
+            </main>
+          </div>
           <Toaster />
         </ThemeProvider>
       </body>

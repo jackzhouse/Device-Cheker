@@ -7,9 +7,9 @@ import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
-import { 
-  Edit, Trash2, Eye, Download, Filter, 
-  Laptop, HardDrive, Calendar, User, Building 
+import {
+  Edit, Trash2, Eye, Download, Filter,
+  Laptop, HardDrive, Calendar, User, Building
 } from 'lucide-react';
 import Link from 'next/link';
 import { useState } from 'react';
@@ -79,11 +79,11 @@ export default function CheckDataPage() {
 
   // Filter checks
   const filteredChecks = checks.filter((check) => {
-    const matchesSearch = 
+    const matchesSearch =
       check.employeeSnapshot.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceBrand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceModel.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability === filters.suitability;
     const matchesOwnership = !filters.ownership || check.deviceDetail.ownership === filters.ownership;
 
@@ -115,16 +115,17 @@ export default function CheckDataPage() {
   }
 
   return (
-    <div className="container py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Device Check Data</h1>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Device Check Data</h1>
         <p className="text-muted-foreground">
           View and manage all device checking records
         </p>
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
+      <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
@@ -260,14 +261,14 @@ export default function CheckDataPage() {
   );
 }
 
-function CheckCard({ 
-  check, 
-  onEdit, 
-  onDelete, 
-  compact = false 
-}: { 
-  check: DeviceCheck; 
-  onEdit: () => void; 
+function CheckCard({
+  check,
+  onEdit,
+  onDelete,
+  compact = false
+}: {
+  check: DeviceCheck;
+  onEdit: () => void;
   onDelete: () => void;
   compact?: boolean;
 }) {
@@ -326,7 +327,7 @@ function CheckCard({
             </div>
           </div>
         )}
-        
+
         <div className="mb-4">
           {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
         </div>

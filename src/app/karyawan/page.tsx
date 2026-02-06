@@ -7,8 +7,8 @@ import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
-import { 
-  User, UserPlus, Edit, Trash2, History, PlusCircle, Search 
+import {
+  User, UserPlus, Edit, Trash2, History, PlusCircle, Search
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
@@ -87,10 +87,10 @@ export default function EmployeesPage() {
 
   // Filter employees
   const filteredEmployees = employees.filter((employee) => {
-    const matchesSearch = 
+    const matchesSearch =
       employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
       employee.position.toLowerCase().includes(searchTerm.toLowerCase());
-    
+
     const matchesDept = !filterDept || employee.department === filterDept;
     const matchesStatus = !filterStatus || employee.status === filterStatus;
 
@@ -106,24 +106,27 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="container py-8">
-      <div className="flex items-center justify-between mb-8">
-        <div>
-          <h1 className="text-3xl font-bold mb-2">Employee Data</h1>
-          <p className="text-muted-foreground">
-            Manage employee information and records
-          </p>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <div className="flex items-center justify-between">
+          <div className="flex flex-col gap-2">
+            <h1 className="text-3xl font-bold tracking-tight">Employee Data</h1>
+            <p className="text-muted-foreground">
+              Manage employee information and records
+            </p>
+          </div>
+          <Button asChild>
+            <Link href="/karyawan/new">
+              <UserPlus className="mr-2 h-4 w-4" />
+              Add Employee
+            </Link>
+          </Button>
         </div>
-        <Button asChild>
-          <Link href="/karyawan/new">
-            <UserPlus className="mr-2 h-4 w-4" />
-            Add Employee
-          </Link>
-        </Button>
       </div>
 
       {/* Filters */}
-      <Card className="mb-6">
+      <Card>
         <CardContent className="pt-6">
           <div className="flex flex-col md:flex-row gap-4">
             <div className="flex-1">
