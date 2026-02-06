@@ -6,7 +6,7 @@ import Employee from '@/models/Employee';
 // GET /api/device-checks/[id] - Get device check by ID
 export async function GET(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -61,7 +61,7 @@ export async function GET(
 // PUT /api/device-checks/[id] - Update device check
 export async function PUT(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();
@@ -121,7 +121,7 @@ export async function PUT(
 // DELETE /api/device-checks/[id] - Delete device check
 export async function DELETE(
   request: NextRequest,
-  { params }: { params: { id: string } }
+  { params }: { params: Promise<{ id: string }> }
 ) {
   try {
     await connectDB();

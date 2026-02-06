@@ -6,7 +6,7 @@ import Employee from '@/models/Employee';
 // GET /api/device-checks/employee/[employeeId] - Get all checks for specific employee
 export async function GET(
   request: NextRequest,
-  { params }: { params: { employeeId: string } }
+  { params }: { params: Promise<{ employeeId: string }> }
 ) {
   try {
     await connectDB();

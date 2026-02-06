@@ -2,6 +2,7 @@
 
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
+import { Suspense } from 'react';
 import { createDeviceCheck, type DeviceCheck } from '@/lib/services/device-checks.service';
 import { normalizeDataForSubmission } from '@/lib/utils/data-normalizer';
 import EmployeeAutocomplete from '@/components/EmployeeAutocomplete';
@@ -11,13 +12,74 @@ import { Label } from '@/components/ui/label';
 import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useFieldArray, useForm } from 'react-hook-form';
+import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
 import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-export default function FormPage() {
+type ApplicationItem = {
+  applicationName?: string;
+  license?: string;
+  notes?: string;
+};
+
+type VPNItem = {
+  vpnName?: string;
+  license?: string;
+  notes?: string;
+};
+
+type FormData = {
+  employeeId: string;
+  checkDate: string;
+  deviceDetail: {
+    deviceType: string;
+    ownership: string;
+    deviceBrand: string;
+    deviceModel: string;
+    serialNumber: string;
+  };
+  operatingSystem: {
+    osType: string;
+    osVersion: string;
+    osLicense: string;
+    osRegularUpdate: boolean;
+  };
+  specification: {
+    ramCapacity: string;
+    memoryType: string;
+    memoryCapacity: string;
+    processor: string;
+  };
+  deviceCondition: {
+    deviceSuitability: string;
+    batterySuitability: string;
+    keyboardCondition: string;
+    touchpadCondition: string;
+    monitorCondition: string;
+    wifiCondition: string;
+  };
+  workApplications: ApplicationItem[];
+  nonWorkApplications: ApplicationItem[];
+  security: {
+    antivirus: {
+      status: string;
+      list: ApplicationItem[];
+    };
+    vpn: {
+      status: string;
+      list: VPNItem[];
+    };
+  };
+  additionalInfo: {
+    passwordUsage: string;
+    otherNotes: string;
+    inspectorPICName: string;
+  };
+};
+
+function FormContent() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const { t, language } = useLanguage();
@@ -25,16 +87,7 @@ export default function FormPage() {
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
 
-  // Handle URL params for pre-filling employee
-  React.useEffect(() => {
-    const employeeIdFromUrl = searchParams.get('employeeId');
-    if (employeeIdFromUrl) {
-      setValue('employeeId', employeeIdFromUrl);
-      handleEmployeeSelect(employeeIdFromUrl);
-    }
-  }, [searchParams]);
-
-  const { register, control, watch, handleSubmit, setValue, formState: { errors } } = useForm({
+  const { register, control, watch, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
       employeeId: '',
       checkDate: new Date().toISOString().split('T')[0],
@@ -108,6 +161,16 @@ export default function FormPage() {
     append: appendVpn,
     remove: removeVpn,
   } = useFieldArray({ control, name: 'security.vpn.list' });
+
+  // Handle URL params for pre-filling employee
+  React.useEffect(() => {
+    const employeeIdFromUrl = searchParams.get('employeeId');
+    if (employeeIdFromUrl) {
+      setValue('employeeId', employeeIdFromUrl);
+      handleEmployeeSelect(employeeIdFromUrl);
+    }
+  }, [searchParams, setValue]);
+
 
   const sections = [
     { id: 'employee', title: t('form.sections.employee'), icon: User },
@@ -893,5 +956,13 @@ export default function FormPage() {
         </form>
       </div>
     </div>
+  );
+}
+
+export default function FormPage() {
+  return (
+    <Suspense fallback={<div className="p-4">Loading form...</div>}>
+      <FormContent />
+    </Suspense>
   );
 }
