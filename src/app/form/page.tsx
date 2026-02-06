@@ -157,7 +157,7 @@ export default function FormPage() {
   // Handle employee selection
   const handleEmployeeSelect = async (employeeId: string) => {
     setValue('employeeId', employeeId);
-    
+
     try {
       const response = await getEmployeeById(employeeId);
       if (response.success && response.data) {
@@ -173,16 +173,16 @@ export default function FormPage() {
     try {
       // Convert to uppercase
       const normalizedValue = value.trim().toUpperCase();
-      
+
       // Immediately update local state with the new option (optimistic update)
       setDropdownOptions((prev) => {
         const currentOptions = prev[fieldName] || [];
         const optionExists = currentOptions.some((opt) => opt.value === normalizedValue);
-        
+
         if (optionExists) {
           return prev; // Don't add duplicate
         }
-        
+
         return {
           ...prev,
           [fieldName]: [
@@ -191,9 +191,9 @@ export default function FormPage() {
           ],
         };
       });
-      
+
       toast.success(`"${normalizedValue}" added successfully`);
-      
+
       // Save to backend in background (don't await)
       saveDropdownOption(fieldName, normalizedValue, category)
         .then(() => {
@@ -245,30 +245,35 @@ export default function FormPage() {
   };
 
   return (
-    <div className="container py-8">
-      <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Device Checking Form</h1>
+    <div className="space-y-6">
+      {/* Page Header */}
+      <div className="flex flex-col gap-2">
+        <h1 className="text-3xl font-bold tracking-tight">Device Checking Form</h1>
         <p className="text-muted-foreground">
-          Fill in the device checking information below
+          Fill in device checking information below
         </p>
       </div>
 
-      <div className="grid lg:grid-cols-[200px_1fr] gap-6">
-        {/* Progress Indicator (Desktop) */}
-        <aside className="hidden lg:block sticky top-20 h-fit space-y-1">
-          {sections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md transition-colors"
-            >
-              <section.icon className="h-4 w-4" />
-              {section.title}
-            </a>
-          ))}
+      {/* Form with Sidebar Navigation */}
+      <div className="grid lg:grid-cols-[240px_1fr] gap-6">
+        {/* Sidebar Navigation */}
+        <aside className="hidden lg:block sticky top-24 h-fit space-y-1">
+          <p className="text-sm font-medium text-muted-foreground mb-3">Form Sections</p>
+          <nav className="space-y-1">
+            {sections.map((section) => (
+              <a
+                key={section.id}
+                href={`#${section.id}`}
+                className="flex items-center gap-3 px-3 py-2 text-sm text-muted-foreground hover:text-foreground hover:bg-accent rounded-md transition-colors"
+              >
+                <section.icon className="h-4 w-4" />
+                {section.title}
+              </a>
+            ))}
+          </nav>
         </aside>
 
-        {/* Form */}
+        {/* Form Content */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Employee Section */}
           <Card id="employee">

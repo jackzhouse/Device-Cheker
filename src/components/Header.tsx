@@ -48,7 +48,7 @@ export default function Header() {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? 'default' : 'ghost'}
-                className="flex items-center space-x-2"
+                className="flex items-center space-x-2 cursor-pointer"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -64,8 +64,11 @@ export default function Header() {
           className="hidden md:flex"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         >
-          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+          {theme === 'dark' ? (
+            <Moon key="moon" className="h-5 w-5 animate-theme-toggle" />
+          ) : (
+            <Sun key="sun" className="h-5 w-5 animate-theme-toggle" />
+          )}
           <span className="sr-only">Toggle theme</span>
         </Button>
 
@@ -92,7 +95,7 @@ export default function Header() {
               >
                 <Button
                   variant={isActive(item.href) ? 'default' : 'ghost'}
-                  className="w-full justify-start"
+                  className="w-full justify-start cursor-pointer"
                 >
                   <item.icon className="mr-2 h-4 w-4" />
                   <span>{item.label}</span>
@@ -104,8 +107,11 @@ export default function Header() {
               className="w-full justify-start"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
-              <Sun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
-              <Moon className="mr-2 h-4 w-4 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
+              {theme === 'dark' ? (
+                <Moon key="moon" className="mr-2 h-4 w-4 animate-theme-toggle" />
+              ) : (
+                <Sun key="sun" className="mr-2 h-4 w-4 animate-theme-toggle" />
+              )}
               <span>Toggle Theme</span>
             </Button>
           </div>
