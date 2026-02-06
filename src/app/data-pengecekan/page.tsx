@@ -313,8 +313,8 @@ function CheckCard({
         <div className="flex items-start justify-between">
           <div className="flex-1">
             <CardTitle className="flex items-center gap-2 text-lg">
-              <Laptop className="h-5 w-5 text-primary" />
-              {check.deviceDetail.deviceType}
+              <User className="h-5 w-5 text-primary" />
+              {check.employeeSnapshot.fullName}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
               {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
@@ -328,8 +328,8 @@ function CheckCard({
           
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-2 text-sm">
-              <User className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{check.employeeSnapshot.fullName}</span>
+              <Laptop className="h-4 w-4 text-muted-foreground" />
+              <span className="font-medium">{check.deviceDetail.deviceType}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Building className="h-4 w-4 text-muted-foreground" />

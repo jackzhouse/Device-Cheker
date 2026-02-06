@@ -256,20 +256,42 @@ export default function EmployeeHistoryPage() {
                   {/* Check Card */}
                   <Card>
                     <CardContent className="pt-6">
-                      <div className="flex items-start justify-between mb-3">
+                      {/* Employee Name Section */}
+                      <div className="mb-4">
+                        <div className="flex items-center gap-2 mb-2">
+                          <User className="h-5 w-5 text-primary" />
+                          <h3 className="text-lg font-semibold">{employee.fullName}</h3>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm text-muted-foreground">
+                          <Badge variant="outline">v{check.version}</Badge>
+                          <Calendar className="h-4 w-4" />
+                          <span>{formatDate(check.checkDate)}</span>
+                        </div>
+                      </div>
+
+                      {/* Device Information */}
+                      <div className="mb-4">
+                        <div className="font-semibold text-lg mb-1">
+                          {check.deviceDetail.deviceType}
+                        </div>
+                        <p className="text-sm text-muted-foreground">
+                          {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
+                        </p>
+                        <div className="mt-2">
+                          <Badge 
+                            variant={check.deviceDetail.ownership === 'Company' ? 'default' : 'secondary'}
+                            className="text-xs"
+                          >
+                            <Building className="h-3 w-3 mr-1" />
+                            {check.deviceDetail.ownership}
+                          </Badge>
+                        </div>
+                      </div>
+
+                      {/* Suitability and Actions */}
+                      <div className="flex items-start justify-between">
                         <div>
-                          <div className="flex items-center gap-2 mb-1">
-                            <Badge variant="outline">v{check.version}</Badge>
-                            <span className="text-sm text-muted-foreground">
-                              {formatDate(check.checkDate)}
-                            </span>
-                          </div>
-                          <div className="font-semibold text-lg">
-                            {check.deviceDetail.deviceType}
-                          </div>
-                          <p className="text-sm text-muted-foreground">
-                            {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
-                          </p>
+                          {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
                         </div>
                         <div className="flex gap-2">
                           <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(check)}>
@@ -282,23 +304,6 @@ export default function EmployeeHistoryPage() {
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
-                      </div>
-
-                      {/* Device Details */}
-                      <div className="space-y-2 mb-4">
-                        <div className="flex items-center gap-2 text-sm">
-                          <HardDrive className="h-4 w-4 text-muted-foreground" />
-                          <span>{check.deviceDetail.ownership}</span>
-                        </div>
-                        <div className="flex items-center gap-2 text-sm">
-                          <Laptop className="h-4 w-4 text-muted-foreground" />
-                          <span>Serial: {check.deviceDetail.serialNumber}</span>
-                        </div>
-                      </div>
-
-                      {/* Suitability */}
-                      <div>
-                        {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
                       </div>
                     </CardContent>
                   </Card>
