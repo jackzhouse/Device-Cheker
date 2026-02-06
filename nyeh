@@ -1,0 +1,61 @@
+pipeline {
+    agent any
+    
+    environment {
+        TELEGRAM_TOKEN = credentials('TELEGRAM_BOT_TOKEN')
+        TELEGRAM_CHAT_ID = '-1002427589906' 
+    }
+    
+    stages {
+        stage('Pull Code') {
+            steps {
+                checkout scmGit(branches: [[name: '*/main']], extensions: [], userRemoteConfigs: [[credentialsId: '59192f9f-0fa4-452d-9930-025c67ebf54f', url: 'https://github.com/teknologi-kartu/support-device-checker.git']])
+            }
+        }
+        stage('Build Docker Image') {
+            steps {
+                sh 'docker build -t support_device_checker .'
+            }
+        }
+        stage('Remove Existing Container') {
+            steps {
+                sh 'docker container rm -f app_support_device_checker'
+            }
+        }
+        stage('Run New Container') {
+            steps {
+                sh 'docker run -d -p 8008:8000 --network staging-local --name app_support_device_checker support_device_checker:latest'
+            }
+        }
+        stage('Prune Unused Images') {
+            steps {
+                sh 'docker image prune -f'
+            }
+        }
+    }
+    
+    post {
+        success {
+            script {
+                def message = " *BUILD STATUS: SUCCEEDED* ✅ \n Name : *${env.JOB_NAME}*  \n Logs : ${env.BUILD_URL} #${env.BUILD_NUMBER}"
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/sendMessage \\
+                        -d chat_id=${env.TELEGRAM_CHAT_ID} \\
+                        -d parse_mode=Markdown \\
+                        -d text="${message}"
+                """
+            }
+        }
+        failure {
+            script {
+                def message = " *BUILD STATUS: FAILED* ❌ \n Name : *${env.JOB_NAME}*  \n Logs : ${env.BUILD_URL} #${env.BUILD_NUMBER}"
+                sh """
+                    curl -s -X POST https://api.telegram.org/bot${env.TELEGRAM_TOKEN}/sendMessage \\
+                        -d chat_id=${env.TELEGRAM_CHAT_ID} \\
+                        -d parse_mode=Markdown \\
+                        -d text="${message}"
+                """
+            }
+        }
+    }
+}
