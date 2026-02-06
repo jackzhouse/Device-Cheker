@@ -26,7 +26,7 @@ let configCache: Partial<ConsulConfig> | null = null;
  */
 async function getKVValue(key: string): Promise<string | null> {
   try {
-    const kvPath = `support-device-checker/setting/${key}`;
+    const kvPath = `new-config/support-device-checker/setting/${key}`;
     const value = await consulClient.kv.get(kvPath);
     
     if (value && value.Value) {
