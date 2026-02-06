@@ -1,4 +1,5 @@
 import { NextRequest, NextResponse } from 'next/server';
+import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
 import DeviceCheck from '@/models/DeviceCheck';
 import Employee from '@/models/Employee';
@@ -110,17 +111,32 @@ export async function GET(request: NextRequest) {
 
     // Execute query with employee population
     const checks = await DeviceCheck.find(query)
-      .populate('employeeId', 'fullName position status')
       .sort(sort)
       .skip(skip)
       .limit(limit)
       .lean();
 
-    // Transform to include employee data
-    const transformedChecks = checks.map((check: any) => ({
-      ...check,
-      employee: check.employeeId,
-    }));
+    // Transform to include employee data and convert ObjectId to string
+    const transformedChecks = checks.map((check: any) => {
+      const employeeId = check.employeeId.toString();
+      return {
+        ...check,
+        employeeId,
+        employee: check.employeeId, // Keep original for reference
+      };
+    });
+
+    // Now populate employee data for each check
+    const employeeIds = transformedChecks.map(c => new mongoose.Types.ObjectId(c.employeeId));
+    const employees = await Employee.find({ _id: { $in: employeeIds } }).lean();
+    
+    const employeeMap = new Map(employees.map(e => [e._id.toString(), e]));
+    
+    transformedChecks.forEach(check => {
+      if (check.employeeId && employeeMap.has(check.employeeId)) {
+        check.employee = employeeMap.get(check.employeeId);
+      }
+    });
 
     const total = await DeviceCheck.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
@@ -198,10 +214,14 @@ export async function POST(request: NextRequest) {
 
     saveDropdownOptions(deviceCheck.toObject(), dropdownOptions).catch(console.error);
 
+    // Convert deviceCheck to plain object and transform employeeId to string
+    const responseData = deviceCheck.toObject() as any;
+    responseData.employeeId = responseData.employeeId.toString();
+
     return NextResponse.json(
       {
         success: true,
-        data: deviceCheck,
+        data: responseData,
       },
       { status: 201 }
     );

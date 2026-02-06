@@ -99,7 +99,9 @@ export default function EmployeeAutocomplete({
       if (response.success && response.data) {
         toast.success('Employee created successfully');
         setIsCreateModalOpen(false);
-        handleEmployeeSelect(response.data._id);
+        // Ensure ID is a string
+        const employeeId = String(response.data._id);
+        handleEmployeeSelect(employeeId);
       } else {
         toast.error('Failed to create employee');
       }

@@ -94,14 +94,15 @@ export default function CheckDataPage() {
   const groupedChecks = React.useMemo(() => {
     const groups = new Map<string, DeviceCheck[]>();
     filteredChecks.forEach((check) => {
-      const key = check.employeeId;
+      const key = check.employeeId.toString();
       if (!groups.has(key)) {
         groups.set(key, []);
       }
       groups.get(key)!.push(check);
     });
-    return Array.from(groups.entries()).map(([employeeId, employeeChecks]) => ({
-      employeeId,
+    // Use the string key (employeeId from map entries) instead of original employeeId
+    return Array.from(groups.entries()).map(([key, employeeChecks]) => ({
+      employeeId: key,
       checks: employeeChecks.sort((a, b) => b.version - a.version),
     }));
   }, [filteredChecks]);
@@ -288,6 +289,7 @@ function CheckCard({
       day: 'numeric',
     });
   };
+  
 
   return (
     <Card>
@@ -307,6 +309,7 @@ function CheckCard({
       </CardHeader>
       <CardContent>
         {!compact && (
+          
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-2 text-sm">
               <User className="h-4 w-4 text-muted-foreground" />
@@ -333,7 +336,7 @@ function CheckCard({
 
         <div className="flex gap-2">
           <Button variant="outline" size="sm" className="flex-1" asChild>
-            <Link href={`/data-pengecekan/${check.employeeId}`}>
+            <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
               <Eye className="h-4 w-4" />
             </Link>
           </Button>

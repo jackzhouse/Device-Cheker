@@ -22,9 +22,7 @@ export async function GET(
     }
 
     // Find device check with employee data
-    const check = await DeviceCheck.findById(id)
-      .populate('employeeId', 'fullName position status department email phoneNumber')
-      .lean();
+    const check = await DeviceCheck.findById(id).lean();
 
     if (!check) {
       return NextResponse.json(
@@ -33,10 +31,18 @@ export async function GET(
       );
     }
 
-    // Transform to include employee data
+    // Convert ObjectId to string and store employeeId
+    const employeeId = check.employeeId?.toString();
+
+    // Populate employee data
+    const employee = await Employee.findById(employeeId).lean();
+
+    // Transform to include employee data and convert ObjectIds to strings
     const transformedCheck = {
       ...check,
-      employee: check.employeeId,
+      _id: check._id.toString(),
+      employeeId: employeeId,
+      employee: employee,
     };
 
     return NextResponse.json({
@@ -92,9 +98,16 @@ export async function PUT(
       );
     }
 
+    // Convert ObjectId to string
+    const transformedCheck = {
+      ...check,
+      _id: check._id.toString(),
+      employeeId: check.employeeId?.toString(),
+    };
+
     return NextResponse.json({
       success: true,
-      data: check,
+      data: transformedCheck,
     });
   } catch (error: any) {
     console.error('Error updating device check:', error);

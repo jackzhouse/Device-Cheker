@@ -37,11 +37,23 @@ export async function GET(
       .limit(5)
       .lean();
 
+    // Convert ObjectIds to strings
+    const employeeData = {
+      ...employee,
+      _id: employee._id.toString(),
+    };
+
+    const checksWithStringId = deviceChecks.map((check) => ({
+      ...check,
+      _id: check._id.toString(),
+      employeeId: check.employeeId.toString(),
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
-        ...employee,
-        deviceChecks,
+        ...employeeData,
+        deviceChecks: checksWithStringId,
       },
     });
   } catch (error: any) {
@@ -85,9 +97,15 @@ export async function PUT(
       );
     }
 
+    // Convert ObjectId to string
+    const employeeData = {
+      ...employee,
+      _id: employee._id.toString(),
+    };
+
     return NextResponse.json({
       success: true,
-      data: employee,
+      data: employeeData,
     });
   } catch (error: any) {
     console.error('Error updating employee:', error);
@@ -134,10 +152,14 @@ export async function DELETE(
       employee.status = 'Resigned';
       await employee.save();
 
+      // Convert to plain object with string ID
+      const employeeData: any = employee.toObject();
+      employeeData._id = employee._id.toString();
+
       return NextResponse.json({
         success: true,
         message: 'Employee status updated to Resigned (soft delete)',
-        data: employee,
+        data: employeeData,
       });
     } else {
       // Hard delete: no device checks exist

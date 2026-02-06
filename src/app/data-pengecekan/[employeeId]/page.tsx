@@ -1,0 +1,284 @@
+'use client';
+
+import * as React from 'react';
+import { useParams, useRouter } from 'next/navigation';
+import { getEmployeeChecks } from '@/lib/services/device-checks.service';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Badge } from '@/components/ui/badge';
+import { Button } from '@/components/ui/button';
+import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download } from 'lucide-react';
+import Link from 'next/link';
+import { toast } from 'sonner';
+
+interface EmployeeCheckHistoryData {
+  employee: {
+    _id: string;
+    firstName: string;
+    lastName: string;
+    fullName: string;
+    position: string;
+    department?: string;
+    email?: string;
+    status: string;
+  };
+  checks: Array<{
+    _id: string;
+    version: number;
+    checkDate: string;
+    deviceDetail: {
+      deviceType: 'PC' | 'Laptop';
+      deviceBrand: string;
+      deviceModel: string;
+      serialNumber: string;
+      ownership: 'Company' | 'Personal';
+    };
+    deviceCondition: {
+      deviceSuitability: string;
+    };
+  }>;
+  summary: {
+    totalChecks: number;
+    latestCheckDate: string | null;
+    deviceTypes: {
+      PC: number;
+      Laptop: number;
+    };
+    ownership: {
+      Company: number;
+      Personal: number;
+    };
+  };
+}
+
+export default function EmployeeHistoryPage() {
+  const params = useParams();
+  const router = useRouter();
+  const employeeId = params.employeeId as string;
+  const [data, setData] = React.useState<EmployeeCheckHistoryData | null>(null);
+  const [loading, setLoading] = React.useState(true);
+  const [error, setError] = React.useState<string | null>(null);
+
+  React.useEffect(() => {
+    fetchEmployeeHistory();
+  }, [employeeId]);
+
+  const fetchEmployeeHistory = async () => {
+    setLoading(true);
+    setError(null);
+    try {
+      // Ensure employeeId is a string
+      const idStr = String(employeeId);
+      const response = await getEmployeeChecks(idStr);
+      if (response.success && response.data) {
+        setData(response.data);
+      } else {
+        setError('Failed to fetch employee history');
+      }
+    } catch (err: any) {
+      console.error('Error fetching employee history:', err);
+      setError(err.message || 'Failed to fetch employee history');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteCheck = async (checkId: string) => {
+    if (!confirm('Are you sure you want to delete this device check?')) {
+      return;
+    }
+
+    try {
+      const { deleteDeviceCheck } = await import('@/lib/services/device-checks.service');
+      await deleteDeviceCheck(checkId);
+      toast.success('Device check deleted successfully');
+      fetchEmployeeHistory();
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to delete device check');
+    }
+  };
+
+  const formatDate = (dateString: string) => {
+    return new Date(dateString).toLocaleDateString('en-US', {
+      year: 'numeric',
+      month: 'short',
+      day: 'numeric',
+    });
+  };
+
+  const getSuitabilityBadge = (suitability: string) => {
+    const variants: any = {
+      'Suitable': 'success',
+      'Limited Suitability': 'warning',
+      'Needs Repair': 'destructive',
+      'Unsuitable': 'destructive',
+    };
+    return <Badge variant={variants[suitability] || 'default'}>{suitability}</Badge>;
+  };
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Loading employee history...</div>
+      </div>
+    );
+  }
+
+  if (error || !data) {
+    return (
+      <div className="container py-8">
+        <Card>
+          <CardContent className="pt-6 text-center py-12">
+            <p className="text-muted-foreground">{error || 'Employee not found'}</p>
+            <Button variant="outline" className="mt-4" onClick={() => router.back()}>
+              <ArrowLeft className="h-4 w-4 mr-2" />
+              Go Back
+            </Button>
+          </CardContent>
+        </Card>
+      </div>
+    );
+  }
+
+  const { employee, checks, summary } = data;
+
+  return (
+    <div className="container py-8">
+      {/* Back Button */}
+      <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+        <ArrowLeft className="h-4 w-4 mr-2" />
+        Back to Check Data
+      </Button>
+
+      {/* Employee Header */}
+      <Card className="mb-6">
+        <CardContent className="pt-6">
+          <div className="flex items-start justify-between">
+            <div>
+              <div className="flex items-center gap-3 mb-2">
+                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                  <User className="h-8 w-8 text-primary" />
+                </div>
+                <div>
+                  <h1 className="text-2xl font-bold">{employee.fullName}</h1>
+                  <p className="text-sm text-muted-foreground">
+                    {employee.position}
+                    {employee.department && ` • ${employee.department}`}
+                  </p>
+                  <Badge variant={employee.status === 'Active' ? 'success' : 'secondary'} className="mt-2">
+                    {employee.status}
+                  </Badge>
+                </div>
+              </div>
+            </div>
+            <div className="flex gap-2">
+              <Button variant="outline" onClick={() => router.push(`/form?employeeId=${employeeId}`)}>
+                Add New Check
+              </Button>
+            </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Summary Cards */}
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{summary.totalChecks}</div>
+            <div className="text-sm text-muted-foreground">Total Checks</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{summary.deviceTypes.PC}</div>
+            <div className="text-sm text-muted-foreground">PC Devices</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{summary.deviceTypes.Laptop}</div>
+            <div className="text-sm text-muted-foreground">Laptops</div>
+          </CardContent>
+        </Card>
+        <Card>
+          <CardContent className="pt-6">
+            <div className="text-2xl font-bold">{summary.ownership.Company}</div>
+            <div className="text-sm text-muted-foreground">Company Owned</div>
+          </CardContent>
+        </Card>
+      </div>
+
+      {/* Timeline */}
+      <Card>
+        <CardHeader>
+          <CardTitle>Check History</CardTitle>
+        </CardHeader>
+        <CardContent>
+          {checks.length === 0 ? (
+            <p className="text-center py-12 text-muted-foreground">No device checks found</p>
+          ) : (
+            <div className="space-y-6">
+              {checks.map((check, index) => (
+                <div key={check._id} className="relative pl-8 pb-6 border-l-2 border-muted">
+                  {/* Timeline Dot */}
+                  <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-primary border-2 border-background" />
+                  
+                  {/* Check Card */}
+                  <Card>
+                    <CardContent className="pt-6">
+                      <div className="flex items-start justify-between mb-3">
+                        <div>
+                          <div className="flex items-center gap-2 mb-1">
+                            <Badge variant="outline">v{check.version}</Badge>
+                            <span className="text-sm text-muted-foreground">
+                              {formatDate(check.checkDate)}
+                            </span>
+                          </div>
+                          <div className="font-semibold text-lg">
+                            {check.deviceDetail.deviceType}
+                          </div>
+                          <p className="text-sm text-muted-foreground">
+                            {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
+                          </p>
+                        </div>
+                        <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => router.push(`/form/edit/${check._id}`)}>
+                            <Edit className="h-4 w-4" />
+                          </Button>
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteCheck(check._id)}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </div>
+                      </div>
+
+                      {/* Device Details */}
+                      <div className="space-y-2 mb-4">
+                        <div className="flex items-center gap-2 text-sm">
+                          <HardDrive className="h-4 w-4 text-muted-foreground" />
+                          <span>{check.deviceDetail.ownership}</span>
+                        </div>
+                        <div className="flex items-center gap-2 text-sm">
+                          <Laptop className="h-4 w-4 text-muted-foreground" />
+                          <span>Serial: {check.deviceDetail.serialNumber}</span>
+                        </div>
+                      </div>
+
+                      {/* Suitability */}
+                      <div>
+                        {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
+                      </div>
+                    </CardContent>
+                  </Card>
+
+                  {/* Connector line (except for last item) */}
+                  {index < checks.length - 1 && (
+                    <div className="absolute left-0 top-24 bottom-0 -translate-x-1/2 w-px bg-muted" />
+                  )}
+                </div>
+              ))}
+            </div>
+          )}
+        </CardContent>
+      </Card>
+    </div>
+  );
+}

@@ -68,7 +68,7 @@ export interface IDeviceCheck extends Document {
     inspectorPICName?: string;
   };
   checkDate: Date;
-  version: number;
+  version?: number; // Optional - auto-calculated in pre-save hook
   createdAt: Date;
   updatedAt: Date;
 }
@@ -295,7 +295,7 @@ const DeviceCheckSchema = new Schema<IDeviceCheck>(
     },
     version: {
       type: Number,
-      required: true,
+      // Not required - auto-calculated in pre-validate hook
       index: true,
     },
   },
@@ -306,14 +306,18 @@ const DeviceCheckSchema = new Schema<IDeviceCheck>(
 
 // Pre-save hook to auto-increment version
 DeviceCheckSchema.pre('save', async function () {
-  if (this.isNew) {
-    // Calculate next version for this employee
-    const lastCheck = await DeviceCheck
-      .findOne({ employeeId: this.employeeId })
-      .sort({ version: -1 })
-      .select('version') as IDeviceCheck | null;
-    
-    this.version = lastCheck ? lastCheck.version + 1 : 1;
+  if (this.isNew && !this.version) {
+    try {
+      // Calculate next version for this employee
+      const lastCheck = await DeviceCheck
+        .findOne({ employeeId: this.employeeId })
+        .sort({ version: -1 })
+        .select('version') as IDeviceCheck | null;
+      
+      this.version = lastCheck && lastCheck.version ? lastCheck.version + 1 : 1;
+    } catch (error) {
+      console.error('Error calculating version:', error);
+    }
   }
 });
 

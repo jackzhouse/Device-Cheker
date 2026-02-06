@@ -36,9 +36,15 @@ export async function GET(request: NextRequest) {
       .limit(limit)
       .lean();
 
+    // Convert ObjectIds to strings
+    const employeesWithStringId = employees.map((emp) => ({
+      ...emp,
+      _id: emp._id.toString(),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: employees,
+      data: employeesWithStringId,
     });
   } catch (error: any) {
     console.error('Error searching employees:', error);

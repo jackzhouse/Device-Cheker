@@ -53,9 +53,15 @@ export async function GET(request: NextRequest) {
     const total = await Employee.countDocuments(query);
     const totalPages = Math.ceil(total / limit);
 
+    // Convert ObjectId to string
+    const employeesWithStringId = employees.map((emp) => ({
+      ...emp,
+      _id: emp._id.toString(),
+    }));
+
     return NextResponse.json({
       success: true,
-      data: employees,
+      data: employeesWithStringId,
       pagination: {
         page,
         limit,
@@ -107,10 +113,14 @@ export async function POST(request: NextRequest) {
       status,
     });
 
+    // Convert to plain object with string ID
+    const employeeData: any = employee.toObject();
+    employeeData._id = employee._id.toString();
+
     return NextResponse.json(
       {
         success: true,
-        data: employee,
+        data: employeeData,
       },
       { status: 201 }
     );

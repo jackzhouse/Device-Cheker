@@ -34,6 +34,7 @@ export function CreatableSelect({
   const [isOpen, setIsOpen] = React.useState(false);
   const [inputValue, setInputValue] = React.useState('');
   const [highlightedIndex, setHighlightedIndex] = React.useState(0);
+  const [lastCreatedValue, setLastCreatedValue] = React.useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
 
@@ -66,18 +67,21 @@ export function CreatableSelect({
   const selectedOption = options.find((opt) => opt.value === value);
 
   React.useEffect(() => {
-    if (isOpen && selectedOption) {
+    if (value && lastCreatedValue && value === lastCreatedValue) {
+      // Handle newly created value that hasn't been added to options yet
+      setInputValue(lastCreatedValue);
+    } else if (isOpen && selectedOption) {
       setInputValue(selectedOption.label);
     } else if (!isOpen && selectedOption) {
       setInputValue(selectedOption.label);
     } else if (!isOpen && !selectedOption) {
       setInputValue('');
     }
-  }, [isOpen, selectedOption]);
+  }, [isOpen, selectedOption, value, lastCreatedValue]);
 
   React.useEffect(() => {
     setHighlightedIndex(0);
-  }, [inputValue]);
+  }, [filteredOptions]);
 
   React.useEffect(() => {
     const handleClickOutside = (event: MouseEvent) => {
@@ -96,7 +100,10 @@ export function CreatableSelect({
 
   const handleSelect = (option: any) => {
     if (option.isNew && onCreate) {
+      setLastCreatedValue(option.value);
       onCreate(option.value);
+      // Also call onChange to select the newly created value
+      onChange(option.value);
     } else {
       onChange(option.value);
     }

@@ -1,8 +1,8 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter, useSearchParams } from 'next/navigation';
-import { createDeviceCheck, type DeviceCheck } from '@/lib/services/device-checks.service';
+import { useParams, useRouter } from 'next/navigation';
+import { getDeviceCheckById, updateDeviceCheck, type DeviceCheck } from '@/lib/services/device-checks.service';
 import EmployeeAutocomplete from '@/components/EmployeeAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -11,46 +11,39 @@ import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
+import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, ArrowLeft } from 'lucide-react';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
 
-export default function FormPage() {
+export default function EditFormPage() {
+  const params = useParams();
   const router = useRouter();
-  const searchParams = useSearchParams();
-  const [loading, setLoading] = React.useState(false);
+  const checkId = params.id as string;
+  const [loading, setLoading] = React.useState(true);
+  const [saving, setSaving] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
 
-  // Handle URL params for pre-filling employee
-  React.useEffect(() => {
-    const employeeIdFromUrl = searchParams.get('employeeId');
-    if (employeeIdFromUrl) {
-      setValue('employeeId', employeeIdFromUrl);
-      handleEmployeeSelect(employeeIdFromUrl);
-    }
-  }, [searchParams]);
-
-  const { register, control, watch, handleSubmit, setValue, formState: { errors } } = useForm({
+  const { register, control, watch, handleSubmit, setValue, formState: { errors }, reset } = useForm({
     defaultValues: {
       employeeId: '',
       checkDate: new Date().toISOString().split('T')[0],
       deviceDetail: {
-        deviceType: 'Laptop',
-        ownership: 'Company',
+        deviceType: 'Laptop' as 'PC' | 'Laptop',
+        ownership: 'Company' as 'Company' | 'Personal',
         deviceBrand: '',
         deviceModel: '',
         serialNumber: '',
       },
       operatingSystem: {
-        osType: 'Windows',
+        osType: 'Windows' as 'Windows' | 'Linux' | 'Mac',
         osVersion: '',
-        osLicense: 'Original',
+        osLicense: 'Original' as 'Original' | 'Pirated' | 'Open Source' | 'Unknown',
         osRegularUpdate: true,
       },
       specification: {
         ramCapacity: '',
-        memoryType: 'HDD',
+        memoryType: 'HDD' as 'HDD' | 'SSD',
         memoryCapacity: '',
         processor: '',
       },
@@ -62,20 +55,20 @@ export default function FormPage() {
         monitorCondition: 'Good',
         wifiCondition: 'Good',
       },
-      workApplications: [],
-      nonWorkApplications: [],
+      workApplications: [] as any,
+      nonWorkApplications: [] as any,
       security: {
         antivirus: {
-          status: 'Active',
-          list: [],
+          status: 'Active' as 'Active' | 'Inactive',
+          list: [] as any,
         },
         vpn: {
-          status: 'Available',
-          list: [],
+          status: 'Available' as 'Available' | 'Not Available',
+          list: [] as any,
         },
       },
       additionalInfo: {
-        passwordUsage: 'Available',
+        passwordUsage: 'Available' as 'Available' | 'Not Available',
         otherNotes: '',
         inspectorPICName: '',
       },
@@ -117,6 +110,11 @@ export default function FormPage() {
     { id: 'info', title: 'Additional Info', icon: Calendar },
   ];
 
+  // Fetch check data on load
+  React.useEffect(() => {
+    fetchCheckData();
+  }, [checkId]);
+
   // Fetch dropdown options
   React.useEffect(() => {
     const fetchDropdownOptions = async () => {
@@ -137,11 +135,10 @@ export default function FormPage() {
         try {
           const response = await getDropdownOptions(field);
           if (response.success && response.data) {
-            const mappedOptions: SelectOption[] = response.data.map((opt) => ({
+            options[field] = response.data.map((opt) => ({
               value: opt.value,
               label: opt.value,
             }));
-            options[field] = mappedOptions;
           }
         } catch (error) {
           console.error(`Error fetching ${field} options:`, error);
@@ -154,7 +151,55 @@ export default function FormPage() {
     fetchDropdownOptions();
   }, []);
 
-  // Handle employee selection
+  const fetchCheckData = async () => {
+    setLoading(true);
+    try {
+      // Ensure checkId is a string
+      const idStr = String(checkId);
+      const response = await getDeviceCheckById(idStr);
+      if (response.success && response.data) {
+        const check = response.data;
+        
+        // Pre-fill form with check data
+        reset({
+          employeeId: check.employeeId.toString(),
+          checkDate: check.checkDate ? check.checkDate.split('T')[0] : new Date().toISOString().split('T')[0],
+          deviceDetail: check.deviceDetail,
+          operatingSystem: check.operatingSystem,
+          specification: check.specification || {
+            ramCapacity: '',
+            memoryType: 'HDD' as 'HDD' | 'SSD',
+            memoryCapacity: '',
+            processor: '',
+          },
+          deviceCondition: check.deviceCondition,
+          workApplications: check.workApplications,
+          nonWorkApplications: check.nonWorkApplications,
+          security: check.security,
+          additionalInfo: check.additionalInfo,
+        });
+
+        // Fetch employee data
+        if (check.employeeId) {
+          const empResponse = await getEmployeeById(check.employeeId.toString());
+          if (empResponse.success && empResponse.data) {
+            setSelectedEmployee(empResponse.data);
+          }
+        }
+      } else {
+        toast.error('Failed to load device check');
+        router.push('/data-pengecekan');
+      }
+    } catch (error: any) {
+      console.error('Error fetching check:', error);
+      toast.error(error.message || 'Failed to load device check');
+      router.push('/data-pengecekan');
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  // Handle employee selection (disabled in edit mode)
   const handleEmployeeSelect = async (employeeId: string) => {
     setValue('employeeId', employeeId);
     
@@ -174,7 +219,7 @@ export default function FormPage() {
       // Convert to uppercase
       const normalizedValue = value.trim().toUpperCase();
       
-      // Immediately update local state with the new option (optimistic update)
+      // Immediately update local state with new option (optimistic update)
       setDropdownOptions((prev) => {
         const currentOptions = prev[fieldName] || [];
         const optionExists = currentOptions.some((opt) => opt.value === normalizedValue);
@@ -200,13 +245,12 @@ export default function FormPage() {
           // Refresh from server after successful save to get updated usage counts
           getDropdownOptions(fieldName).then((response) => {
             if (response.success && response.data) {
-              const mappedOptions: SelectOption[] = response.data.map((opt) => ({
-                value: opt.value,
-                label: opt.value,
-              }));
               setDropdownOptions((prev) => ({
                 ...prev,
-                [fieldName]: mappedOptions,
+                [fieldName]: response.data!.map((opt: any) => ({
+                  value: opt.value,
+                  label: opt.value,
+                })),
               }));
             }
           });
@@ -223,33 +267,51 @@ export default function FormPage() {
 
   const onSubmit = async (data: any) => {
     if (!data.employeeId) {
-      toast.error('Please select an employee');
+      toast.error('Employee ID is required');
       return;
     }
 
-    setLoading(true);
+    setSaving(true);
     try {
-      const response = await createDeviceCheck(data);
+      // Ensure checkId is a string
+      const idStr = String(checkId);
+      
+      // Remove employeeId from update payload (cannot be changed after creation)
+      const { employeeId, ...updateData } = data;
+      
+      const response = await updateDeviceCheck(idStr, updateData);
       if (response.success && response.data) {
-        toast.success('Device check created successfully');
+        toast.success('Device check updated successfully');
         router.push('/data-pengecekan');
       } else {
-        toast.error('Failed to create device check');
+        toast.error('Failed to update device check');
       }
     } catch (error: any) {
-      console.error('Error submitting form:', error);
-      toast.error(error.message || 'Failed to create device check');
+      console.error('Error updating form:', error);
+      toast.error(error.message || 'Failed to update device check');
     } finally {
-      setLoading(false);
+      setSaving(false);
     }
   };
+
+  if (loading) {
+    return (
+      <div className="container py-8">
+        <div className="text-center">Loading device check...</div>
+      </div>
+    );
+  }
 
   return (
     <div className="container py-8">
       <div className="mb-8">
-        <h1 className="text-3xl font-bold mb-2">Device Checking Form</h1>
+        <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+          <ArrowLeft className="h-4 w-4 mr-2" />
+          Back
+        </Button>
+        <h1 className="text-3xl font-bold mb-2">Edit Device Check</h1>
         <p className="text-muted-foreground">
-          Fill in the device checking information below
+          Update device checking information below
         </p>
       </div>
 
@@ -279,11 +341,18 @@ export default function FormPage() {
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
-              <EmployeeAutocomplete
-                value={watch('employeeId')}
-                onChange={handleEmployeeSelect}
-                error={errors.employeeId?.message as string}
-              />
+              {/* Employee selector disabled in edit mode */}
+              <div className="p-4 bg-muted/50 rounded-md">
+                <p className="text-sm text-muted-foreground mb-2">
+                  Employee cannot be changed after check is created
+                </p>
+                <EmployeeAutocomplete
+                  value={watch('employeeId')}
+                  onChange={handleEmployeeSelect}
+                  error={errors.employeeId?.message as string}
+                  disabled
+                />
+              </div>
 
               {selectedEmployee && (
                 <div className="p-4 bg-muted rounded-md">
@@ -860,13 +929,13 @@ export default function FormPage() {
               type="button"
               variant="outline"
               onClick={() => router.back()}
-              disabled={loading}
+              disabled={saving}
             >
               Cancel
             </Button>
-            <Button type="submit" disabled={loading} className="flex-1">
+            <Button type="submit" disabled={saving} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Saving...' : 'Save Device Check'}
+              {saving ? 'Saving...' : 'Update Device Check'}
             </Button>
           </div>
         </form>
