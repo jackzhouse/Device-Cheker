@@ -10,6 +10,7 @@ import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, D
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { generateDeviceCheckPDF, generateEmployeeHistoryPDF } from '@/lib/utils/pdf';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EmployeeCheckHistoryData {
   employee: {
@@ -55,9 +56,71 @@ export default function EmployeeHistoryPage() {
   const params = useParams();
   const router = useRouter();
   const employeeId = params.employeeId as string;
+  const { t } = useLanguage();
   const [data, setData] = React.useState<EmployeeCheckHistoryData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+
+  // Helper to get translated device type
+  const getDeviceTypeLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'pc': 'pc',
+      'laptop': 'laptop',
+      'PC': 'pc',
+      'Laptop': 'laptop',
+    };
+    const key = keyMap[value] || value;
+    return t(`form.deviceDetail.deviceTypeOptions.${key}` as any);
+  };
+
+  // Helper to get translated ownership
+  const getOwnershipLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'company': 'company',
+      'personal': 'personal',
+      'Company': 'company',
+      'Personal': 'personal',
+    };
+    const key = keyMap[value] || value;
+    return t(`form.deviceDetail.ownershipOptions.${key}` as any);
+  };
+
+  // Helper to get badge variant
+  const getSuitabilityBadgeVariant = (value: string) => {
+    const variants: Record<string, string> = {
+      'suitable': 'success',
+      'limitedSuitability': 'warning',
+      'needsRepair': 'destructive',
+      'unsuitable': 'destructive',
+      'Suitable': 'success',
+      'Limited Suitability': 'warning',
+      'Needs Repair': 'destructive',
+      'Unsuitable': 'destructive',
+    };
+    return variants[value] || 'default';
+  };
+
+  // Helper to get translated suitability
+  const getSuitabilityLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'suitable': 'suitable',
+      'limitedSuitability': 'limitedSuitability',
+      'needsRepair': 'needsRepair',
+      'unsuitable': 'unsuitable',
+      'Suitable': 'suitable',
+      'Limited Suitability': 'limitedSuitability',
+      'Needs Repair': 'needsRepair',
+      'Unsuitable': 'unsuitable',
+    };
+    const key = keyMap[value] || value;
+    return t(`checkData.suitability.${key}` as any);
+  };
+
+  const getSuitabilityBadge = (suitability: string) => {
+    const variant = getSuitabilityBadgeVariant(suitability);
+    const label = getSuitabilityLabel(suitability);
+    return <Badge variant={variant as any}>{label}</Badge>;
+  };
 
   React.useEffect(() => {
     fetchEmployeeHistory();
@@ -128,16 +191,6 @@ export default function EmployeeHistoryPage() {
     });
   };
 
-  const getSuitabilityBadge = (suitability: string) => {
-    const variants: any = {
-      'Suitable': 'success',
-      'Limited Suitability': 'warning',
-      'Needs Repair': 'destructive',
-      'Unsuitable': 'destructive',
-    };
-    return <Badge variant={variants[suitability] || 'default'}>{suitability}</Badge>;
-  };
-
   if (loading) {
     return (
       <div className="container py-8">
@@ -169,7 +222,7 @@ export default function EmployeeHistoryPage() {
       {/* Back Button */}
       <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Check Data
+        {t('common.back')}
       </Button>
 
       {/* Employee Header */}
@@ -207,25 +260,25 @@ export default function EmployeeHistoryPage() {
         <Card>
           <CardContent className="pt-6">
             <div className="text-2xl font-bold">{summary.totalChecks}</div>
-            <div className="text-sm text-muted-foreground">Total Checks</div>
+            <div className="text-sm text-muted-foreground">{t('checkData.summary.totalChecks')}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.deviceTypes.PC}</div>
-            <div className="text-sm text-muted-foreground">PC Devices</div>
+            <div className="text-2xl font-bold">{summary.deviceTypes.PC || 0}</div>
+            <div className="text-sm text-muted-foreground">{t('checkData.summary.pcDevices')}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.deviceTypes.Laptop}</div>
-            <div className="text-sm text-muted-foreground">Laptops</div>
+            <div className="text-2xl font-bold">{summary.deviceTypes.Laptop || 0}</div>
+            <div className="text-sm text-muted-foreground">{t('checkData.summary.laptops')}</div>
           </CardContent>
         </Card>
         <Card>
           <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.ownership.Company}</div>
-            <div className="text-sm text-muted-foreground">Company Owned</div>
+            <div className="text-2xl font-bold">{summary.ownership.Company || 0}</div>
+            <div className="text-sm text-muted-foreground">{t('checkData.summary.companyOwned')}</div>
           </CardContent>
         </Card>
       </div>
@@ -234,18 +287,18 @@ export default function EmployeeHistoryPage() {
       <Card>
         <CardHeader>
           <div className="flex items-center justify-between">
-            <CardTitle>Check History</CardTitle>
+            <CardTitle>{t('checkData.checkHistory')}</CardTitle>
             {checks.length > 0 && (
               <Button onClick={handleExportAllPDF}>
                 <Download className="h-4 w-4 mr-2" />
-                Export All to PDF
+                {t('checkData.exportAll')}
               </Button>
             )}
           </div>
         </CardHeader>
         <CardContent>
           {checks.length === 0 ? (
-            <p className="text-center py-12 text-muted-foreground">No device checks found</p>
+            <p className="text-center py-12 text-muted-foreground">{t('checkData.noChecks')}</p>
           ) : (
             <div className="space-y-6">
               {checks.map((check, index) => (
@@ -272,7 +325,7 @@ export default function EmployeeHistoryPage() {
                       {/* Device Information */}
                       <div className="mb-4">
                         <div className="font-semibold text-lg mb-1">
-                          {check.deviceDetail.deviceType}
+                          {getDeviceTypeLabel(check.deviceDetail.deviceType)}
                         </div>
                         <p className="text-sm text-muted-foreground">
                           {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
@@ -283,7 +336,7 @@ export default function EmployeeHistoryPage() {
                             className="text-xs"
                           >
                             <Building className="h-3 w-3 mr-1" />
-                            {check.deviceDetail.ownership}
+                            {getOwnershipLabel(check.deviceDetail.ownership)}
                           </Badge>
                         </div>
                       </div>

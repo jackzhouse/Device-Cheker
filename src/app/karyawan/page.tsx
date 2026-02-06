@@ -13,9 +13,11 @@ import {
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function EmployeesPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -41,23 +43,21 @@ export default function EmployeesPage() {
   };
 
   const handleDelete = async (id: string, totalChecks: number) => {
-    if (totalChecks > 0) {
-      if (!confirm('This employee has device checks. Deleting will mark them as resigned. Continue?')) {
-        return;
-      }
-    } else {
-      if (!confirm('Are you sure you want to delete this employee?')) {
-        return;
-      }
+    const confirmMsg = totalChecks > 0 
+      ? 'This employee has device checks. Deleting will mark them as resigned. Continue?'
+      : t('employee.confirmDelete');
+    
+    if (!confirm(confirmMsg)) {
+      return;
     }
 
     try {
       const { deleteEmployee } = await import('@/lib/services/employees.service');
       await deleteEmployee(id);
-      toast.success('Employee deleted successfully');
+      toast.success(t('employee.toast.deleteSuccess'));
       fetchEmployees();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete employee');
+      toast.error(error.message || t('employee.toast.deleteFailed'));
     }
   };
 
@@ -100,7 +100,7 @@ export default function EmployeesPage() {
   if (loading) {
     return (
       <div className="container py-8">
-        <div className="text-center">Loading employees...</div>
+        <div className="text-center">{t('common.loading')}</div>
       </div>
     );
   }
@@ -111,15 +111,15 @@ export default function EmployeesPage() {
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
           <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">Employee Data</h1>
+            <h1 className="text-3xl font-bold tracking-tight">{t('employee.title')}</h1>
             <p className="text-muted-foreground">
-              Manage employee information and records
+              {t('employee.description')}
             </p>
           </div>
           <Button asChild>
             <Link href="/karyawan/new">
               <UserPlus className="mr-2 h-4 w-4" />
-              Add Employee
+              {t('employee.addButton')}
             </Link>
           </Button>
         </div>
@@ -133,7 +133,7 @@ export default function EmployeesPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by name or position..."
+                  placeholder={t('employee.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -145,7 +145,7 @@ export default function EmployeesPage() {
               onChange={(e) => setFilterDept(e.target.value)}
               className="h-10 rounded-md border bg-background px-3 text-sm"
             >
-              <option value="">All Departments</option>
+              <option value="">{t('employee.filters.allDepartments')}</option>
               {departments.map((dept) => (
                 <option key={dept} value={dept}>
                   {dept}
@@ -157,7 +157,7 @@ export default function EmployeesPage() {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="h-10 rounded-md border bg-background px-3 text-sm"
             >
-              <option value="">All Status</option>
+              <option value="">{t('employee.filters.allPositions')}</option>
               <option value="Active">Active</option>
               <option value="Inactive">Inactive</option>
               <option value="Resigned">Resigned</option>
@@ -170,7 +170,7 @@ export default function EmployeesPage() {
                 setSearchTerm('');
               }}
             >
-              Clear Filters
+              {t('common.clear')}
             </Button>
           </div>
         </CardContent>
@@ -181,7 +181,7 @@ export default function EmployeesPage() {
         <Card>
           <CardContent className="pt-6 text-center py-12">
             <User className="mx-auto h-12 w-12 text-muted-foreground mb-4" />
-            <p className="text-muted-foreground">No employees found</p>
+            <p className="text-muted-foreground">{t('employee.empty')}</p>
           </CardContent>
         </Card>
       ) : (
@@ -209,6 +209,8 @@ function EmployeeCard({
   onEdit: () => void;
   onDelete: () => void;
 }) {
+  const { t } = useLanguage();
+  
   const getStatusBadge = (status: string) => {
     const variants: any = {
       'Active': 'success',
@@ -254,7 +256,7 @@ function EmployeeCard({
             </div>
           )}
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Total Checks:</span>
+            <span className="text-muted-foreground">{t('employee.totalChecks')}:</span>
             <span className="font-medium">{employee.totalDeviceChecks}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">

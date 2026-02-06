@@ -15,9 +15,12 @@ import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
 import { generateDeviceCheckPDF } from '@/lib/utils/pdf';
+import { useLanguage } from '@/contexts/LanguageContext';
+import { normalizeDataForForm } from '@/lib/utils/data-normalizer';
 
 export default function CheckDataPage() {
   const router = useRouter();
+  const { t } = useLanguage();
   const [checks, setChecks] = React.useState<DeviceCheck[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [searchTerm, setSearchTerm] = useState('');
@@ -46,38 +49,69 @@ export default function CheckDataPage() {
   };
 
   const handleDelete = async (id: string) => {
-    if (!confirm('Are you sure you want to delete this device check?')) {
+    if (!confirm(t('checkData.confirmDelete'))) {
       return;
     }
 
     try {
       const { deleteDeviceCheck } = await import('@/lib/services/device-checks.service');
       await deleteDeviceCheck(id);
-      toast.success('Device check deleted successfully');
+      toast.success(t('checkData.toast.deleteSuccess'));
       fetchChecks();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete device check');
+      toast.error(error.message || t('checkData.toast.deleteFailed'));
     }
   };
 
   const handleDownloadPDF = async (check: DeviceCheck) => {
     try {
-      toast.loading('Generating PDF...');
+      toast.loading(t('checkData.toast.pdfGenerating'));
       await generateDeviceCheckPDF(check);
-      toast.success('PDF downloaded successfully');
+      toast.success(t('checkData.toast.pdfSuccess'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to generate PDF');
+      toast.error(error.message || t('checkData.toast.pdfFailed'));
     }
   };
 
-  const getSuitabilityBadge = (suitability: string) => {
-    const variants: any = {
+  // Helper to get badge variant from internal value
+  const getSuitabilityBadgeVariant = (value: string) => {
+    const variants: Record<string, string> = {
+      'suitable': 'success',
+      'limitedSuitability': 'warning',
+      'needsRepair': 'destructive',
+      'unsuitable': 'destructive',
+    };
+    // Handle old format for backward compatibility
+    const oldVariants: Record<string, string> = {
       'Suitable': 'success',
       'Limited Suitability': 'warning',
       'Needs Repair': 'destructive',
       'Unsuitable': 'destructive',
     };
-    return <Badge variant={variants[suitability] || 'default'}>{suitability}</Badge>;
+    return variants[value] || oldVariants[value] || 'default';
+  };
+
+  // Helper to get translated label from internal value
+  const getSuitabilityLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'suitable': 'suitable',
+      'limitedSuitability': 'limitedSuitability',
+      'needsRepair': 'needsRepair',
+      'unsuitable': 'unsuitable',
+      // Old format for backward compatibility
+      'Suitable': 'suitable',
+      'Limited Suitability': 'limitedSuitability',
+      'Needs Repair': 'needsRepair',
+      'Unsuitable': 'unsuitable',
+    };
+    const key = keyMap[value] || value;
+    return t(`checkData.suitability.${key}` as any);
+  };
+
+  const getSuitabilityBadge = (suitability: string) => {
+    const variant = getSuitabilityBadgeVariant(suitability);
+    const label = getSuitabilityLabel(suitability);
+    return <Badge variant={variant as any}>{label}</Badge>;
   };
 
   const formatDate = (dateString: string) => {
@@ -121,7 +155,7 @@ export default function CheckDataPage() {
   if (loading) {
     return (
       <div className="container py-8">
-        <div className="text-center">Loading device checks...</div>
+        <div className="text-center">{t('common.loading')}</div>
       </div>
     );
   }
@@ -130,9 +164,9 @@ export default function CheckDataPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Device Check Data</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('checkData.title')}</h1>
         <p className="text-muted-foreground">
-          View and manage all device checking records
+          {t('checkData.description')}
         </p>
       </div>
 
@@ -144,7 +178,7 @@ export default function CheckDataPage() {
               <div className="relative">
                 <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
                 <Input
-                  placeholder="Search by employee, device brand or model..."
+                  placeholder={t('checkData.filters.searchPlaceholder')}
                   value={searchTerm}
                   onChange={(e) => setSearchTerm(e.target.value)}
                   className="pl-10"
@@ -156,20 +190,20 @@ export default function CheckDataPage() {
               onChange={(e) => setFilters({ ...filters, suitability: e.target.value })}
               className="h-10 rounded-md border bg-background px-3 text-sm"
             >
-              <option value="">All Conditions</option>
-              <option value="Suitable">Suitable</option>
-              <option value="Limited Suitability">Limited Suitability</option>
-              <option value="Needs Repair">Needs Repair</option>
-              <option value="Unsuitable">Unsuitable</option>
+              <option value="">{t('checkData.filters.allConditions')}</option>
+              <option value="suitable">{t('checkData.suitability.suitable')}</option>
+              <option value="limitedSuitability">{t('checkData.suitability.limitedSuitability')}</option>
+              <option value="needsRepair">{t('checkData.suitability.needsRepair')}</option>
+              <option value="unsuitable">{t('checkData.suitability.unsuitable')}</option>
             </select>
             <select
               value={filters.ownership}
               onChange={(e) => setFilters({ ...filters, ownership: e.target.value })}
               className="h-10 rounded-md border bg-background px-3 text-sm"
             >
-              <option value="">All Ownership</option>
-              <option value="Company">Company</option>
-              <option value="Personal">Personal</option>
+              <option value="">{t('checkData.filters.allOwnership')}</option>
+              <option value="company">{t('form.deviceDetail.ownershipOptions.company')}</option>
+              <option value="personal">{t('form.deviceDetail.ownershipOptions.personal')}</option>
             </select>
             <Button
               variant="outline"
@@ -178,7 +212,7 @@ export default function CheckDataPage() {
                 setSearchTerm('');
               }}
             >
-              Clear Filters
+              {t('checkData.filters.clearFilters')}
             </Button>
           </div>
           <div className="mt-4 flex items-center gap-2">
@@ -190,7 +224,7 @@ export default function CheckDataPage() {
               className="h-4 w-4"
             />
             <label htmlFor="groupBy" className="text-sm cursor-pointer">
-              Group by Employee
+              {t('checkData.filters.groupByEmployee')}
             </label>
           </div>
         </CardContent>
@@ -200,7 +234,7 @@ export default function CheckDataPage() {
       {filteredChecks.length === 0 ? (
         <Card>
           <CardContent className="pt-6 text-center py-12">
-            <p className="text-muted-foreground">No device checks found</p>
+            <p className="text-muted-foreground">{t('checkData.empty')}</p>
           </CardContent>
         </Card>
       ) : groupByEmployee ? (
@@ -222,12 +256,12 @@ export default function CheckDataPage() {
                         {employee.department && ` • ${employee.department}`}
                       </p>
                       <Badge variant="secondary" className="mt-2">
-                        Total: {employeeChecks.length} checks
+                        {t('checkData.badge.total').replace('{count}', employeeChecks.length.toString())}
                       </Badge>
                     </div>
                     <Button variant="outline" size="sm" asChild>
                       <Link href={`/data-pengecekan/${employeeId}`}>
-                        View All History
+                        {t('checkData.buttons.viewAllHistory')}
                       </Link>
                     </Button>
                   </div>
@@ -247,7 +281,7 @@ export default function CheckDataPage() {
                     {employeeChecks.length > 3 && (
                       <Button variant="link" asChild className="w-full">
                         <Link href={`/data-pengecekan/${employeeId}`}>
-                          View all {employeeChecks.length} checks →
+                          {t('checkData.buttons.viewAllChecks').replace('{count}', employeeChecks.length.toString())}
                         </Link>
                       </Button>
                     )}
@@ -288,14 +322,67 @@ function CheckCard({
   onDownload?: () => void;
   compact?: boolean;
 }) {
-  const getSuitabilityBadge = (suitability: string) => {
-    const variants: any = {
+  const { t } = useLanguage();
+  
+  // Helper to get translated device type
+  const getDeviceTypeLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'pc': 'pc',
+      'laptop': 'laptop',
+      'PC': 'pc',
+      'Laptop': 'laptop',
+    };
+    const key = keyMap[value] || value;
+    return t(`form.deviceDetail.deviceTypeOptions.${key}` as any);
+  };
+
+  // Helper to get translated ownership
+  const getOwnershipLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'company': 'company',
+      'personal': 'personal',
+      'Company': 'company',
+      'Personal': 'personal',
+    };
+    const key = keyMap[value] || value;
+    return t(`form.deviceDetail.ownershipOptions.${key}` as any);
+  };
+
+  // Helper to get badge variant
+  const getSuitabilityBadgeVariant = (value: string) => {
+    const variants: Record<string, string> = {
+      'suitable': 'success',
+      'limitedSuitability': 'warning',
+      'needsRepair': 'destructive',
+      'unsuitable': 'destructive',
       'Suitable': 'success',
       'Limited Suitability': 'warning',
       'Needs Repair': 'destructive',
       'Unsuitable': 'destructive',
     };
-    return <Badge variant={variants[suitability] || 'default'}>{suitability}</Badge>;
+    return variants[value] || 'default';
+  };
+
+  // Helper to get translated suitability
+  const getSuitabilityLabel = (value: string) => {
+    const keyMap: Record<string, string> = {
+      'suitable': 'suitable',
+      'limitedSuitability': 'limitedSuitability',
+      'needsRepair': 'needsRepair',
+      'unsuitable': 'unsuitable',
+      'Suitable': 'suitable',
+      'Limited Suitability': 'limitedSuitability',
+      'Needs Repair': 'needsRepair',
+      'Unsuitable': 'unsuitable',
+    };
+    const key = keyMap[value] || value;
+    return t(`checkData.suitability.${key}` as any);
+  };
+
+  const getSuitabilityBadge = (suitability: string) => {
+    const variant = getSuitabilityBadgeVariant(suitability);
+    const label = getSuitabilityLabel(suitability);
+    return <Badge variant={variant as any}>{label}</Badge>;
   };
 
   const formatDate = (dateString: string) => {
@@ -329,7 +416,7 @@ function CheckCard({
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-2 text-sm">
               <Laptop className="h-4 w-4 text-muted-foreground" />
-              <span className="font-medium">{check.deviceDetail.deviceType}</span>
+              <span className="font-medium">{getDeviceTypeLabel(check.deviceDetail.deviceType)}</span>
             </div>
             <div className="flex items-center gap-2 text-sm">
               <Building className="h-4 w-4 text-muted-foreground" />
@@ -341,7 +428,7 @@ function CheckCard({
             </div>
             <div className="flex items-center gap-2 text-sm">
               <HardDrive className="h-4 w-4 text-muted-foreground" />
-              <span>{check.deviceDetail.ownership}</span>
+              <span>{getOwnershipLabel(check.deviceDetail.ownership)}</span>
             </div>
           </div>
         )}

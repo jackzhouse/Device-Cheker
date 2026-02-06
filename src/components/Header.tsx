@@ -3,14 +3,16 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { Laptop, Database, Users, Menu, X, Moon, Sun } from 'lucide-react';
+import { Laptop, Database, Users, Menu, X, Moon, Sun, Globe } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function Header() {
   const pathname = usePathname();
   const [mobileMenuOpen, setMobileMenuOpen] = useState(false);
   const { theme, setTheme } = useTheme();
+  const { language, setLanguage, t } = useLanguage();
   const [mounted, setMounted] = useState(false);
 
   // Avoid hydration mismatch by only rendering after mount
@@ -23,10 +25,14 @@ export default function Header() {
   }
 
   const navItems = [
-    { href: '/form', label: 'Form', icon: Laptop },
-    { href: '/data-pengecekan', label: 'Check Data', icon: Database },
-    { href: '/karyawan', label: 'Employee Data', icon: Users },
+    { href: '/form', label: t('header.form'), icon: Laptop },
+    { href: '/data-pengecekan', label: t('header.checkData'), icon: Database },
+    { href: '/karyawan', label: t('header.employeeData'), icon: Users },
   ];
+
+  const toggleLanguage = () => {
+    setLanguage(language === 'en' ? 'id' : 'en');
+  };
 
   const isActive = (href: string) => pathname === href;
 
@@ -57,20 +63,35 @@ export default function Header() {
           ))}
         </nav>
 
-        {/* Theme Toggle Button */}
-        <Button
-          variant="ghost"
-          size="icon"
-          className="hidden md:flex"
-          onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-        >
-          {theme === 'dark' ? (
-            <Moon key="moon" className="h-5 w-5 animate-theme-toggle" />
-          ) : (
-            <Sun key="sun" className="h-5 w-5 animate-theme-toggle" />
-          )}
-          <span className="sr-only">Toggle theme</span>
-        </Button>
+        <div className="hidden md:flex items-center space-x-2">
+          {/* Language Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={toggleLanguage}
+            title={t('header.toggleLanguage')}
+          >
+            <Globe className="h-5 w-5" />
+            <span className="absolute top-1 right-1 text-[10px] font-bold">
+              {language === 'en' ? 'EN' : 'ID'}
+            </span>
+          </Button>
+
+          {/* Theme Toggle Button */}
+          <Button
+            variant="ghost"
+            size="icon"
+            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+            title={t('header.toggleTheme')}
+          >
+            {theme === 'dark' ? (
+              <Moon key="moon" className="h-5 w-5 animate-theme-toggle" />
+            ) : (
+              <Sun key="sun" className="h-5 w-5 animate-theme-toggle" />
+            )}
+            <span className="sr-only">Toggle theme</span>
+          </Button>
+        </div>
 
         {/* Mobile Menu Button */}
         <Button
@@ -112,7 +133,18 @@ export default function Header() {
               ) : (
                 <Sun key="sun" className="mr-2 h-4 w-4 animate-theme-toggle" />
               )}
-              <span>Toggle Theme</span>
+              <span>{t('header.toggleTheme')}</span>
+            </Button>
+            <Button
+              variant="ghost"
+              className="w-full justify-start relative"
+              onClick={toggleLanguage}
+            >
+              <Globe className="mr-2 h-4 w-4" />
+              <span>{t('header.toggleLanguage')}</span>
+              <span className="ml-auto text-xs font-bold">
+                {language === 'en' ? 'EN' : 'ID'}
+              </span>
             </Button>
           </div>
         </nav>

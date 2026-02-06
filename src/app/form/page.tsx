@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { createDeviceCheck, type DeviceCheck } from '@/lib/services/device-checks.service';
+import { normalizeDataForSubmission } from '@/lib/utils/data-normalizer';
 import EmployeeAutocomplete from '@/components/EmployeeAutocomplete';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -14,10 +15,12 @@ import { useFieldArray, useForm } from 'react-hook-form';
 import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 export default function FormPage() {
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { t, language } = useLanguage();
   const [loading, setLoading] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
@@ -36,26 +39,26 @@ export default function FormPage() {
       employeeId: '',
       checkDate: new Date().toISOString().split('T')[0],
       deviceDetail: {
-        deviceType: 'Laptop',
-        ownership: 'Company',
+        deviceType: 'laptop',
+        ownership: 'company',
         deviceBrand: '',
         deviceModel: '',
         serialNumber: '',
       },
       operatingSystem: {
-        osType: 'Windows',
+        osType: 'windows',
         osVersion: '',
-        osLicense: 'Original',
+        osLicense: 'original',
         osRegularUpdate: true,
       },
       specification: {
         ramCapacity: '',
-        memoryType: 'HDD',
+        memoryType: 'hdd',
         memoryCapacity: '',
         processor: '',
       },
       deviceCondition: {
-        deviceSuitability: 'Suitable',
+        deviceSuitability: 'suitable',
         batterySuitability: 'Good',
         keyboardCondition: 'Good',
         touchpadCondition: 'Good',
@@ -66,16 +69,16 @@ export default function FormPage() {
       nonWorkApplications: [],
       security: {
         antivirus: {
-          status: 'Active',
+          status: 'active',
           list: [],
         },
         vpn: {
-          status: 'Available',
+          status: 'available',
           list: [],
         },
       },
       additionalInfo: {
-        passwordUsage: 'Available',
+        passwordUsage: 'available',
         otherNotes: '',
         inspectorPICName: '',
       },
@@ -107,15 +110,15 @@ export default function FormPage() {
   } = useFieldArray({ control, name: 'security.vpn.list' });
 
   const sections = [
-    { id: 'employee', title: 'Employee', icon: User },
-    { id: 'device', title: 'Device Detail', icon: Laptop },
-    { id: 'os', title: 'Operating System', icon: HardDrive },
-    { id: 'spec', title: 'Specification', icon: HardDrive },
-    { id: 'condition', title: 'Device Condition', icon: Shield },
-    { id: 'apps', title: 'Applications', icon: Shield },
-    { id: 'security', title: 'Security', icon: Shield },
-    { id: 'info', title: 'Additional Info', icon: Calendar },
-  ];
+    { id: 'employee', title: t('form.sections.employee'), icon: User },
+    { id: 'device', title: t('form.sections.deviceDetail'), icon: Laptop },
+    { id: 'os', title: t('form.sections.operatingSystem'), icon: HardDrive },
+    { id: 'spec', title: t('form.sections.specification'), icon: HardDrive },
+    { id: 'condition', title: t('form.sections.deviceCondition'), icon: Shield },
+    { id: 'apps', title: t('form.sections.applications'), icon: Shield },
+    { id: 'security', title: t('form.sections.security'), icon: Shield },
+    { id: 'info', title: t('form.sections.additionalInfo'), icon: Calendar },
+  ] as const;
 
   // Fetch dropdown options
   React.useEffect(() => {
@@ -192,7 +195,7 @@ export default function FormPage() {
         };
       });
 
-      toast.success(`"${normalizedValue}" added successfully`);
+      toast.success(`"${normalizedValue}" ${t('form.toast.optionAdded')}`);
 
       // Save to backend in background (don't await)
       saveDropdownOption(fieldName, normalizedValue, category)
@@ -213,7 +216,7 @@ export default function FormPage() {
         })
         .catch((error) => {
           console.error('Error saving option to backend:', error);
-          toast.error('Failed to save option to database');
+          toast.error(t('form.toast.optionSaveFailed'));
         });
     } catch (error) {
       console.error('Error creating option:', error);
@@ -223,24 +226,33 @@ export default function FormPage() {
 
   const onSubmit = async (data: any) => {
     if (!data.employeeId) {
-      toast.error('Please select an employee');
+      toast.error(t('form.toast.selectEmployee'));
       return;
     }
 
     setLoading(true);
     try {
-      const response = await createDeviceCheck(data);
+      // Normalize data to match database enum values
+      const normalizedData = normalizeDataForSubmission(data);
+      const response = await createDeviceCheck(normalizedData);
       if (response.success && response.data) {
-        toast.success('Device check created successfully');
+        toast.success(t('form.toast.createSuccess'));
         router.push('/data-pengecekan');
       } else {
-        toast.error('Failed to create device check');
+        toast.error(t('form.toast.createFailed'));
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
-      toast.error(error.message || 'Failed to create device check');
+      toast.error(error.message || t('form.toast.createFailed'));
     } finally {
       setLoading(false);
+    }
+  };
+
+  const handleKeyDown = (e: React.KeyboardEvent<HTMLTextAreaElement>) => {
+    if (e.key === 'Enter' && !e.shiftKey) {
+      e.preventDefault();
+      handleSubmit(onSubmit)();
     }
   };
 
@@ -248,9 +260,9 @@ export default function FormPage() {
     <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">Device Checking Form</h1>
+        <h1 className="text-3xl font-bold tracking-tight">{t('form.title')}</h1>
         <p className="text-muted-foreground">
-          Fill in device checking information below
+          {t('form.description')}
         </p>
       </div>
 
@@ -258,7 +270,7 @@ export default function FormPage() {
       <div className="grid lg:grid-cols-[240px_1fr] gap-6">
         {/* Sidebar Navigation */}
         <aside className="hidden lg:block sticky top-24 h-fit space-y-1">
-          <p className="text-sm font-medium text-muted-foreground mb-3">Form Sections</p>
+          <p className="text-sm font-medium text-muted-foreground mb-3">{t('form.formSections')}</p>
           <nav className="space-y-1">
             {sections.map((section) => (
               <a
@@ -280,7 +292,7 @@ export default function FormPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <User className="h-5 w-5" />
-                Employee Information
+                {t('form.employeeInfo.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -294,21 +306,21 @@ export default function FormPage() {
                 <div className="p-4 bg-muted rounded-md">
                   <div className="grid md:grid-cols-2 gap-4">
                     <div>
-                      <Label className="text-muted-foreground">Full Name</Label>
+                      <Label className="text-muted-foreground">{t('form.employeeInfo.fullName')}</Label>
                       <p className="font-medium">{selectedEmployee.fullName}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">Position</Label>
+                      <Label className="text-muted-foreground">{t('form.employeeInfo.position')}</Label>
                       <p className="font-medium">{selectedEmployee.position}</p>
                     </div>
                     {selectedEmployee.department && (
                       <div>
-                        <Label className="text-muted-foreground">Department</Label>
+                        <Label className="text-muted-foreground">{t('form.employeeInfo.department')}</Label>
                         <p className="font-medium">{selectedEmployee.department}</p>
                       </div>
                     )}
                     <div>
-                      <Label className="text-muted-foreground">Total Checks</Label>
+                      <Label className="text-muted-foreground">{t('form.employeeInfo.totalChecks')}</Label>
                       <p className="font-medium">{selectedEmployee.totalDeviceChecks}</p>
                     </div>
                   </div>
@@ -316,11 +328,11 @@ export default function FormPage() {
               )}
 
               <div>
-                <Label htmlFor="checkDate">Check Date *</Label>
+                <Label htmlFor="checkDate">{t('form.employeeInfo.checkDate')} *</Label>
                 <Input
                   id="checkDate"
                   type="date"
-                  {...register('checkDate', { required: 'Check date is required' })}
+                  {...register('checkDate', { required: t('form.validation.checkDateRequired') })}
                 />
                 {errors.checkDate?.message && (
                   <p className="text-sm text-destructive mt-1">{errors.checkDate.message as string}</p>
@@ -334,60 +346,60 @@ export default function FormPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Laptop className="h-5 w-5" />
-                Device Detail
+                {t('form.deviceDetail.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="deviceType">Device Type *</Label>
+                  <Label htmlFor="deviceType">{t('form.deviceDetail.deviceType')} *</Label>
                   <select
                     id="deviceType"
-                    {...register('deviceDetail.deviceType', { required: 'Device type is required' })}
+                    {...register('deviceDetail.deviceType', { required: t('form.validation.deviceTypeRequired') })}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="PC">PC</option>
-                    <option value="Laptop">Laptop</option>
+                    <option value="pc">{t('form.deviceDetail.deviceTypeOptions.pc')}</option>
+                    <option value="laptop">{t('form.deviceDetail.deviceTypeOptions.laptop')}</option>
                   </select>
                 </div>
                 <div>
-                  <Label htmlFor="ownership">Ownership *</Label>
+                  <Label htmlFor="ownership">{t('form.deviceDetail.ownership')} *</Label>
                   <select
                     id="ownership"
-                    {...register('deviceDetail.ownership', { required: 'Ownership is required' })}
+                    {...register('deviceDetail.ownership', { required: t('form.validation.ownershipRequired') })}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="Company">Company</option>
-                    <option value="Personal">Personal</option>
+                    <option value="company">{t('form.deviceDetail.ownershipOptions.company')}</option>
+                    <option value="personal">{t('form.deviceDetail.ownershipOptions.personal')}</option>
                   </select>
                 </div>
               </div>
 
               <div>
-                <Label htmlFor="deviceBrand">Device Brand *</Label>
+                <Label htmlFor="deviceBrand">{t('form.deviceDetail.deviceBrand')} *</Label>
                 <CreatableSelect
                   key="deviceBrand"
                   options={dropdownOptions['deviceBrand'] || []}
                   value={watch('deviceDetail.deviceBrand')}
                   onChange={(val) => setValue('deviceDetail.deviceBrand', val)}
                   onCreate={(val) => handleCreateOption('deviceBrand', val)}
-                  placeholder="Select or create device brand..."
+                  placeholder={t('form.placeholders.deviceBrand')}
                 />
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="deviceModel">Device Model *</Label>
+                  <Label htmlFor="deviceModel">{t('form.deviceDetail.deviceModel')} *</Label>
                   <Input
                     id="deviceModel"
-                    {...register('deviceDetail.deviceModel', { required: 'Device model is required' })}
+                    {...register('deviceDetail.deviceModel', { required: t('form.validation.deviceModelRequired') })}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="serialNumber">Serial Number *</Label>
+                  <Label htmlFor="serialNumber">{t('form.deviceDetail.serialNumber')} *</Label>
                   <Input
                     id="serialNumber"
-                    {...register('deviceDetail.serialNumber', { required: 'Serial number is required' })}
+                    {...register('deviceDetail.serialNumber', { required: t('form.validation.serialNumberRequired') })}
                   />
                 </div>
               </div>
@@ -399,45 +411,45 @@ export default function FormPage() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <HardDrive className="h-5 w-5" />
-                Operating System
+                {t('form.operatingSystem.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="osType">OS Type *</Label>
+                  <Label htmlFor="osType">{t('form.operatingSystem.osType')} *</Label>
                   <select
                     id="osType"
-                    {...register('operatingSystem.osType', { required: 'OS type is required' })}
+                    {...register('operatingSystem.osType', { required: t('form.validation.osTypeRequired') })}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="Windows">Windows</option>
-                    <option value="Linux">Linux</option>
-                    <option value="Mac">Mac</option>
+                    <option value="windows">{t('form.operatingSystem.osTypeOptions.windows')}</option>
+                    <option value="linux">{t('form.operatingSystem.osTypeOptions.linux')}</option>
+                    <option value="mac">{t('form.operatingSystem.osTypeOptions.mac')}</option>
                   </select>
                 </div>
                 <div>
-                  <Label htmlFor="osVersion">OS Version *</Label>
+                  <Label htmlFor="osVersion">{t('form.operatingSystem.osVersion')} *</Label>
                   <Input
                     id="osVersion"
-                    {...register('operatingSystem.osVersion', { required: 'OS version is required' })}
-                    placeholder="e.g., Windows 11, Ubuntu 22.04, macOS Sonoma"
+                    {...register('operatingSystem.osVersion', { required: t('form.validation.osVersionRequired') })}
+                    placeholder={t('form.placeholders.osVersion')}
                   />
                 </div>
               </div>
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="osLicense">OS License *</Label>
+                  <Label htmlFor="osLicense">{t('form.operatingSystem.osLicense')} *</Label>
                   <select
                     id="osLicense"
-                    {...register('operatingSystem.osLicense', { required: 'OS license is required' })}
+                    {...register('operatingSystem.osLicense', { required: t('form.validation.osLicenseRequired') })}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="Original">Original</option>
-                    <option value="Pirated">Pirated</option>
-                    <option value="Open Source">Open Source</option>
-                    <option value="Unknown">Unknown</option>
+                    <option value="original">{t('form.operatingSystem.osLicenseOptions.original')}</option>
+                    <option value="pirated">{t('form.operatingSystem.osLicenseOptions.pirated')}</option>
+                    <option value="openSource">{t('form.operatingSystem.osLicenseOptions.openSource')}</option>
+                    <option value="unknown">{t('form.operatingSystem.osLicenseOptions.unknown')}</option>
                   </select>
                 </div>
                 <div className="flex items-center gap-2 pt-6">
@@ -448,7 +460,7 @@ export default function FormPage() {
                     className="h-4 w-4"
                   />
                   <Label htmlFor="osRegularUpdate" className="cursor-pointer">
-                    Regular Updates Enabled
+                    {t('form.operatingSystem.regularUpdates')}
                   </Label>
                 </div>
               </div>
@@ -477,14 +489,14 @@ export default function FormPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="memoryType">Memory Type</Label>
+                  <Label htmlFor="memoryType">{t('form.specification.memoryType')}</Label>
                   <select
                     id="memoryType"
                     {...register('specification.memoryType')}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
-                    <option value="HDD">HDD</option>
-                    <option value="SSD">SSD</option>
+                    <option value="hdd">{t('form.specification.memoryTypeOptions.hdd')}</option>
+                    <option value="ssd">{t('form.specification.memoryTypeOptions.ssd')}</option>
                   </select>
                 </div>
               </div>
@@ -526,16 +538,16 @@ export default function FormPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="deviceSuitability">Device Suitability *</Label>
+                <Label htmlFor="deviceSuitability">{t('form.deviceCondition.deviceSuitability')} *</Label>
                 <select
                   id="deviceSuitability"
-                  {...register('deviceCondition.deviceSuitability', { required: 'Device suitability is required' })}
+                  {...register('deviceCondition.deviceSuitability', { required: t('form.validation.deviceSuitabilityRequired') })}
                   className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                 >
-                  <option value="Suitable">Suitable</option>
-                  <option value="Limited Suitability">Limited Suitability</option>
-                  <option value="Needs Repair">Needs Repair</option>
-                  <option value="Unsuitable">Unsuitable</option>
+                  <option value="suitable">{t('form.deviceCondition.suitabilityOptions.suitable')}</option>
+                  <option value="limitedSuitability">{t('form.deviceCondition.suitabilityOptions.limitedSuitability')}</option>
+                  <option value="needsRepair">{t('form.deviceCondition.suitabilityOptions.needsRepair')}</option>
+                  <option value="unsuitable">{t('form.deviceCondition.suitabilityOptions.unsuitable')}</option>
                 </select>
               </div>
 
@@ -596,34 +608,34 @@ export default function FormPage() {
               {/* Work Applications */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label>Work Applications</Label>
+                  <Label>{t('form.applications.workApplications')}</Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendWorkApp({ applicationName: '', license: 'Original', notes: '' })}
+                    onClick={() => appendWorkApp({ applicationName: '', license: 'original', notes: '' })}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add
+                    {t('common.add')}
                   </Button>
                 </div>
                 {workAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
                     <Input
-                      placeholder="Application name"
+                      placeholder={t('form.applications.applicationName')}
                       {...register(`workApplications.${index}.applicationName` as any)}
                     />
                     <select
                       {...register(`workApplications.${index}.license` as any)}
                       className="h-10 rounded-md border bg-background px-3 text-sm"
                     >
-                      <option value="Original">Original</option>
-                      <option value="Pirated">Pirated</option>
-                      <option value="Open Source">Open Source</option>
-                      <option value="Unknown">Unknown</option>
+                      <option value="original">{t('form.applications.licenseOptions.original')}</option>
+                      <option value="pirated">{t('form.applications.licenseOptions.pirated')}</option>
+                      <option value="openSource">{t('form.applications.licenseOptions.openSource')}</option>
+                      <option value="unknown">{t('form.applications.licenseOptions.unknown')}</option>
                     </select>
                     <Input
-                      placeholder="Notes (optional)"
+                      placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`workApplications.${index}.notes` as any)}
                     />
                     {workAppFields.length > 1 && (
@@ -643,34 +655,34 @@ export default function FormPage() {
               {/* Non-Work Applications */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label>Non-Work Applications</Label>
+                  <Label>{t('form.applications.nonWorkApplications')}</Label>
                   <Button
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendNonWorkApp({ applicationName: '', license: 'Original', notes: '' })}
+                    onClick={() => appendNonWorkApp({ applicationName: '', license: 'original', notes: '' })}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add
+                    {t('common.add')}
                   </Button>
                 </div>
                 {nonWorkAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
                     <Input
-                      placeholder="Application name"
+                      placeholder={t('form.applications.applicationName')}
                       {...register(`nonWorkApplications.${index}.applicationName` as any)}
                     />
                     <select
                       {...register(`nonWorkApplications.${index}.license` as any)}
                       className="h-10 rounded-md border bg-background px-3 text-sm"
                     >
-                      <option value="Original">Original</option>
-                      <option value="Pirated">Pirated</option>
-                      <option value="Open Source">Open Source</option>
-                      <option value="Unknown">Unknown</option>
+                      <option value="original">{t('form.applications.licenseOptions.original')}</option>
+                      <option value="pirated">{t('form.applications.licenseOptions.pirated')}</option>
+                      <option value="openSource">{t('form.applications.licenseOptions.openSource')}</option>
+                      <option value="unknown">{t('form.applications.licenseOptions.unknown')}</option>
                     </select>
                     <Input
-                      placeholder="Notes (optional)"
+                      placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`nonWorkApplications.${index}.notes` as any)}
                     />
                     {nonWorkAppFields.length > 1 && (
@@ -701,13 +713,13 @@ export default function FormPage() {
               {/* Antivirus */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label>Antivirus Software</Label>
+                  <Label>{t('form.security.antivirus')}</Label>
                   <select
                     {...register('security.antivirus.status')}
                     className="h-8 rounded-md border bg-background px-2 text-xs"
                   >
-                    <option value="Active">Active</option>
-                    <option value="Inactive">Inactive</option>
+                    <option value="active">{t('form.security.statusOptions.active')}</option>
+                    <option value="inactive">{t('form.security.statusOptions.inactive')}</option>
                   </select>
                 </div>
                 <div className="flex items-center justify-between mb-3">
@@ -716,29 +728,29 @@ export default function FormPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendAntivirus({ applicationName: '', license: 'Original', notes: '' })}
+                    onClick={() => appendAntivirus({ applicationName: '', license: 'original', notes: '' })}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add
+                    {t('common.add')}
                   </Button>
                 </div>
                 {antivirusFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
                     <Input
-                      placeholder="Antivirus name"
+                      placeholder={t('form.applications.applicationName')}
                       {...register(`security.antivirus.list.${index}.applicationName` as any)}
                     />
                     <select
                       {...register(`security.antivirus.list.${index}.license` as any)}
                       className="h-10 rounded-md border bg-background px-3 text-sm"
                     >
-                      <option value="Original">Original</option>
-                      <option value="Pirated">Pirated</option>
-                      <option value="Open Source">Open Source</option>
-                      <option value="Unknown">Unknown</option>
+                      <option value="original">{t('form.applications.licenseOptions.original')}</option>
+                      <option value="pirated">{t('form.applications.licenseOptions.pirated')}</option>
+                      <option value="openSource">{t('form.applications.licenseOptions.openSource')}</option>
+                      <option value="unknown">{t('form.applications.licenseOptions.unknown')}</option>
                     </select>
                     <Input
-                      placeholder="Notes (optional)"
+                      placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.antivirus.list.${index}.notes` as any)}
                     />
                     {antivirusFields.length > 1 && (
@@ -758,13 +770,13 @@ export default function FormPage() {
               {/* VPN */}
               <div>
                 <div className="flex items-center justify-between mb-3">
-                  <Label>VPN Software</Label>
+                  <Label>{t('form.security.vpn')}</Label>
                   <select
                     {...register('security.vpn.status')}
                     className="h-8 rounded-md border bg-background px-2 text-xs"
                   >
-                    <option value="Available">Available</option>
-                    <option value="Not Available">Not Available</option>
+                    <option value="available">{t('form.security.statusOptions.available')}</option>
+                    <option value="notAvailable">{t('form.security.statusOptions.notAvailable')}</option>
                   </select>
                 </div>
                 <div className="flex items-center justify-between mb-3">
@@ -773,10 +785,10 @@ export default function FormPage() {
                     type="button"
                     variant="outline"
                     size="sm"
-                    onClick={() => appendVpn({ vpnName: '', license: 'Original', notes: '' })}
+                    onClick={() => appendVpn({ vpnName: '', license: 'original', notes: '' })}
                   >
                     <Plus className="h-4 w-4 mr-1" />
-                    Add
+                    {t('common.add')}
                   </Button>
                 </div>
                 {vpnFields.map((field, index) => (
@@ -789,13 +801,13 @@ export default function FormPage() {
                       {...register(`security.vpn.list.${index}.license` as any)}
                       className="h-10 rounded-md border bg-background px-3 text-sm"
                     >
-                      <option value="Original">Original</option>
-                      <option value="Pirated">Pirated</option>
-                      <option value="Open Source">Open Source</option>
-                      <option value="Unknown">Unknown</option>
+                      <option value="original">{t('form.applications.licenseOptions.original')}</option>
+                      <option value="pirated">{t('form.applications.licenseOptions.pirated')}</option>
+                      <option value="openSource">{t('form.applications.licenseOptions.openSource')}</option>
+                      <option value="unknown">{t('form.applications.licenseOptions.unknown')}</option>
                     </select>
                     <Input
-                      placeholder="Notes (optional)"
+                      placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.vpn.list.${index}.notes` as any)}
                     />
                     {vpnFields.length > 1 && (
@@ -824,37 +836,41 @@ export default function FormPage() {
             </CardHeader>
             <CardContent className="space-y-4">
               <div>
-                <Label htmlFor="passwordUsage">Password Usage *</Label>
+                <Label htmlFor="passwordUsage">{t('form.additionalInfo.passwordUsage')} *</Label>
                 <select
                   id="passwordUsage"
-                  {...register('additionalInfo.passwordUsage', { required: 'Password usage is required' })}
+                  {...register('additionalInfo.passwordUsage', { required: t('form.validation.passwordUsageRequired') })}
                   className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                 >
-                  <option value="Available">Available</option>
-                  <option value="Not Available">Not Available</option>
+                  <option value="available">{t('form.additionalInfo.passwordUsageOptions.available')}</option>
+                  <option value="notAvailable">{t('form.additionalInfo.passwordUsageOptions.notAvailable')}</option>
                 </select>
               </div>
 
               <div>
-                <Label htmlFor="inspectorPICName">Inspector PIC Name</Label>
+                <Label htmlFor="inspectorPICName">{t('form.additionalInfo.inspectorPICName')}</Label>
                 <CreatableSelect
                   key="inspectorPICName"
                   options={dropdownOptions['inspectorPICName'] || []}
                   value={watch('additionalInfo.inspectorPICName')}
                   onChange={(val) => setValue('additionalInfo.inspectorPICName', val)}
                   onCreate={(val) => handleCreateOption('inspectorPICName', val)}
-                  placeholder="Select or create inspector name..."
+                  placeholder={t('form.placeholders.inspectorName')}
                 />
               </div>
 
               <div>
-                <Label htmlFor="otherNotes">Other Notes</Label>
+                <Label htmlFor="otherNotes">{t('form.additionalInfo.otherNotes')}</Label>
                 <textarea
                   id="otherNotes"
                   {...register('additionalInfo.otherNotes')}
+                  onKeyDown={handleKeyDown}
                   className="flex min-h-[100px] w-full rounded-md border bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2"
-                  placeholder="Enter any additional notes..."
+                  placeholder={t('form.placeholders.otherNotes')}
                 />
+                <p className="text-sm text-muted-foreground mt-1">
+                  Press Enter to save, Shift+Enter for new line
+                </p>
               </div>
             </CardContent>
           </Card>
@@ -867,11 +883,11 @@ export default function FormPage() {
               onClick={() => router.back()}
               disabled={loading}
             >
-              Cancel
+              {t('common.cancel')}
             </Button>
             <Button type="submit" disabled={loading} className="flex-1">
               <Save className="h-4 w-4 mr-2" />
-              {loading ? 'Saving...' : 'Save Device Check'}
+              {loading ? t('common.loading') : t('form.title')}
             </Button>
           </div>
         </form>
