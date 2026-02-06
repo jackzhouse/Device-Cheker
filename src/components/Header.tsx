@@ -41,7 +41,11 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-8 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Laptop className="h-6 w-6 text-primary" />
+            <img
+              src="/logo-tki.png"
+              alt="TKI Logo"
+              className="h-10 w-auto"
+            />
             <span className="hidden font-bold sm:inline-block">
               Device Checking System
             </span>
@@ -54,7 +58,7 @@ export default function Header() {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? 'default' : 'ghost'}
-                className="flex items-center space-x-2 cursor-pointer"
+                className="flex items-center space-x-2"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -116,7 +120,7 @@ export default function Header() {
               >
                 <Button
                   variant={isActive(item.href) ? 'default' : 'ghost'}
-                  className="w-full justify-start cursor-pointer"
+                  className="w-full justify-start"
                 >
                   <item.icon className="mr-2 h-4 w-4" />
                   <span>{item.label}</span>
