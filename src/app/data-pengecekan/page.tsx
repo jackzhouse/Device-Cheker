@@ -14,6 +14,7 @@ import {
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
+import { generateDeviceCheckPDF } from '@/lib/utils/pdf';
 
 export default function CheckDataPage() {
   const router = useRouter();
@@ -56,6 +57,16 @@ export default function CheckDataPage() {
       fetchChecks();
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete device check');
+    }
+  };
+
+  const handleDownloadPDF = async (check: DeviceCheck) => {
+    try {
+      toast.loading('Generating PDF...');
+      await generateDeviceCheckPDF(check);
+      toast.success('PDF downloaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to generate PDF');
     }
   };
 
@@ -228,6 +239,7 @@ export default function CheckDataPage() {
                         check={check}
                         onEdit={() => router.push(`/form/edit/${check._id}`)}
                         onDelete={() => handleDelete(check._id)}
+                        onDownload={() => handleDownloadPDF(check)}
                         compact
                       />
                     ))}
@@ -253,6 +265,7 @@ export default function CheckDataPage() {
               check={check}
               onEdit={() => router.push(`/form/edit/${check._id}`)}
               onDelete={() => handleDelete(check._id)}
+              onDownload={() => handleDownloadPDF(check)}
             />
           ))}
         </div>
@@ -264,12 +277,14 @@ export default function CheckDataPage() {
 function CheckCard({ 
   check, 
   onEdit, 
-  onDelete, 
+  onDelete,
+  onDownload,
   compact = false 
 }: { 
   check: DeviceCheck; 
   onEdit: () => void; 
   onDelete: () => void;
+  onDownload?: () => void;
   compact?: boolean;
 }) {
   const getSuitabilityBadge = (suitability: string) => {
@@ -340,6 +355,11 @@ function CheckCard({
               <Eye className="h-4 w-4" />
             </Link>
           </Button>
+          {onDownload && (
+            <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
+              <Download className="h-4 w-4" />
+            </Button>
+          )}
           <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
             <Edit className="h-4 w-4" />
           </Button>

@@ -2,13 +2,14 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getEmployeeChecks } from '@/lib/services/device-checks.service';
+import { getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-checks.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
+import { generateDeviceCheckPDF, generateEmployeeHistoryPDF } from '@/lib/utils/pdf';
 
 interface EmployeeCheckHistoryData {
   employee: {
@@ -94,6 +95,28 @@ export default function EmployeeHistoryPage() {
       fetchEmployeeHistory();
     } catch (error: any) {
       toast.error(error.message || 'Failed to delete device check');
+    }
+  };
+
+  const handleDownloadPDF = async (check: any) => {
+    try {
+      toast.loading('Generating PDF...');
+      await generateDeviceCheckPDF(check as DeviceCheck);
+      toast.success('PDF downloaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to generate PDF');
+    }
+  };
+
+  const handleExportAllPDF = async () => {
+    if (!data) return;
+    
+    try {
+      toast.loading('Generating PDF for all checks...');
+      await generateEmployeeHistoryPDF(data.employee, data.checks as DeviceCheck[]);
+      toast.success('PDF downloaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to generate PDF');
     }
   };
 
@@ -210,7 +233,15 @@ export default function EmployeeHistoryPage() {
       {/* Timeline */}
       <Card>
         <CardHeader>
-          <CardTitle>Check History</CardTitle>
+          <div className="flex items-center justify-between">
+            <CardTitle>Check History</CardTitle>
+            {checks.length > 0 && (
+              <Button onClick={handleExportAllPDF}>
+                <Download className="h-4 w-4 mr-2" />
+                Export All to PDF
+              </Button>
+            )}
+          </div>
         </CardHeader>
         <CardContent>
           {checks.length === 0 ? (
@@ -241,6 +272,9 @@ export default function EmployeeHistoryPage() {
                           </p>
                         </div>
                         <div className="flex gap-2">
+                          <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(check)}>
+                            <Download className="h-4 w-4" />
+                          </Button>
                           <Button variant="outline" size="sm" onClick={() => router.push(`/form/edit/${check._id}`)}>
                             <Edit className="h-4 w-4" />
                           </Button>

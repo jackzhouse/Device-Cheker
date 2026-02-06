@@ -39,24 +39,69 @@ export default function EmployeeAutocomplete({
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
+  const [hasLoadedInitial, setHasLoadedInitial] = React.useState(false);
   
   const debouncedSearch = useDebounce(searchTerm, 300);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
-  // Search employees
+  // Load initial employees on mount
+  React.useEffect(() => {
+    const loadInitialEmployees = async () => {
+      setLoading(true);
+      try {
+        const response = await searchEmployees('', 10);
+        if (response.success && response.data) {
+          const employeeOptions = response.data.map((emp) => ({
+            value: emp._id,
+            label: `${emp.fullName} - ${emp.position}`,
+            employee: emp,
+          }));
+          setOptions(employeeOptions);
+        }
+      } catch (error: any) {
+        console.error('Error loading initial employees:', error);
+      } finally {
+        setLoading(false);
+        setHasLoadedInitial(true);
+      }
+    };
+
+    loadInitialEmployees();
+  }, []);
+
+  // Search employees when typing
   React.useEffect(() => {
     const searchEmployeesEffect = async () => {
+      if (!hasLoadedInitial) return; // Don't search while initial load is in progress
+      
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
       
       abortControllerRef.current = new AbortController();
       
+      // If debouncedSearch is empty, reload initial employees
       if (!debouncedSearch) {
-        setOptions([]);
+        setLoading(true);
+        try {
+          const response = await searchEmployees('', 10);
+          if (response.success && response.data) {
+            const employeeOptions = response.data.map((emp) => ({
+              value: emp._id,
+              label: `${emp.fullName} - ${emp.position}`,
+              employee: emp,
+            }));
+            setOptions(employeeOptions);
+          }
+        } catch (error: any) {
+          console.error('Error searching employees:', error);
+        } finally {
+          setLoading(false);
+        }
         return;
       }
 
+      // Search with the term
       setLoading(true);
       try {
         const response = await searchEmployees(debouncedSearch, 10);
@@ -76,7 +121,7 @@ export default function EmployeeAutocomplete({
     };
 
     searchEmployeesEffect();
-  }, [debouncedSearch]);
+  }, [debouncedSearch, hasLoadedInitial]);
 
   const handleEmployeeSelect = async (employeeId: string) => {
     const option = options.find((opt) => opt.value === employeeId);
