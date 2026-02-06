@@ -1,5 +1,6 @@
 import jsPDF from 'jspdf';
 import { DeviceCheck } from '@/lib/services/device-checks.service';
+import { getTKILogoDataUrl } from './logo';
 
 // Color constants (as readonly tuples for type safety)
 const COLORS = {
@@ -14,15 +15,11 @@ const COLORS = {
 };
 
 /**
- * Helper function to draw a rounded rectangle badge
+ * Get TKI Logo as base64 data URL
+ * Loads the PNG file from public directory and converts to base64
  */
-function drawBadge(doc: jsPDF, x: number, y: number, width: number, height: number, radius: number, color: readonly number[], text: string, textColor: readonly number[] = COLORS.white) {
-  doc.setFillColor(color[0], color[1], color[2]);
-  doc.roundedRect(x, y, width, height, radius, radius, 'F');
-  doc.setTextColor(textColor[0], textColor[1], textColor[2]);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text(text, x + width / 2, y + height / 2 + 3, { align: 'center' });
+async function getTKILogo(): Promise<string> {
+  return await getTKILogoDataUrl();
 }
 
 /**
@@ -77,45 +74,50 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   const bottomMargin = 20;
   const contentWidth = pageWidth - leftMargin - rightMargin;
 
-  // ============ HEADER SECTION (80mm height) ============
-  const headerHeight = 80;
+  // ============ HEADER SECTION (70mm height) ============
+  const headerHeight = 70;
   
   // Dark background
   doc.setFillColor(...COLORS.primaryDark);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
-  // Company Name (prominent branding)
+  // TKI Logo (84x40 PNG)
+  const logoUrl = await getTKILogo();
+  doc.addImage(logoUrl, 'PNG', leftMargin, 15, 25, 12);
+
+  // Company Name (after logo)
   doc.setTextColor(...COLORS.white);
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
-  doc.text('Teknologi Kartu Indonesia', leftMargin, 22);
+  doc.text('Teknologi Kartu Indonesia', leftMargin + 30, 25);
   
   // Subtitle
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('Device Checking System', leftMargin, 30);
+  doc.text('Device Checking System', leftMargin + 30, 32);
 
   // Report Title
   doc.setFontSize(28);
   doc.setFont('helvetica', 'bold');
-  doc.text('DEVICE CHECK REPORT', leftMargin, 48);
+  doc.text('DEVICE CHECK REPORT', leftMargin + 30, 48);
 
   // IT Department subtitle
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
-  doc.text('IT Department', leftMargin, 58);
+  doc.text('IT Department', leftMargin + 30, 56);
 
-  // Version Badge
+  // Version and Date (under IT Department, same line)
   const versionText = `Version: v${check.version || 1}`;
-  drawBadge(doc, pageWidth - rightMargin - 95, 20, 45, 15, 3, COLORS.secondaryBlue, versionText);
-
-  // Date Badge
   const dateText = new Date(check.checkDate).toLocaleDateString('id-ID', {
     day: '2-digit',
     month: 'short',
     year: 'numeric'
   });
-  drawBadge(doc, pageWidth - rightMargin - 45, 20, 45, 15, 3, COLORS.accentGreen, dateText);
+  
+  doc.setTextColor(...COLORS.white);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text(`${versionText} • ${dateText}`, leftMargin + 30, 64);
 
   // ============ CONTENT SECTIONS ============
   let yPos = topMargin + headerHeight + 10;
@@ -153,15 +155,18 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   drawLabelValue(doc, 'Serial Number', check.deviceDetail.serialNumber, leftMargin, yPos);
   yPos += 7;
 
-  // Ownership Badge
-  const ownershipColor = check.deviceDetail.ownership === 'Company' ? COLORS.secondaryBlue : COLORS.darkGray;
-  drawBadge(doc, leftMargin + 45, yPos, 50, 12, 3, ownershipColor, check.deviceDetail.ownership);
+  // Ownership (text with color)
   doc.setTextColor(...COLORS.black);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Ownership:', leftMargin, yPos + 8);
+  doc.text('Ownership:', leftMargin, yPos);
   
-  yPos += 12;
+  const ownershipColor = check.deviceDetail.ownership === 'Company' ? COLORS.accentGreen : COLORS.darkGray;
+  doc.setTextColor(ownershipColor[0], ownershipColor[1], ownershipColor[2]);
+  doc.setFont('helvetica', 'normal');
+  doc.text(check.deviceDetail.ownership, leftMargin + 45, yPos);
+  
+  yPos += 10;
 
   // 3. Operating System
   yPos = drawSectionHeader(doc, 'Operating System', yPos, leftMargin, pageWidth);
@@ -176,16 +181,19 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   drawLabelValue(doc, 'License', check.operatingSystem.osLicense, leftMargin, yPos);
   yPos += 7;
 
-  // Updates Status Badge
-  const updatesText = check.operatingSystem.osRegularUpdate ? 'Yes' : 'No';
-  const updatesColor = check.operatingSystem.osRegularUpdate ? COLORS.accentGreen : COLORS.red;
-  drawBadge(doc, leftMargin + 45, yPos, 50, 12, 3, updatesColor, updatesText);
+  // Updates Status (text with color)
   doc.setTextColor(...COLORS.black);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Regular Updates:', leftMargin, yPos + 8);
+  doc.text('Regular Updates:', leftMargin, yPos);
   
-  yPos += 15;
+  const updatesColor = check.operatingSystem.osRegularUpdate ? COLORS.accentGreen : COLORS.red;
+  const updatesText = check.operatingSystem.osRegularUpdate ? 'Yes' : 'No';
+  doc.setTextColor(updatesColor[0], updatesColor[1], updatesColor[2]);
+  doc.setFont('helvetica', 'normal');
+  doc.text(updatesText, leftMargin + 45, yPos);
+  
+  yPos += 10;
 
   // 4. Specifications & Device Condition (Side by Side)
   const columnWidth = (contentWidth - 10) / 2;
@@ -215,7 +223,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     }
   }
 
-  // Overall Status Badge (Right Column - Top)
+  // Overall Status (Right Column - Top)
   doc.setTextColor(...COLORS.black);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
@@ -226,8 +234,10 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     : check.deviceCondition.deviceSuitability === 'Unsuitable' 
     ? COLORS.red 
     : COLORS.secondaryBlue;
-
-  drawBadge(doc, rightColumnX, yPos - 15, 60, 10, 3, statusColor, check.deviceCondition.deviceSuitability, COLORS.white);
+  
+  doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+  doc.setFont('helvetica', 'normal');
+  doc.text(check.deviceCondition.deviceSuitability, rightColumnX + 40, yPos - 21);
 
   // Device Condition (Right Column)
   doc.setTextColor(...COLORS.black);
@@ -244,7 +254,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     { label: 'Wi-Fi', value: check.deviceCondition.wifiCondition },
   ];
 
-  conditions.forEach((condition, index) => {
+  conditions.forEach((condition) => {
     const isGood = condition.value.toLowerCase().includes('good') || condition.value.toLowerCase().includes('suitable');
     drawStatusCircle(doc, rightColumnX, yPos + 1, isGood);
     
@@ -271,9 +281,11 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       doc.setFont('helvetica', 'bold');
       doc.text(`• ${app.applicationName}`, leftMargin, yPos);
       
-      // License badge
-      drawBadge(doc, leftMargin + 100, yPos - 4, 30, 8, 2, licenseColor, app.license, COLORS.white);
-      yPos += 7;
+      // License text (colored)
+      doc.setTextColor(licenseColor[0], licenseColor[1], licenseColor[2]);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`License: ${app.license}`, leftMargin + 10, yPos + 5);
+      yPos += 10;
       
       if (app.notes) {
         doc.setTextColor(...COLORS.darkGray);
@@ -300,9 +312,11 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       doc.setFont('helvetica', 'bold');
       doc.text(`• ${app.applicationName}`, leftMargin, yPos);
       
-      // License badge
-      drawBadge(doc, leftMargin + 100, yPos - 4, 30, 8, 2, licenseColor, app.license, COLORS.white);
-      yPos += 7;
+      // License text (colored)
+      doc.setTextColor(licenseColor[0], licenseColor[1], licenseColor[2]);
+      doc.setFont('helvetica', 'normal');
+      doc.text(`License: ${app.license}`, leftMargin + 10, yPos + 5);
+      yPos += 10;
       
       if (app.notes) {
         doc.setTextColor(...COLORS.darkGray);
@@ -321,11 +335,14 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   // Antivirus
   const avStatusColor = check.security.antivirus.status === 'Active' ? COLORS.accentGreen : COLORS.red;
-  drawBadge(doc, leftMargin + 60, yPos - 4, 35, 8, 2, avStatusColor, check.security.antivirus.status, COLORS.white);
   doc.setTextColor(...COLORS.black);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('Antivirus Status:', leftMargin, yPos + 3);
+  doc.text('Antivirus Status:', leftMargin, yPos);
+  
+  doc.setTextColor(avStatusColor[0], avStatusColor[1], avStatusColor[2]);
+  doc.setFont('helvetica', 'normal');
+  doc.text(check.security.antivirus.status, leftMargin + 45, yPos);
   yPos += 10;
 
   if (check.security.antivirus.list && check.security.antivirus.list.length > 0) {
@@ -341,11 +358,14 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   // VPN
   const vpnStatusColor = check.security.vpn.status === 'Available' ? COLORS.accentGreen : COLORS.red;
-  drawBadge(doc, leftMargin + 50, yPos - 4, 45, 8, 2, vpnStatusColor, check.security.vpn.status, COLORS.white);
   doc.setTextColor(...COLORS.black);
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
-  doc.text('VPN Status:', leftMargin, yPos + 3);
+  doc.text('VPN Status:', leftMargin, yPos);
+  
+  doc.setTextColor(vpnStatusColor[0], vpnStatusColor[1], vpnStatusColor[2]);
+  doc.setFont('helvetica', 'normal');
+  doc.text(check.security.vpn.status, leftMargin + 45, yPos);
   yPos += 10;
 
   if (check.security.vpn.list && check.security.vpn.list.length > 0) {
@@ -428,16 +448,20 @@ export async function generateEmployeeHistoryPDF(
   doc.setFillColor(...COLORS.primaryDark);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
-  // Company Name (prominent branding)
+  // TKI Logo (84x40 PNG)
+  const logoUrl2 = await getTKILogo();
+  doc.addImage(logoUrl2, 'PNG', leftMargin, 15, 25, 12);
+
+  // Company Name (after logo)
   doc.setTextColor(...COLORS.white);
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text('Teknologi Kartu Indonesia', leftMargin, 22);
+  doc.text('Teknologi Kartu Indonesia', leftMargin + 30, 22);
 
   // Report Title
   doc.setFontSize(20);
   doc.setFont('helvetica', 'bold');
-  doc.text('Employee Device Check History', leftMargin, 40);
+  doc.text('Employee Device Check History', leftMargin + 30, 40);
 
   yPos = headerHeight + 10;
 
@@ -516,7 +540,7 @@ export async function generateEmployeeHistoryPDF(
     doc.text(`OS: ${check.operatingSystem.osType} ${check.operatingSystem.osVersion}`, leftMargin, yPos);
     yPos += lineHeight;
 
-    // Overall Status with badge
+    // Overall Status with icon
     const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable' 
       ? COLORS.accentGreen 
       : check.deviceCondition.deviceSuitability === 'Unsuitable' 
@@ -529,6 +553,7 @@ export async function generateEmployeeHistoryPDF(
       ? '✗' 
       : '⚠';
     
+    doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
     doc.text(`Overall: ${statusIcon} ${check.deviceCondition.deviceSuitability}`, leftMargin, yPos);
     yPos += lineHeight * 2;
 

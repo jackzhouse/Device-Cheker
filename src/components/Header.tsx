@@ -35,7 +35,11 @@ export default function Header() {
       <div className="container flex h-16 items-center">
         <div className="mr-8 flex items-center">
           <Link href="/" className="flex items-center space-x-2">
-            <Laptop className="h-6 w-6 text-primary" />
+            <img
+              src="/logo-tki.png"
+              alt="TKI Logo"
+              className="h-10 w-auto"
+            />
             <span className="hidden font-bold sm:inline-block">
               Device Checking System
             </span>
@@ -48,7 +52,7 @@ export default function Header() {
             <Link key={item.href} href={item.href}>
               <Button
                 variant={isActive(item.href) ? 'default' : 'ghost'}
-                className="flex items-center space-x-2 cursor-pointer"
+                className="flex items-center space-x-2"
               >
                 <item.icon className="h-4 w-4" />
                 <span>{item.label}</span>
@@ -64,11 +68,8 @@ export default function Header() {
           className="hidden md:flex"
           onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
         >
-          {theme === 'dark' ? (
-            <Moon key="moon" className="h-5 w-5 animate-theme-toggle" />
-          ) : (
-            <Sun key="sun" className="h-5 w-5 animate-theme-toggle" />
-          )}
+          <Sun className="h-5 w-5 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+          <Moon className="absolute h-5 w-5 rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
           <span className="sr-only">Toggle theme</span>
         </Button>
 
@@ -95,7 +96,7 @@ export default function Header() {
               >
                 <Button
                   variant={isActive(item.href) ? 'default' : 'ghost'}
-                  className="w-full justify-start cursor-pointer"
+                  className="w-full justify-start"
                 >
                   <item.icon className="mr-2 h-4 w-4" />
                   <span>{item.label}</span>
@@ -107,11 +108,8 @@ export default function Header() {
               className="w-full justify-start"
               onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
             >
-              {theme === 'dark' ? (
-                <Moon key="moon" className="mr-2 h-4 w-4 animate-theme-toggle" />
-              ) : (
-                <Sun key="sun" className="mr-2 h-4 w-4 animate-theme-toggle" />
-              )}
+              <Sun className="mr-2 h-4 w-4 rotate-0 scale-100 transition-all dark:-rotate-90 dark:scale-0" />
+              <Moon className="mr-2 h-4 w-4 absolute rotate-90 scale-0 transition-all dark:rotate-0 dark:scale-100" />
               <span>Toggle Theme</span>
             </Button>
           </div>
