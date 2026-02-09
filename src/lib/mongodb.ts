@@ -6,7 +6,14 @@ let MONGODB_URI: string;
 async function getMongoUri() {
   if (!MONGODB_URI) {
     const config = await getConfig();
-    MONGODB_URI = config.MONGODB_URI;
+    const uri = config.MONGODB_URI;
+    
+    // Validate MongoDB URI format before caching
+    if (!uri.startsWith('mongodb://') && !uri.startsWith('mongodb+srv://')) {
+      throw new Error(`Invalid MONGODB_URI format. Expected to start with 'mongodb://' or 'mongodb+srv://'. Got: '${uri.substring(0, 50)}...'`);
+    }
+    
+    MONGODB_URI = uri;
   }
   return MONGODB_URI;
 }
@@ -39,7 +46,7 @@ async function connectDB() {
   if (!cached.promise) {
     // Get MongoDB URI from Consul or environment
     const uri = await getMongoUri();
-    
+    console.log(uri,'=====')
     if (!uri) {
       throw new Error('MONGODB_URI not found in Consul or environment variables');
     }
@@ -53,16 +60,17 @@ async function connectDB() {
     };
 
     cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
-      console.log('✅ MongoDB connected successfully');
+        console.log('✅ MongoDB connected successfully');
+        console.log(mongoose)
       return mongoose;
     });
   }
 
   try {
     cached.conn = await cached.promise;
-  } catch (e) {
+  } catch (e:any) {
     cached.promise = null;
-    console.error('❌ MongoDB connection error:', e);
+    console.error('❌ MongoDB connection error: bener iki to yooo?', e.message);
     throw e;
   }
 

@@ -28,11 +28,28 @@ async function getKVValue(key: string): Promise<string | null> {
   try {
     const kvPath = `new-config/support-device-checker/setting/${key}`;
     const value = await consulClient.kv.get(kvPath);
+    console.log(value)
     
     if (value && value.Value) {
       const decodedValue = Buffer.from(value.Value, 'base64').toString('utf-8');
+      // Trim whitespace and remove newlines
+      const sanitizedValue = decodedValue.trim().replace(/\n/g, '').replace(/\r/g, '');
+      
       console.log(`✅ Fetched ${key} from Consul`);
-      return decodedValue;
+      console.log(`📝 Raw value (first 100 chars):`, decodedValue.substring(0, 100));
+      console.log(`📝 Sanitized value (first 100 chars):`, sanitizedValue.substring(0, 100));
+      console.log(`📝 Value length: ${sanitizedValue.length}`);
+      return value.Value
+      // Validate MongoDB URI format
+      if (key === 'MONGODB_URI' && sanitizedValue) {
+        if (!sanitizedValue.startsWith('mongodb://') && !sanitizedValue.startsWith('mongodb+srv://')) {
+          console.error(`❌ Invalid MONGODB_URI format. Expected to start with 'mongodb://' or 'mongodb+srv://'`);
+          console.error(`❌ Actual value starts with: '${sanitizedValue.substring(0, 20)}'`);
+          return null;
+        }
+      }
+      
+      return sanitizedValue;
     }
     
     console.warn(`⚠️ Key ${key} not found in Consul`);
