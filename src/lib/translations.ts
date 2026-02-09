@@ -262,9 +262,12 @@ export interface Translations {
     description: string;
     addButton: string;
     searchPlaceholder: string;
+    department: string;
+    lastCheck: string;
     filters: {
       allPositions: string;
       allDepartments: string;
+      allStatuses: string;
     };
     empty: string;
     totalChecks: string;
@@ -543,7 +546,7 @@ export const translations: Record<Language, Translations> = {
         touchpad: 'e.g., Good, Fair, Poor',
         monitor: 'e.g., Good, Fair, Poor',
         wifi: 'e.g., Good, Fair, Poor',
-        applicationName: '',
+        applicationName: 'e.g., Microsoft Office, Adobe Reader',
         notes: 'Notes (optional)',
         inspectorName: 'Select or create inspector name...',
         otherNotes: 'Enter any additional notes...',
@@ -588,9 +591,12 @@ export const translations: Record<Language, Translations> = {
       description: 'View and manage all employee records',
       addButton: 'Add Employee',
       searchPlaceholder: 'Search by name, position, or ID...',
+      department: 'Department',
+      lastCheck: 'Last Check',
       filters: {
         allPositions: 'All Positions',
         allDepartments: 'All Departments',
+        allStatuses: 'All Statuses',
       },
       empty: 'No employees found',
       totalChecks: 'Total Checks',
@@ -867,7 +873,7 @@ export const translations: Record<Language, Translations> = {
         touchpad: 'cth: Baik, Cukup, Buruk',
         monitor: 'cth: Baik, Cukup, Buruk',
         wifi: 'cth: Baik, Cukup, Buruk',
-        applicationName: '',
+        applicationName: 'cth: Microsoft Office, Adobe Reader',
         notes: 'Catatan (opsional)',
         inspectorName: 'Pilih atau buat nama pemeriksa...',
         otherNotes: 'Masukkan catatan tambahan...',
@@ -912,9 +918,12 @@ export const translations: Record<Language, Translations> = {
       description: 'Lihat dan kelola semua catatan karyawan',
       addButton: 'Tambah Karyawan',
       searchPlaceholder: 'Cari berdasarkan nama, posisi, atau ID...',
+      department: 'Departemen',
+      lastCheck: 'Pengecekan Terakhir',
       filters: {
         allPositions: 'Semua Posisi',
         allDepartments: 'Semua Departemen',
+        allStatuses: 'Semua Status',
       },
       empty: 'Tidak ada karyawan ditemukan',
       totalChecks: 'Total Pengecekan',

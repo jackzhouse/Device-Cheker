@@ -554,21 +554,22 @@ function FormContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <HardDrive className="h-5 w-5" />
-                Specification (Optional)
+                {t('form.specification.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ramCapacity">RAM Capacity</Label>
+                  <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')}&nbsp;(GB)</Label>
                   <CreatableSelect
                     key="ramCapacity"
+                    inputType="number"
                     options={dropdownOptions['ramCapacity'] || []}
                     value={watch('specification.ramCapacity')}
                     onChange={(val) => setValue('specification.ramCapacity', val)}
                     onCreate={(val) => handleCreateOption('ramCapacity', val)}
                     onDelete={handleDeleteOption('ramCapacity')}
-                    placeholder="Select or create RAM capacity..."
+                    placeholder={t('form.placeholders.ramCapacity')}
                   />
                 </div>
                 <div>
@@ -586,19 +587,20 @@ function FormContent() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="memoryCapacity">Storage Capacity</Label>
+                  <Label htmlFor="memoryCapacity">{t('form.specification.storageCapacity')}&nbsp;(GB)</Label>
                   <CreatableSelect
                     key="memoryCapacity"
+                    inputType="number"
                     options={dropdownOptions['memoryCapacity'] || []}
                     value={watch('specification.memoryCapacity')}
                     onChange={(val) => setValue('specification.memoryCapacity', val)}
                     onCreate={(val) => handleCreateOption('memoryCapacity', val)}
                     onDelete={handleDeleteOption('memoryCapacity')}
-                    placeholder="Select or create storage capacity..."
+                    placeholder={t('form.placeholders.storageCapacity')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="processor">Processor</Label>
+                  <Label htmlFor="processor">{t('form.specification.processor')}</Label>
                   <CreatableSelect
                     key="processor"
                     options={dropdownOptions['processor'] || []}
@@ -606,7 +608,7 @@ function FormContent() {
                     onChange={(val) => setValue('specification.processor', val)}
                     onCreate={(val) => handleCreateOption('processor', val)}
                     onDelete={handleDeleteOption('processor')}
-                    placeholder="Select or create processor..."
+                    placeholder={t('form.placeholders.processor')}
                   />
                 </div>
               </div>
@@ -618,7 +620,7 @@ function FormContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Device Condition
+                {t('form.deviceCondition.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">
@@ -638,43 +640,43 @@ function FormContent() {
 
               <div className="grid md:grid-cols-2 lg:grid-cols-5 gap-4">
                 <div>
-                  <Label htmlFor="batterySuitability">Battery</Label>
+                  <Label htmlFor="batterySuitability">{t('form.deviceCondition.battery')}</Label>
                   <Input
                     id="batterySuitability"
                     {...register('deviceCondition.batterySuitability')}
-                    placeholder="e.g., Good, Fair, Poor"
+                    placeholder={t('form.placeholders.battery')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="keyboardCondition">Keyboard</Label>
+                  <Label htmlFor="keyboardCondition">{t('form.deviceCondition.keyboard')}</Label>
                   <Input
                     id="keyboardCondition"
                     {...register('deviceCondition.keyboardCondition')}
-                    placeholder="e.g., Good, Fair, Poor"
+                    placeholder={t('form.placeholders.keyboard')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="touchpadCondition">Touchpad</Label>
+                  <Label htmlFor="touchpadCondition">{t('form.deviceCondition.touchpad')}</Label>
                   <Input
                     id="touchpadCondition"
                     {...register('deviceCondition.touchpadCondition')}
-                    placeholder="e.g., Good, Fair, Poor"
+                    placeholder={t('form.placeholders.touchpad')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="monitorCondition">Monitor</Label>
+                  <Label htmlFor="monitorCondition">{t('form.deviceCondition.monitor')}</Label>
                   <Input
                     id="monitorCondition"
                     {...register('deviceCondition.monitorCondition')}
-                    placeholder="e.g., Good, Fair, Poor"
+                    placeholder={t('form.placeholders.monitor')}
                   />
                 </div>
                 <div>
-                  <Label htmlFor="wifiCondition">WiFi</Label>
+                  <Label htmlFor="wifiCondition">{t('form.deviceCondition.wifi')}</Label>
                   <Input
                     id="wifiCondition"
                     {...register('deviceCondition.wifiCondition')}
-                    placeholder="e.g., Good, Fair, Poor"
+                    placeholder={t('form.placeholders.wifi')}
                   />
                 </div>
               </div>
@@ -686,7 +688,7 @@ function FormContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Applications
+                {t('form.applications.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -728,7 +730,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`workApplications.${index}.notes` as any)}
                     />
-                    {workAppFields.length > 1 && (
+                    {workAppFields.length > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -785,7 +787,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`nonWorkApplications.${index}.notes` as any)}
                     />
-                    {nonWorkAppFields.length > 1 && (
+                    {nonWorkAppFields.length > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -811,7 +813,7 @@ function FormContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
-                Security
+                {t('form.security.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-6">
@@ -863,7 +865,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.antivirus.list.${index}.notes` as any)}
                     />
-                    {antivirusFields.length > 1 && (
+                    {antivirusFields.length > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -914,7 +916,7 @@ function FormContent() {
                 {vpnFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
                     <Input
-                      placeholder="VPN name"
+                      placeholder={t('form.placeholders.applicationName')}
                       {...register(`security.vpn.list.${index}.vpnName` as any)}
                     />
                     <select
@@ -930,7 +932,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.vpn.list.${index}.notes` as any)}
                     />
-                    {vpnFields.length > 1 && (
+                    {vpnFields.length > 0 && (
                       <Tooltip>
                         <TooltipTrigger asChild>
                           <Button
@@ -956,7 +958,7 @@ function FormContent() {
             <CardHeader>
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
-                Additional Information
+                {t('form.additionalInfo.title')}
               </CardTitle>
             </CardHeader>
             <CardContent className="space-y-4">

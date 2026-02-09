@@ -44,10 +44,10 @@ export default function EmployeesPage() {
   };
 
   const handleDelete = async (id: string, totalChecks: number) => {
-    const confirmMsg = totalChecks > 0 
+    const confirmMsg = totalChecks > 0
       ? 'This employee has device checks. Deleting will mark them as resigned. Continue?'
       : t('employee.confirmDelete');
-    
+
     if (!confirm(confirmMsg)) {
       return;
     }
@@ -159,10 +159,10 @@ export default function EmployeesPage() {
               onChange={(e) => setFilterStatus(e.target.value)}
               className="h-10 rounded-md border bg-background px-3 text-sm"
             >
-              <option value="">{t('employee.filters.allPositions')}</option>
-              <option value="Active">Active</option>
-              <option value="Inactive">Inactive</option>
-              <option value="Resigned">Resigned</option>
+              <option value="">{t('employee.filters.allStatuses')}</option>
+              <option value="Active">{t('createEmployee.statusOptions.active')}</option>
+              <option value="Inactive">{t('createEmployee.statusOptions.inactive')}</option>
+              <option value="Resigned">{t('createEmployee.statusOptions.resigned')}</option>
             </select>
             <Button
               variant="outline"
@@ -213,14 +213,14 @@ function EmployeeCard({
   onDelete: () => void;
 }) {
   const { t } = useLanguage();
-  
+
   const getStatusBadge = (status: string) => {
     const variants: any = {
       'Active': 'success',
       'Inactive': 'warning',
       'Resigned': 'secondary',
     };
-    return <Badge variant={variants[status] || 'default'}>{status}</Badge>;
+    return <Badge variant={variants[status] || 'default'}>{t(`createEmployee.statusOptions.${status.toLowerCase()}`)}</Badge>;
   };
 
   const formatDate = (dateString: string | undefined) => {
@@ -254,7 +254,7 @@ function EmployeeCard({
         <div className="space-y-3 mb-4">
           {employee.department && (
             <div className="flex items-center gap-2 text-sm">
-              <span className="text-muted-foreground">Department:</span>
+              <span className="text-muted-foreground">{t('employee.department')}:</span>
               <span className="font-medium">{employee.department}</span>
             </div>
           )}
@@ -263,7 +263,7 @@ function EmployeeCard({
             <span className="font-medium">{employee.totalDeviceChecks}</span>
           </div>
           <div className="flex items-center gap-2 text-sm">
-            <span className="text-muted-foreground">Last Check:</span>
+            <span className="text-muted-foreground">{t('employee.lastCheck')}:</span>
             <span className="font-medium">
               {formatDate(employee.lastCheckDate)}
             </span>
