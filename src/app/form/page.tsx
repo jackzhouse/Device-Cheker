@@ -206,6 +206,7 @@ function FormContent() {
             const mappedOptions: SelectOption[] = response.data.map((opt) => ({
               value: opt.value,
               label: opt.value,
+              _id: opt._id,
             }));
             options[field] = mappedOptions;
           }
@@ -269,6 +270,7 @@ function FormContent() {
               const mappedOptions: SelectOption[] = response.data.map((opt) => ({
                 value: opt.value,
                 label: opt.value,
+                _id: opt._id,
               }));
               setDropdownOptions((prev) => ({
                 ...prev,
@@ -285,6 +287,20 @@ function FormContent() {
       console.error('Error creating option:', error);
       toast.error('Failed to create option');
     }
+  };
+
+  // Handle deleting dropdown option
+  const handleDeleteOption = (fieldName: string) => {
+    return (optionId: string) => {
+      setDropdownOptions((prev) => {
+        const currentOptions = prev[fieldName] || [];
+        const filteredOptions = currentOptions.filter((opt) => opt._id !== optionId);
+        return {
+          ...prev,
+          [fieldName]: filteredOptions,
+        };
+      });
+    };
   };
 
   const onSubmit = async (data: any) => {
@@ -320,7 +336,7 @@ function FormContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('form.title')}</h1>
@@ -446,6 +462,7 @@ function FormContent() {
                   value={watch('deviceDetail.deviceBrand')}
                   onChange={(val) => setValue('deviceDetail.deviceBrand', val)}
                   onCreate={(val) => handleCreateOption('deviceBrand', val)}
+                  onDelete={handleDeleteOption('deviceBrand')}
                   placeholder={t('form.placeholders.deviceBrand')}
                 />
               </div>
@@ -548,6 +565,7 @@ function FormContent() {
                     value={watch('specification.ramCapacity')}
                     onChange={(val) => setValue('specification.ramCapacity', val)}
                     onCreate={(val) => handleCreateOption('ramCapacity', val)}
+                    onDelete={handleDeleteOption('ramCapacity')}
                     placeholder={t('form.placeholders.ramCapacity')}
                   />
                 </div>
@@ -573,6 +591,7 @@ function FormContent() {
                     value={watch('specification.memoryCapacity')}
                     onChange={(val) => setValue('specification.memoryCapacity', val)}
                     onCreate={(val) => handleCreateOption('memoryCapacity', val)}
+                    onDelete={handleDeleteOption('memoryCapacity')}
                     placeholder={t('form.placeholders.storageCapacity')}
                   />
                 </div>
@@ -584,6 +603,7 @@ function FormContent() {
                     value={watch('specification.processor')}
                     onChange={(val) => setValue('specification.processor', val)}
                     onCreate={(val) => handleCreateOption('processor', val)}
+                    onDelete={handleDeleteOption('processor')}
                     placeholder={t('form.placeholders.processor')}
                   />
                 </div>
@@ -918,6 +938,7 @@ function FormContent() {
                   value={watch('additionalInfo.inspectorPICName')}
                   onChange={(val) => setValue('additionalInfo.inspectorPICName', val)}
                   onCreate={(val) => handleCreateOption('inspectorPICName', val)}
+                  onDelete={handleDeleteOption('inspectorPICName')}
                   placeholder={t('form.placeholders.inspectorName')}
                 />
               </div>

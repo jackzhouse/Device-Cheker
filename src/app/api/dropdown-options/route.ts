@@ -95,3 +95,42 @@ export async function POST(request: NextRequest) {
     );
   }
 }
+
+// DELETE /api/dropdown-options - Delete a dropdown option
+export async function DELETE(request: NextRequest) {
+  try {
+    await connectDB();
+
+    const searchParams = request.nextUrl.searchParams;
+    const id = searchParams.get('id');
+
+    // Validation
+    if (!id) {
+      return NextResponse.json(
+        { success: false, error: 'Option ID is required' },
+        { status: 400 }
+      );
+    }
+
+    // Find and delete the option
+    const deletedOption = await DropdownOption.findByIdAndDelete(id);
+
+    if (!deletedOption) {
+      return NextResponse.json(
+        { success: false, error: 'Option not found' },
+        { status: 404 }
+      );
+    }
+
+    return NextResponse.json({
+      success: true,
+      message: 'Option deleted successfully',
+    });
+  } catch (error: any) {
+    console.error('Error deleting dropdown option:', error);
+    return NextResponse.json(
+      { success: false, error: error.message || 'Failed to delete dropdown option' },
+      { status: 500 }
+    );
+  }
+}
