@@ -253,6 +253,42 @@ export interface Translations {
     noChecks: string;
     totalChecks: string;
   };
+  createEmployee: {
+    title: string;
+    description: string;
+    formTitle: string;
+    formDescription: string;
+    firstName: string;
+    lastName: string;
+    position: string;
+    department: string;
+    email: string;
+    phoneNumber: string;
+    status: string;
+    statusOptions: {
+      active: string;
+      inactive: string;
+      resigned: string;
+    };
+    required: string;
+    placeholders: {
+      firstName: string;
+      lastName: string;
+      position: string;
+      department: string;
+      email: string;
+      phoneNumber: string;
+    };
+    backToEmployees: string;
+    cancel: string;
+    createButton: string;
+    creating: string;
+    validation: {
+      requiredFields: string;
+      createSuccess: string;
+      createFailed: string;
+    };
+  };
   errors: {
     generic: string;
     network: string;
@@ -514,6 +550,42 @@ export const translations: Record<Language, Translations> = {
       noChecks: 'No device checks found for this employee',
       totalChecks: 'Total Checks',
     },
+    createEmployee: {
+      title: 'Create New Employee',
+      description: 'Add a new employee to the system. This will allow you to create device checks for them.',
+      formTitle: 'Employee Information',
+      formDescription: 'Fill in the required fields marked with *. Contact information and status are optional.',
+      firstName: 'First Name',
+      lastName: 'Last Name',
+      position: 'Position',
+      department: 'Department',
+      email: 'Email',
+      phoneNumber: 'Phone Number',
+      status: 'Status',
+      statusOptions: {
+        active: 'Active',
+        inactive: 'Inactive',
+        resigned: 'Resigned',
+      },
+      required: '*',
+      placeholders: {
+        firstName: 'Enter first name',
+        lastName: 'Enter last name',
+        position: 'e.g., Software Engineer',
+        department: 'e.g., IT, HR, Marketing',
+        email: 'e.g., john.doe@company.com',
+        phoneNumber: 'e.g., +62 812 3456 7890',
+      },
+      backToEmployees: 'Back to Employees',
+      cancel: 'Cancel',
+      createButton: 'Create Employee',
+      creating: 'Creating...',
+      validation: {
+        requiredFields: 'Please fill in all required fields',
+        createSuccess: 'Employee created successfully',
+        createFailed: 'Failed to create employee',
+      },
+    },
     errors: {
       generic: 'An error occurred',
       network: 'Network error. Please check your connection',
@@ -772,6 +844,42 @@ export const translations: Record<Language, Translations> = {
       deviceChecks: 'Pengecekan Perangkat',
       noChecks: 'Tidak ada pengecekan perangkat ditemukan untuk karyawan ini',
       totalChecks: 'Total Pengecekan',
+    },
+    createEmployee: {
+      title: 'Tambah Karyawan Baru',
+      description: 'Tambahkan karyawan baru ke sistem. Ini akan memungkinkan Anda membuat pengecekan perangkat untuk mereka.',
+      formTitle: 'Informasi Karyawan',
+      formDescription: 'Isi bidang wajib ditandai dengan *. Informasi kontak dan status adalah opsional.',
+      firstName: 'Nama Depan',
+      lastName: 'Nama Belakang',
+      position: 'Posisi',
+      department: 'Departemen',
+      email: 'Email',
+      phoneNumber: 'Nomor Telepon',
+      status: 'Status',
+      statusOptions: {
+        active: 'Aktif',
+        inactive: 'Tidak Aktif',
+        resigned: 'Mengundurkan Diri',
+      },
+      required: '*',
+      placeholders: {
+        firstName: 'Masukkan nama depan',
+        lastName: 'Masukkan nama belakang',
+        position: 'cth: Software Engineer',
+        department: 'cth: IT, HR, Pemasaran',
+        email: 'cth: john.doe@perusahaan.com',
+        phoneNumber: 'cth: +62 812 3456 7890',
+      },
+      backToEmployees: 'Kembali ke Karyawan',
+      cancel: 'Batal',
+      createButton: 'Tambah Karyawan',
+      creating: 'Membuat...',
+      validation: {
+        requiredFields: 'Silakan isi semua bidang wajib',
+        createSuccess: 'Karyawan berhasil ditambahkan',
+        createFailed: 'Gagal menambahkan karyawan',
+      },
     },
     errors: {
       generic: 'Terjadi kesalahan',
