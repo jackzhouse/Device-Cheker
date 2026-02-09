@@ -38,8 +38,8 @@ export default function Header() {
 
   return (
     <header className="sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60">
-      <div className="container flex h-16 items-center">
-        <div className="mr-8 flex items-center">
+      <div className="flex h-16 items-center justify-between px-6">
+        <div className="flex items-center">
           <Link href="/" className="flex items-center space-x-2">
             <img
               src="/logo-tki.png"
@@ -52,49 +52,68 @@ export default function Header() {
           </Link>
         </div>
 
-        {/* Desktop Navigation */}
-        <nav className="hidden items-center space-x-6 md:flex">
-          {navItems.map((item) => (
-            <Link key={item.href} href={item.href}>
-              <Button
-                variant={isActive(item.href) ? 'default' : 'ghost'}
-                className="flex items-center space-x-2"
-              >
-                <item.icon className="h-4 w-4" />
-                <span>{item.label}</span>
-              </Button>
-            </Link>
-          ))}
-        </nav>
+        {/* Desktop Navigation and Toggles */}
+        <div className="hidden md:flex items-start space-x-6">
+          <nav className="flex items-center space-x-6">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant={isActive(item.href) ? 'default' : 'ghost'}
+                  className="flex items-center space-x-2"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Button>
+              </Link>
+            ))}
+          </nav>
+        </div>
+        <div className="hidden md:flex items-center space-x-6">
+          {/* <nav className="flex items-center space-x-6">
+            {navItems.map((item) => (
+              <Link key={item.href} href={item.href}>
+                <Button
+                  variant={isActive(item.href) ? 'default' : 'ghost'}
+                  className="flex items-center space-x-2"
+                >
+                  <item.icon className="h-4 w-4" />
+                  <span>{item.label}</span>
+                </Button>
+              </Link>
+            ))}
+          </nav> */}
 
-        <div className="hidden md:flex items-center space-x-2">
-          {/* Language Toggle Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={toggleLanguage}
-            title={t('header.toggleLanguage')}
-          >
-            <Globe className="h-5 w-5" />
-            <span className="absolute top-1 right-1 text-[10px] font-bold">
-              {language === 'en' ? 'EN' : 'ID'}
-            </span>
-          </Button>
+          <div className="flex items-center space-x-2">
+            {/* Theme Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
+              title={t('header.toggleTheme')}
+              className="h-9 w-9"
+            >
+              {theme === 'dark' ? (
+                <Moon key="moon" className="h-4 w-4 animate-theme-toggle" />
+              ) : (
+                <Sun key="sun" className="h-4 w-4 animate-theme-toggle" />
+              )}
+              <span className="sr-only">Toggle theme</span>
+            </Button>
 
-          {/* Theme Toggle Button */}
-          <Button
-            variant="ghost"
-            size="icon"
-            onClick={() => setTheme(theme === 'dark' ? 'light' : 'dark')}
-            title={t('header.toggleTheme')}
-          >
-            {theme === 'dark' ? (
-              <Moon key="moon" className="h-5 w-5 animate-theme-toggle" />
-            ) : (
-              <Sun key="sun" className="h-5 w-5 animate-theme-toggle" />
-            )}
-            <span className="sr-only">Toggle theme</span>
-          </Button>
+            {/* Language Toggle Button */}
+            <Button
+              variant="ghost"
+              size="icon"
+              onClick={toggleLanguage}
+              title={t('header.toggleLanguage')}
+              className="h-9 w-9 relative"
+            >
+              <Globe className="h-4 w-4" />
+              <span className="absolute -top-0.5 -right-0.5 bg-primary text-primary-foreground text-[9px] font-bold rounded-full px-1 min-w-[14px] h-4 flex items-center justify-center">
+                {language === 'en' ? 'EN' : 'ID'}
+              </span>
+            </Button>
+          </div>
         </div>
 
         {/* Mobile Menu Button */}
