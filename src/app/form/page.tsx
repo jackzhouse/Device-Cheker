@@ -723,7 +723,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`workApplications.${index}.notes` as any)}
                     />
-                    {workAppFields.length > 1 && (
+                    {workAppFields.length > 0 && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -770,7 +770,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`nonWorkApplications.${index}.notes` as any)}
                     />
-                    {nonWorkAppFields.length > 1 && (
+                    {nonWorkAppFields.length > 0 && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -838,7 +838,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.antivirus.list.${index}.notes` as any)}
                     />
-                    {antivirusFields.length > 1 && (
+                    {antivirusFields.length > 0 && (
                       <Button
                         type="button"
                         variant="ghost"
@@ -895,7 +895,7 @@ function FormContent() {
                       placeholder={t('form.applications.notesPlaceholder')}
                       {...register(`security.vpn.list.${index}.notes` as any)}
                     />
-                    {vpnFields.length > 1 && (
+                    {vpnFields.length > 0 && (
                       <Button
                         type="button"
                         variant="ghost"
