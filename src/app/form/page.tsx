@@ -11,6 +11,7 @@ import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
 import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
@@ -336,7 +337,8 @@ function FormContent() {
   };
 
   return (
-    <div className="space-y-6 m-3">
+    <TooltipProvider>
+      <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('form.title')}</h1>
@@ -692,15 +694,20 @@ function FormContent() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <Label>{t('form.applications.workApplications')}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendWorkApp({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendWorkApp({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addWorkApp')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {workAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -722,14 +729,19 @@ function FormContent() {
                       {...register(`workApplications.${index}.notes` as any)}
                     />
                     {workAppFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeWorkApp(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeWorkApp(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -739,15 +751,20 @@ function FormContent() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <Label>{t('form.applications.nonWorkApplications')}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendNonWorkApp({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendNonWorkApp({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addNonWorkApp')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {nonWorkAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -769,14 +786,19 @@ function FormContent() {
                       {...register(`nonWorkApplications.${index}.notes` as any)}
                     />
                     {nonWorkAppFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeNonWorkApp(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeNonWorkApp(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -807,15 +829,20 @@ function FormContent() {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-full"></div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendAntivirus({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendAntivirus({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addAntivirus')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {antivirusFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -837,14 +864,19 @@ function FormContent() {
                       {...register(`security.antivirus.list.${index}.notes` as any)}
                     />
                     {antivirusFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeAntivirus(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeAntivirus(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -864,15 +896,20 @@ function FormContent() {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-full"></div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendVpn({ vpnName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendVpn({ vpnName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addVPN')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {vpnFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -894,14 +931,19 @@ function FormContent() {
                       {...register(`security.vpn.list.${index}.notes` as any)}
                     />
                     {vpnFields.length > 1 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeVpn(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeVpn(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -977,6 +1019,7 @@ function FormContent() {
         </form>
       </div>
     </div>
+    </TooltipProvider>
   );
 }
 
