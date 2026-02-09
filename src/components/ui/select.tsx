@@ -1,13 +1,16 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, X } from 'lucide-react';
+import { ChevronDown, X, Trash2 } from 'lucide-react';
 import { cn } from '@/lib/utils';
+import { deleteDropdownOption } from '@/lib/services/dropdown-options.service';
+import { toast } from 'sonner';
 
 export interface SelectOption {
   value: string;
   label: string;
   isNew?: boolean;
+  _id?: string; // MongoDB ID for deleting
 }
 
 interface CreatableSelectProps {
@@ -16,6 +19,7 @@ interface CreatableSelectProps {
   onChange: (value: string) => void;
   onCreate?: (value: string) => void;
   onInputChange?: (value: string) => void;
+  onDelete?: (optionId: string) => void;
   placeholder?: string;
   disabled?: boolean;
   className?: string;
@@ -27,6 +31,7 @@ export function CreatableSelect({
   onChange,
   onCreate,
   onInputChange,
+  onDelete,
   placeholder = 'Select or create...',
   disabled = false,
   className,
@@ -114,6 +119,39 @@ export function CreatableSelect({
     }
   };
 
+  const handleDelete = async (e: React.MouseEvent, option: SelectOption) => {
+    e.stopPropagation(); // Prevent the option from being selected
+    
+    if (!option._id) {
+      console.error('Cannot delete option without ID');
+      return;
+    }
+
+    // Confirm deletion
+    if (!confirm(`Are you sure you want to delete "${option.label}"?`)) {
+      return;
+    }
+
+    try {
+      await deleteDropdownOption(option._id);
+      toast.success(`"${option.label}" deleted successfully`);
+      
+      // Call parent callback if provided
+      if (onDelete) {
+        onDelete(option._id);
+      }
+      
+      // Clear input if the deleted option was selected
+      if (value === option.value) {
+        onChange('');
+        setInputValue('');
+      }
+    } catch (error: any) {
+      console.error('Error deleting option:', error);
+      toast.error(error.message || 'Failed to delete option');
+    }
+  };
+
   const handleInputChange = (newValue: string) => {
     setInputValue(newValue);
     if (onInputChange) {
@@ -176,22 +214,36 @@ export function CreatableSelect({
       {isOpen && filteredOptions.length > 0 && (
         <div className="absolute z-50 mt-1 max-h-60 bg-black w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
           {filteredOptions.map((option, index) => (
-            <button
+            <div
               key={option.value}
-              type="button"
-              onClick={() => handleSelect(option)}
               onMouseEnter={() => setHighlightedIndex(index)}
               className={cn(
-                'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none hover:bg-accent hover:text-accent-foreground',
+                'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none',
                 index === highlightedIndex && 'bg-accent',
                 option.isNew && 'font-semibold text-primary'
               )}
             >
-              <span>{option.label}</span>
+              <button
+                type="button"
+                onClick={() => handleSelect(option)}
+                className="flex-1 text-left hover:text-accent-foreground"
+              >
+                {option.label}
+              </button>
               {option.isNew && (
-                <span className="ml-auto text-xs">+ New</span>
+                <span className="ml-2 text-xs">+ New</span>
               )}
-            </button>
+              {!option.isNew && option._id && (
+                <button
+                  type="button"
+                  onClick={(e) => handleDelete(e, option)}
+                  className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
+                  title="Delete option"
+                >
+                  <Trash2 className="h-3.5 w-3.5" />
+                </button>
+              )}
+            </div>
           ))}
         </div>
       )}

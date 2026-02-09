@@ -57,3 +57,18 @@ export async function saveDropdownOption(
 
   return response.json();
 }
+
+export async function deleteDropdownOption(
+  id: string
+): Promise<APIResponse<{ message: string }>> {
+  const response = await fetch(`/api/dropdown-options?id=${id}`, {
+    method: 'DELETE',
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || 'Failed to delete dropdown option');
+  }
+
+  return response.json();
+}
