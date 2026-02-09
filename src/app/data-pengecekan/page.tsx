@@ -161,7 +161,7 @@ export default function CheckDataPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('checkData.title')}</h1>

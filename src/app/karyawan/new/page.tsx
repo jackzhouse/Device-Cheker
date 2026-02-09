@@ -65,7 +65,7 @@ export default function CreateEmployeePage() {
     };
 
     return (
-        <div className="space-y-6">
+        <div className="space-y-6 m-3">
 
             {/* Page Header */}
             <div className="mb-6">

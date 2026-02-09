@@ -106,7 +106,7 @@ export default function EmployeesPage() {
   }
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
