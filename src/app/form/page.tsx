@@ -336,7 +336,7 @@ function FormContent() {
   };
 
   return (
-    <div className="space-y-6 m-3">
+    <div className="space-y-6">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('form.title')}</h1>
@@ -558,9 +558,10 @@ function FormContent() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')}</Label>
+                  <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')}&nbsp;(GB)</Label>
                   <CreatableSelect
                     key="ramCapacity"
+                    inputType="number"
                     options={dropdownOptions['ramCapacity'] || []}
                     value={watch('specification.ramCapacity')}
                     onChange={(val) => setValue('specification.ramCapacity', val)}
@@ -584,9 +585,10 @@ function FormContent() {
 
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="memoryCapacity">{t('form.specification.storageCapacity')}</Label>
+                  <Label htmlFor="memoryCapacity">{t('form.specification.storageCapacity')}&nbsp;(GB)</Label>
                   <CreatableSelect
                     key="memoryCapacity"
+                    inputType="number"
                     options={dropdownOptions['memoryCapacity'] || []}
                     value={watch('specification.memoryCapacity')}
                     onChange={(val) => setValue('specification.memoryCapacity', val)}

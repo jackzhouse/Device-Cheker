@@ -22,6 +22,7 @@ interface CreatableSelectProps {
   onDelete?: (optionId: string) => void;
   placeholder?: string;
   disabled?: boolean;
+  inputType?: 'text' | 'number';
   className?: string;
 }
 
@@ -34,6 +35,7 @@ export function CreatableSelect({
   onDelete,
   placeholder = 'Select or create...',
   disabled = false,
+  inputType = 'text',
   className,
 }: CreatableSelectProps) {
   const [isOpen, setIsOpen] = React.useState(false);
@@ -49,7 +51,7 @@ export function CreatableSelect({
     const exactMatch = options.find(
       (opt) => opt.label.toLowerCase() === lowerInput
     );
-    
+
     if (exactMatch) {
       return [exactMatch];
     }
@@ -121,7 +123,7 @@ export function CreatableSelect({
 
   const handleDelete = async (e: React.MouseEvent, option: SelectOption) => {
     e.stopPropagation(); // Prevent the option from being selected
-    
+
     if (!option._id) {
       console.error('Cannot delete option without ID');
       return;
@@ -135,12 +137,12 @@ export function CreatableSelect({
     try {
       await deleteDropdownOption(option._id);
       toast.success(`"${option.label}" deleted successfully`);
-      
+
       // Call parent callback if provided
       if (onDelete) {
         onDelete(option._id);
       }
-      
+
       // Clear input if the deleted option was selected
       if (value === option.value) {
         onChange('');
@@ -183,7 +185,7 @@ export function CreatableSelect({
       <div className="relative">
         <input
           ref={inputRef}
-          type="text"
+          type={inputType}
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsOpen(true)}
