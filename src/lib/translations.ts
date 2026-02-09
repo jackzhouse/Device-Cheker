@@ -182,20 +182,21 @@ export interface Translations {
       };
       otherNotesPlaceholder: string;
     };
-    validation: {
-      employeeRequired: string;
-      checkDateRequired: string;
-      deviceTypeRequired: string;
-      ownershipRequired: string;
-      deviceBrandRequired: string;
-      deviceModelRequired: string;
-      serialNumberRequired: string;
-      osTypeRequired: string;
-      osVersionRequired: string;
-      osLicenseRequired: string;
-      deviceSuitabilityRequired: string;
-      passwordUsageRequired: string;
-    };
+      validation: {
+        employeeRequired: string;
+        checkDateRequired: string;
+        deviceTypeRequired: string;
+        ownershipRequired: string;
+        deviceBrandRequired: string;
+        deviceModelRequired: string;
+        serialNumberRequired: string;
+        osTypeRequired: string;
+        osVersionRequired: string;
+        osLicenseRequired: string;
+        deviceSuitabilityRequired: string;
+        passwordUsageRequired: string;
+        inspectorPICNameRequired: string;
+      };
       toast: {
         createSuccess: string;
         createFailed: string;
@@ -524,6 +525,7 @@ export const translations: Record<Language, Translations> = {
         osLicenseRequired: 'OS license is required',
         deviceSuitabilityRequired: 'Device suitability is required',
         passwordUsageRequired: 'Password usage is required',
+        inspectorPICNameRequired: 'Inspector PIC name is required',
       },
       toast: {
         createSuccess: 'Device check created successfully',
@@ -851,6 +853,7 @@ export const translations: Record<Language, Translations> = {
         osLicenseRequired: 'Lisensi OS wajib diisi',
         deviceSuitabilityRequired: 'Kesesuaian perangkat wajib diisi',
         passwordUsageRequired: 'Penggunaan password wajib diisi',
+        inspectorPICNameRequired: 'Nama PIC pemeriksa wajib diisi',
       },
       toast: {
         createSuccess: 'Pengecekan perangkat berhasil dibuat',

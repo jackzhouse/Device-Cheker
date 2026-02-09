@@ -310,6 +310,11 @@ function FormContent() {
       return;
     }
 
+    if (!data.additionalInfo.inspectorPICName) {
+      toast.error(t('form.toast.selectInspector'));
+      return;
+    }
+
     setLoading(true);
     try {
       // Normalize data to match database enum values
@@ -975,7 +980,7 @@ function FormContent() {
               </div>
 
               <div>
-                <Label htmlFor="inspectorPICName">{t('form.additionalInfo.inspectorPICName')}</Label>
+                <Label htmlFor="inspectorPICName">{t('form.additionalInfo.inspectorPICName')} *</Label>
                 <CreatableSelect
                   key="inspectorPICName"
                   options={dropdownOptions['inspectorPICName'] || []}
@@ -985,6 +990,9 @@ function FormContent() {
                   onDelete={handleDeleteOption('inspectorPICName')}
                   placeholder={t('form.placeholders.inspectorName')}
                 />
+                {errors.additionalInfo?.inspectorPICName && (
+                  <p className="text-sm text-destructive mt-1">{errors.additionalInfo.inspectorPICName.message as string}</p>
+                )}
               </div>
 
               <div>
