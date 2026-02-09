@@ -155,9 +155,14 @@ export function CreatableSelect({
   };
 
   const handleInputChange = (newValue: string) => {
-    setInputValue(newValue);
+    // Filter non-numeric characters if inputType is number
+    const processedValue = inputType === 'number'
+      ? newValue.replace(/[^0-9]/g, '')
+      : newValue;
+
+    setInputValue(processedValue);
     if (onInputChange) {
-      onInputChange(newValue);
+      onInputChange(processedValue);
     }
   };
 
@@ -185,7 +190,9 @@ export function CreatableSelect({
       <div className="relative">
         <input
           ref={inputRef}
-          type={inputType}
+          type="text"
+          inputMode={inputType === 'number' ? 'numeric' : undefined}
+          pattern={inputType === 'number' ? '[0-9]*' : undefined}
           value={inputValue}
           onChange={(e) => handleInputChange(e.target.value)}
           onFocus={() => setIsOpen(true)}
