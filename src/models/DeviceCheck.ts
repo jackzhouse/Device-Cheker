@@ -3,6 +3,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 export interface IDeviceCheck extends Document {
   employeeId: mongoose.Types.ObjectId;
   employeeSnapshot: {
+    employeeId: string;
     fullName: string;
     position: string;
     department?: string;
@@ -82,6 +83,9 @@ const DeviceCheckSchema = new Schema<IDeviceCheck>(
       index: true,
     },
     employeeSnapshot: {
+      employeeId: {
+        type: String,
+      },
       fullName: {
         type: String,
         required: true,

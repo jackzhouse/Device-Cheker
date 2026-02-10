@@ -49,6 +49,7 @@ export interface Translations {
     employeeInfo: {
       title: string;
       fullName: string;
+      employeeId: string;
       position: string;
       department: string;
       totalChecks: string;
@@ -227,12 +228,22 @@ export interface Translations {
       pdfSuccess: string;
       pdfFailed: string;
     };
+    summary: {
+      totalChecks: string;
+      pcDevices: string;
+      laptops: string;
+      companyOwned: string;
+    };
+    checkHistory: string;
+    exportAll: string;
+    noChecks: string;
   };
   employee: {
     title: string;
     description: string;
     addButton: string;
     searchPlaceholder: string;
+    employeeId: string;
     department: string;
     lastCheck: string;
     filters: {
@@ -251,10 +262,27 @@ export interface Translations {
   };
   employeeDetail: {
     title: string;
+    employeeId: string;
     backToEmployees: string;
     deviceChecks: string;
     noChecks: string;
     totalChecks: string;
+  };
+  employeeHistory: {
+    title: string;
+    fetchFailed: string;
+    notFound: string;
+    loading: string;
+    goBack: string;
+    addNewCheck: string;
+    confirmDelete: string;
+    toast: {
+      deleteSuccess: string;
+      deleteFailed: string;
+      pdfGenerating: string;
+      pdfSuccess: string;
+      pdfFailed: string;
+    };
   };
   createEmployee: {
     title: string;
@@ -349,6 +377,7 @@ export const translations: Record<Language, Translations> = {
       employeeInfo: {
         title: 'Employee Information',
         fullName: 'Full Name',
+        employeeId: 'Employee ID',
         position: 'Position',
         department: 'Department',
         totalChecks: 'Total Checks',
@@ -498,7 +527,7 @@ export const translations: Record<Language, Translations> = {
       title: 'Device Check Data',
       description: 'View and manage all device checking records',
       filters: {
-        searchPlaceholder: 'Search by employee, device brand or model...',
+        searchPlaceholder: 'Search by employee name, employee id, device brand or model...',
         allConditions: 'All Conditions',
         allOwnership: 'All Ownership',
         clearFilters: 'Clear Filters',
@@ -527,12 +556,22 @@ export const translations: Record<Language, Translations> = {
         pdfSuccess: 'PDF downloaded successfully',
         pdfFailed: 'Failed to generate PDF',
       },
+      summary: {
+        totalChecks: 'Total Checks',
+        pcDevices: 'PC Devices',
+        laptops: 'Laptops',
+        companyOwned: 'Company Owned',
+      },
+      checkHistory: 'Check History',
+      exportAll: 'Export All',
+      noChecks: 'No device checks found',
     },
     employee: {
       title: 'Employee Data',
       description: 'View and manage all employee records',
       addButton: 'Add Employee',
       searchPlaceholder: 'Search by name, position, or ID...',
+      employeeId: 'Employee ID',
       department: 'Department',
       lastCheck: 'Last Check',
       filters: {
@@ -551,16 +590,33 @@ export const translations: Record<Language, Translations> = {
     },
     employeeDetail: {
       title: 'Employee Details',
+      employeeId: 'Employee ID',
       backToEmployees: 'Back to Employees',
       deviceChecks: 'Device Checks',
       noChecks: 'No device checks found for this employee',
       totalChecks: 'Total Checks',
     },
+    employeeHistory: {
+      title: 'Employee History',
+      fetchFailed: 'Failed to fetch employee history',
+      notFound: 'Employee not found',
+      loading: 'Loading employee history...',
+      goBack: 'Go Back',
+      addNewCheck: 'Add New Check',
+      confirmDelete: 'Are you sure you want to delete this device check?',
+      toast: {
+        deleteSuccess: 'Device check deleted successfully',
+        deleteFailed: 'Failed to delete device check',
+        pdfGenerating: 'Generating PDF...',
+        pdfSuccess: 'PDF downloaded successfully',
+        pdfFailed: 'Failed to generate PDF',
+      },
+    },
     createEmployee: {
       title: 'Create New Employee',
       description: 'Add a new employee to the system. This will allow you to create device checks for them.',
       formTitle: 'Employee Information',
-      formDescription: 'Fill in the required fields marked with *. Contact information and status are optional.',
+      formDescription: 'Fill in required fields marked with *. Contact information and status are optional.',
       firstName: 'First Name',
       lastName: 'Last Name',
       position: 'Position',
@@ -647,6 +703,7 @@ export const translations: Record<Language, Translations> = {
       employeeInfo: {
         title: 'Informasi Karyawan',
         fullName: 'Nama Lengkap',
+        employeeId: 'ID Karyawan',
         position: 'Posisi',
         department: 'Departemen',
         totalChecks: 'Total Pengecekan',
@@ -796,7 +853,7 @@ export const translations: Record<Language, Translations> = {
       title: 'Data Pengecekan Perangkat',
       description: 'Lihat dan kelola semua catatan pengecekan perangkat',
       filters: {
-        searchPlaceholder: 'Cari berdasarkan karyawan, merk atau model perangkat...',
+        searchPlaceholder: 'Cari berdasarkan nama karyawan, id karyawan, merk atau model perangkat...',
         allConditions: 'Semua Kondisi',
         allOwnership: 'Semua Kepemilikan',
         clearFilters: 'Hapus Filter',
@@ -825,12 +882,22 @@ export const translations: Record<Language, Translations> = {
         pdfSuccess: 'PDF berhasil diunduh',
         pdfFailed: 'Gagal membuat PDF',
       },
+      summary: {
+        totalChecks: 'Total Pengecekan',
+        pcDevices: 'Perangkat PC',
+        laptops: 'Laptop',
+        companyOwned: 'Dimiliki Perusahaan',
+      },
+      checkHistory: 'Riwayat Pengecekan',
+      exportAll: 'Ekspor Semua',
+      noChecks: 'Tidak ada pengecekan perangkat ditemukan',
     },
     employee: {
       title: 'Data Karyawan',
       description: 'Lihat dan kelola semua catatan karyawan',
       addButton: 'Tambah Karyawan',
       searchPlaceholder: 'Cari berdasarkan nama, posisi, atau ID...',
+      employeeId: 'ID Karyawan',
       department: 'Departemen',
       lastCheck: 'Pengecekan Terakhir',
       filters: {
@@ -849,10 +916,27 @@ export const translations: Record<Language, Translations> = {
     },
     employeeDetail: {
       title: 'Detail Karyawan',
+      employeeId: 'ID Karyawan',
       backToEmployees: 'Kembali ke Karyawan',
       deviceChecks: 'Pengecekan Perangkat',
       noChecks: 'Tidak ada pengecekan perangkat ditemukan untuk karyawan ini',
       totalChecks: 'Total Pengecekan',
+    },
+    employeeHistory: {
+      title: 'Riwayat Karyawan',
+      fetchFailed: 'Gagal mengambil riwayat karyawan',
+      notFound: 'Karyawan tidak ditemukan',
+      loading: 'Memuat riwayat karyawan...',
+      goBack: 'Kembali',
+      addNewCheck: 'Tambah Pengecekan Baru',
+      confirmDelete: 'Apakah Anda yakin ingin menghapus pengecekan perangkat ini?',
+      toast: {
+        deleteSuccess: 'Pengecekan perangkat berhasil dihapus',
+        deleteFailed: 'Gagal menghapus pengecekan perangkat',
+        pdfGenerating: 'Membuat PDF...',
+        pdfSuccess: 'PDF berhasil diunduh',
+        pdfFailed: 'Gagal membuat PDF',
+      },
     },
     createEmployee: {
       title: 'Tambah Karyawan Baru',

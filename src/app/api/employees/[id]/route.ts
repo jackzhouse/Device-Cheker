@@ -75,6 +75,7 @@ export async function PUT(
 
     const { id } = await params;
     const body = await request.json();
+    const { employeeId: newEmployeeId } = body;
 
     // Validate ObjectId
     if (!id.match(/^[0-9a-fA-F]{24}$/)) {
@@ -82,6 +83,26 @@ export async function PUT(
         { success: false, error: 'Invalid employee ID' },
         { status: 400 }
       );
+    }
+
+    // If employeeId is being updated, check for duplicates
+    if (newEmployeeId) {
+      const existingEmployee = await Employee.findOne({
+        employeeId: newEmployeeId.toUpperCase(),
+        _id: { $ne: id }, // Exclude current employee
+      });
+
+      if (existingEmployee) {
+        return NextResponse.json(
+          { success: false, error: 'Employee ID already exists' },
+          { status: 409 }
+        );
+      }
+    }
+
+    // Normalize employeeId to uppercase if provided
+    if (newEmployeeId) {
+      body.employeeId = newEmployeeId.toUpperCase();
     }
 
     // Find and update employee

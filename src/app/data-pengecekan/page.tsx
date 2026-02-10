@@ -65,8 +65,9 @@ export default function CheckDataPage() {
 
   const handleDownloadPDF = async (check: DeviceCheck) => {
     try {
-      toast.loading(t('checkData.toast.pdfGenerating'));
+      toast.loading(t('checkData.toast.pdfGenerating'), { id: 'pdfGenerating' });
       await generateDeviceCheckPDF(check);
+      toast.dismiss('pdfGenerating');
       toast.success(t('checkData.toast.pdfSuccess'));
     } catch (error: any) {
       toast.error(error.message || t('checkData.toast.pdfFailed'));
@@ -125,7 +126,10 @@ export default function CheckDataPage() {
   // Filter checks
   const filteredChecks = checks.filter((check) => {
     const matchesSearch =
+      check.employeeSnapshot?.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      check.employee?.employeeId?.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.employeeSnapshot.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      check.employeeId.toString().toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceBrand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceModel.toLowerCase().includes(searchTerm.toLowerCase());
 
@@ -241,7 +245,10 @@ export default function CheckDataPage() {
         // Grouped View
         <div className="space-y-6">
           {groupedChecks.map(({ employeeId, checks: employeeChecks }) => {
-            const employee = employeeChecks[0].employeeSnapshot;
+            const firstCheck = employeeChecks[0];
+            const employee = firstCheck.employeeSnapshot;
+            const displayEmployeeId = employee?.employeeId || firstCheck.employee?.employeeId || 'N/A';
+            console.log(employee, 'employee')
             return (
               <Card key={employeeId}>
                 <CardHeader>
@@ -252,7 +259,7 @@ export default function CheckDataPage() {
                         {employee.fullName}
                       </CardTitle>
                       <p className="text-sm text-muted-foreground mt-1">
-                        {employee.position}
+                        ID: {displayEmployeeId} • {employee.position}
                         {employee.department && ` • ${employee.department}`}
                       </p>
                       <Badge variant="secondary" className="mt-2">
@@ -309,21 +316,21 @@ export default function CheckDataPage() {
   );
 }
 
-function CheckCard({ 
-  check, 
-  onEdit, 
+function CheckCard({
+  check,
+  onEdit,
   onDelete,
   onDownload,
-  compact = false 
-}: { 
-  check: DeviceCheck; 
-  onEdit: () => void; 
+  compact = false
+}: {
+  check: DeviceCheck;
+  onEdit: () => void;
   onDelete: () => void;
   onDownload?: () => void;
   compact?: boolean;
 }) {
   const { t } = useLanguage();
-  
+
   // Helper to get translated device type
   const getDeviceTypeLabel = (value: string) => {
     const keyMap: Record<string, string> = {
@@ -392,7 +399,6 @@ function CheckCard({
       day: 'numeric',
     });
   };
-  
 
   return (
     <Card>
@@ -404,7 +410,7 @@ function CheckCard({
               {check.employeeSnapshot.fullName}
             </CardTitle>
             <p className="text-sm text-muted-foreground mt-1">
-              {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
+              ID: {check.employeeSnapshot?.employeeId || check.employee?.employeeId || 'N/A'} • {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
             </p>
           </div>
           <Badge variant="outline">v{check.version}</Badge>
@@ -412,7 +418,7 @@ function CheckCard({
       </CardHeader>
       <CardContent>
         {!compact && (
-          
+
           <div className="space-y-3 mb-4">
             <div className="flex items-center gap-2 text-sm">
               <Laptop className="h-4 w-4 text-muted-foreground" />

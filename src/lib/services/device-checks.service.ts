@@ -1,39 +1,51 @@
-import { APIResponse, PaginationParams } from './employees.service';
+import { APIResponse, PaginationParams } from "./employees.service";
 
 export interface DeviceCheck {
   _id: string;
   employeeId: string;
   employeeSnapshot: {
+    employeeId: string;
     fullName: string;
     position: string;
     department?: string;
   };
   employee?: {
     _id: string;
+    employeeId?: string;
+    firstName?: string;
+    lastName?: string;
     fullName: string;
+    position?: string;
+    department?: string;
     status: string;
+    totalDeviceChecks?: number;
+    lastCheckDate?: string;
   };
   deviceDetail: {
-    deviceType: 'PC' | 'Laptop';
-    ownership: 'Company' | 'Personal';
+    deviceType: "PC" | "Laptop";
+    ownership: "Company" | "Personal";
     deviceBrand: string;
     deviceModel: string;
     serialNumber: string;
   };
   operatingSystem: {
-    osType: 'Windows' | 'Linux' | 'Mac';
+    osType: "Windows" | "Linux" | "Mac";
     osVersion: string;
-    osLicense: 'Original' | 'Pirated' | 'Open Source' | 'Unknown';
+    osLicense: "Original" | "Pirated" | "Open Source" | "Unknown";
     osRegularUpdate: boolean;
   };
   specification?: {
     ramCapacity?: string;
-    memoryType?: 'HDD' | 'SSD';
+    memoryType?: "HDD" | "SSD";
     memoryCapacity?: string;
     processor?: string;
   };
   deviceCondition: {
-    deviceSuitability: 'Suitable' | 'Limited Suitability' | 'Needs Repair' | 'Unsuitable';
+    deviceSuitability:
+      | "Suitable"
+      | "Limited Suitability"
+      | "Needs Repair"
+      | "Unsuitable";
     batterySuitability: string;
     keyboardCondition: string;
     touchpadCondition: string;
@@ -42,34 +54,34 @@ export interface DeviceCheck {
   };
   workApplications: Array<{
     applicationName: string;
-    license: 'Original' | 'Pirated' | 'Unknown' | 'Open Source';
+    license: "Original" | "Pirated" | "Unknown" | "Open Source";
     notes?: string;
   }>;
   nonWorkApplications: Array<{
     applicationName: string;
-    license: 'Original' | 'Pirated' | 'Unknown' | 'Open Source';
+    license: "Original" | "Pirated" | "Unknown" | "Open Source";
     notes?: string;
   }>;
   security: {
     antivirus: {
-      status: 'Active' | 'Inactive';
+      status: "Active" | "Inactive";
       list: Array<{
         applicationName: string;
-        license: 'Original' | 'Pirated' | 'Unknown' | 'Open Source';
+        license: "Original" | "Pirated" | "Unknown" | "Open Source";
         notes?: string;
       }>;
     };
     vpn: {
-      status: 'Available' | 'Not Available';
+      status: "Available" | "Not Available";
       list: Array<{
         vpnName: string;
-        license: 'Original' | 'Pirated' | 'Unknown' | 'Open Source';
+        license: "Original" | "Pirated" | "Unknown" | "Open Source";
         notes?: string;
       }>;
     };
   };
   additionalInfo: {
-    passwordUsage: 'Available' | 'Not Available';
+    passwordUsage: "Available" | "Not Available";
     otherNotes?: string;
     inspectorPICName?: string;
   };
@@ -88,52 +100,50 @@ export interface DeviceCheckParams extends PaginationParams {
 }
 
 export async function getDeviceChecks(
-  params: DeviceCheckParams = {}
+  params: DeviceCheckParams = {},
 ): Promise<APIResponse<DeviceCheck[]>> {
-  const queryString = new URLSearchParams(
-    params as any
-  ).toString();
+  const queryString = new URLSearchParams(params as any).toString();
   const response = await fetch(`/api/device-checks?${queryString}`, {
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch device checks');
+    throw new Error(error.error || "Failed to fetch device checks");
   }
 
   return response.json();
 }
 
 export async function createDeviceCheck(
-  data: Partial<DeviceCheck>
+  data: Partial<DeviceCheck>,
 ): Promise<APIResponse<DeviceCheck>> {
-  const response = await fetch('/api/device-checks', {
-    method: 'POST',
+  const response = await fetch("/api/device-checks", {
+    method: "POST",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to create device check');
+    throw new Error(error.error || "Failed to create device check");
   }
 
   return response.json();
 }
 
 export async function getDeviceCheckById(
-  id: string
+  id: string,
 ): Promise<APIResponse<DeviceCheck>> {
   const response = await fetch(`/api/device-checks/${id}`, {
-    cache: 'no-store',
+    cache: "no-store",
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch device check');
+    throw new Error(error.error || "Failed to fetch device check");
   }
 
   return response.json();
@@ -141,34 +151,32 @@ export async function getDeviceCheckById(
 
 export async function updateDeviceCheck(
   id: string,
-  data: Partial<DeviceCheck>
+  data: Partial<DeviceCheck>,
 ): Promise<APIResponse<DeviceCheck>> {
   const response = await fetch(`/api/device-checks/${id}`, {
-    method: 'PUT',
+    method: "PUT",
     headers: {
-      'Content-Type': 'application/json',
+      "Content-Type": "application/json",
     },
     body: JSON.stringify(data),
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to update device check');
+    throw new Error(error.error || "Failed to update device check");
   }
 
   return response.json();
 }
 
-export async function deleteDeviceCheck(
-  id: string
-): Promise<APIResponse<any>> {
+export async function deleteDeviceCheck(id: string): Promise<APIResponse<any>> {
   const response = await fetch(`/api/device-checks/${id}`, {
-    method: 'DELETE',
+    method: "DELETE",
   });
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to delete device check');
+    throw new Error(error.error || "Failed to delete device check");
   }
 
   return response.json();
@@ -176,7 +184,7 @@ export async function deleteDeviceCheck(
 
 export async function getEmployeeChecks(
   employeeId: string,
-  params: PaginationParams = {}
+  params: PaginationParams = {},
 ): Promise<
   APIResponse<{
     employee: any;
@@ -201,17 +209,15 @@ export async function getEmployeeChecks(
     };
   }>
 > {
-  const queryString = new URLSearchParams(
-    params as any
-  ).toString();
+  const queryString = new URLSearchParams(params as any).toString();
   const response = await fetch(
     `/api/device-checks/employee/${employeeId}?${queryString}`,
-    { cache: 'no-store' }
+    { cache: "no-store" },
   );
 
   if (!response.ok) {
     const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch employee checks');
+    throw new Error(error.error || "Failed to fetch employee checks");
   }
 
   return response.json();

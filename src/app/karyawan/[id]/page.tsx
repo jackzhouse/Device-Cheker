@@ -30,7 +30,7 @@ export default function EmployeeDetailPage() {
     try {
       // Ensure employeeId is a string
       const idStr = String(employeeId);
-      
+
       // Fetch employee details
       const empResponse = await getEmployeeById(idStr);
       if (empResponse.success && empResponse.data) {
@@ -194,6 +194,10 @@ export default function EmployeeDetailPage() {
             <CardTitle className="text-lg">Work Information</CardTitle>
           </CardHeader>
           <CardContent className="space-y-4">
+            <div>
+              <label className="text-sm text-muted-foreground">Employee ID</label>
+              <p className="font-medium">{employee.employeeId}</p>
+            </div>
             <div>
               <label className="text-sm text-muted-foreground">Position</label>
               <p className="font-medium">{employee.position}</p>

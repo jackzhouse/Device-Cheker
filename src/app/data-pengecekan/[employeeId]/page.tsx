@@ -15,6 +15,7 @@ import { useLanguage } from '@/contexts/LanguageContext';
 interface EmployeeCheckHistoryData {
   employee: {
     _id: string;
+    employeeId: string;
     firstName: string;
     lastName: string;
     fullName: string;
@@ -136,7 +137,7 @@ export default function EmployeeHistoryPage() {
       if (response.success && response.data) {
         setData(response.data);
       } else {
-        setError('Failed to fetch employee history');
+        setError(t('employeeHistory.fetchFailed'));
       }
     } catch (err: any) {
       console.error('Error fetching employee history:', err);
@@ -147,39 +148,40 @@ export default function EmployeeHistoryPage() {
   };
 
   const handleDeleteCheck = async (checkId: string) => {
-    if (!confirm('Are you sure you want to delete this device check?')) {
+    if (!confirm(t('employeeHistory.confirmDelete'))) {
       return;
     }
 
     try {
       const { deleteDeviceCheck } = await import('@/lib/services/device-checks.service');
       await deleteDeviceCheck(checkId);
-      toast.success('Device check deleted successfully');
+      toast.success(t('employeeHistory.toast.deleteSuccess'));
       fetchEmployeeHistory();
     } catch (error: any) {
-      toast.error(error.message || 'Failed to delete device check');
+      toast.error(error.message || t('employeeHistory.toast.deleteFailed'));
     }
   };
 
   const handleDownloadPDF = async (check: any) => {
     try {
-      toast.loading('Generating PDF...');
+      toast.loading(t('checkData.toast.pdfGenerating'), { id: 'pdfGenerating' });
       await generateDeviceCheckPDF(check as DeviceCheck);
-      toast.success('PDF downloaded successfully');
+      toast.dismiss('pdfGenerating');
+      toast.success(t('employeeHistory.toast.pdfSuccess'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to generate PDF');
+      toast.error(error.message || t('employeeHistory.toast.pdfFailed'));
     }
   };
 
   const handleExportAllPDF = async () => {
     if (!data) return;
-    
+
     try {
-      toast.loading('Generating PDF for all checks...');
+      toast.loading(t('employeeHistory.toast.pdfGenerating'));
       await generateEmployeeHistoryPDF(data.employee, data.checks as DeviceCheck[]);
-      toast.success('PDF downloaded successfully');
+      toast.success(t('employeeHistory.toast.pdfSuccess'));
     } catch (error: any) {
-      toast.error(error.message || 'Failed to generate PDF');
+      toast.error(error.message || t('employeeHistory.toast.pdfFailed'));
     }
   };
 
@@ -194,7 +196,7 @@ export default function EmployeeHistoryPage() {
   if (loading) {
     return (
       <div className="container py-8">
-        <div className="text-center">Loading employee history...</div>
+        <div className="text-center">{t('employeeHistory.loading')}</div>
       </div>
     );
   }
@@ -204,10 +206,10 @@ export default function EmployeeHistoryPage() {
       <div className="container py-8">
         <Card>
           <CardContent className="pt-6 text-center py-12">
-            <p className="text-muted-foreground">{error || 'Employee not found'}</p>
+            <p className="text-muted-foreground">{error || t('employeeHistory.notFound')}</p>
             <Button variant="outline" className="mt-4" onClick={() => router.back()}>
               <ArrowLeft className="h-4 w-4 mr-2" />
-              Go Back
+              {t('employeeHistory.goBack')}
             </Button>
           </CardContent>
         </Card>
@@ -243,12 +245,15 @@ export default function EmployeeHistoryPage() {
                   <Badge variant={employee.status === 'Active' ? 'success' : 'secondary'} className="mt-2">
                     {employee.status}
                   </Badge>
+                  <p className="text-xs text-muted-foreground mt-1">
+                    ID: {employee.employeeId}
+                  </p>
                 </div>
               </div>
             </div>
             <div className="flex gap-2">
               <Button variant="outline" onClick={() => router.push(`/form?employeeId=${employeeId}`)}>
-                Add New Check
+                {t('employeeHistory.addNewCheck')}
               </Button>
             </div>
           </div>
@@ -305,7 +310,7 @@ export default function EmployeeHistoryPage() {
                 <div key={check._id} className="relative pl-8 pb-6 border-l-2 border-muted">
                   {/* Timeline Dot */}
                   <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-primary border-2 border-background" />
-                  
+
                   {/* Check Card */}
                   <Card>
                     <CardContent className="pt-6">
@@ -331,7 +336,7 @@ export default function EmployeeHistoryPage() {
                           {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
                         </p>
                         <div className="mt-2">
-                          <Badge 
+                          <Badge
                             variant={check.deviceDetail.ownership === 'Company' ? 'default' : 'secondary'}
                             className="text-xs"
                           >

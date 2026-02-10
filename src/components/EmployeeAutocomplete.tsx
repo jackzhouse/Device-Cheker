@@ -40,7 +40,7 @@ export default function EmployeeAutocomplete({
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const [hasLoadedInitial, setHasLoadedInitial] = React.useState(false);
-  
+
   const debouncedSearch = useDebounce(searchTerm, 300);
   const abortControllerRef = React.useRef<AbortController | null>(null);
 
@@ -53,7 +53,7 @@ export default function EmployeeAutocomplete({
         if (response.success && response.data) {
           const employeeOptions = response.data.map((emp) => ({
             value: emp._id,
-            label: `${emp.fullName} - ${emp.position}`,
+            label: `${emp.fullName} (${emp.employeeId}) - ${emp.position}`,
             employee: emp,
           }));
           setOptions(employeeOptions);
@@ -73,13 +73,13 @@ export default function EmployeeAutocomplete({
   React.useEffect(() => {
     const searchEmployeesEffect = async () => {
       if (!hasLoadedInitial) return; // Don't search while initial load is in progress
-      
+
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
       }
-      
+
       abortControllerRef.current = new AbortController();
-      
+
       // If debouncedSearch is empty, reload initial employees
       if (!debouncedSearch) {
         setLoading(true);
@@ -88,7 +88,7 @@ export default function EmployeeAutocomplete({
           if (response.success && response.data) {
             const employeeOptions = response.data.map((emp) => ({
               value: emp._id,
-              label: `${emp.fullName} - ${emp.position}`,
+              label: `${emp.fullName} (${emp.employeeId}) - ${emp.position}`,
               employee: emp,
             }));
             setOptions(employeeOptions);
@@ -108,7 +108,7 @@ export default function EmployeeAutocomplete({
         if (response.success && response.data) {
           const employeeOptions = response.data.map((emp) => ({
             value: emp._id,
-            label: `${emp.fullName} - ${emp.position}`,
+            label: `${emp.fullName} (${emp.employeeId}) - ${emp.position}`,
             employee: emp,
           }));
           setOptions(employeeOptions);
@@ -164,7 +164,7 @@ export default function EmployeeAutocomplete({
     const names = name.trim().split(' ');
     const firstName = names[0] || '';
     const lastName = names.slice(1).join(' ') || '';
-    
+
     // Open create modal with pre-filled data
     setCreateFormData({
       firstName,
@@ -256,7 +256,7 @@ function CreateEmployeeModal({
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    
+
     if (!formData.firstName || !formData.lastName || !formData.position) {
       toast.error('Please fill in all required fields');
       return;

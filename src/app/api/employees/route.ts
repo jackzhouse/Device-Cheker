@@ -25,6 +25,7 @@ export async function GET(request: NextRequest) {
         { fullName: { $regex: search, $options: 'i' } },
         { firstName: { $regex: search, $options: 'i' } },
         { lastName: { $regex: search, $options: 'i' } },
+        { employeeId: { $regex: search, $options: 'i' } },
       ];
     }
 
@@ -85,6 +86,7 @@ export async function POST(request: NextRequest) {
 
     const body = await request.json();
     const {
+      employeeId,
       firstName,
       lastName,
       position,
@@ -102,8 +104,27 @@ export async function POST(request: NextRequest) {
       );
     }
 
+    // Generate employeeId if not provided (backward compatibility)
+    let finalEmployeeId = employeeId;
+    if (!employeeId) {
+      // Generate from first letters of first name + random 4-digit number
+      const letters = (firstName.substring(0, 2) + lastName.substring(0, 1)).toUpperCase().padEnd(2, 'X');
+      const number = Math.floor(1000 + Math.random() * 9000);
+      finalEmployeeId = `${letters}-${number}`;
+    }
+
+    // Check for duplicate employeeId
+    const existingEmployee = await Employee.findOne({ employeeId: finalEmployeeId });
+    if (existingEmployee) {
+      return NextResponse.json(
+        { success: false, error: 'Employee ID already exists' },
+        { status: 409 }
+      );
+    }
+
     // Create employee (normalize position and department to uppercase)
     const employee = await Employee.create({
+      employeeId: finalEmployeeId.toUpperCase(),
       firstName: firstName.trim(),
       lastName: lastName.trim(),
       position: position.trim().toUpperCase(),

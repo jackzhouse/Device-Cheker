@@ -1,6 +1,7 @@
 import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IEmployee extends Document {
+  employeeId: string;
   firstName: string;
   lastName: string;
   fullName: string;
@@ -18,6 +19,13 @@ export interface IEmployee extends Document {
 
 const EmployeeSchema = new Schema<IEmployee>(
   {
+    employeeId: {
+      type: String,
+      required: [true, 'Employee ID is required'],
+      unique: true,
+      trim: true,
+      uppercase: true,
+    },
     firstName: {
       type: String,
       required: [true, 'First name is required'],
@@ -102,6 +110,7 @@ EmployeeSchema.index({ fullName: 'text' });
 EmployeeSchema.index({ firstName: 1, lastName: 1 });
 EmployeeSchema.index({ department: 1, status: 1 });
 EmployeeSchema.index({ status: 1 });
+EmployeeSchema.index({ employeeId: 1 }, { unique: true });
 
 const Employee: Model<IEmployee> = mongoose.models.Employee || mongoose.model<IEmployee>('Employee', EmployeeSchema);
 

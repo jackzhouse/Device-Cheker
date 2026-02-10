@@ -1,22 +1,25 @@
 'use client';
 
 import * as React from 'react';
-import { useRouter } from 'next/navigation';
-import { createEmployee } from '@/lib/services/employees.service';
+import { useParams, useRouter } from 'next/navigation';
+import { getEmployeeById, updateEmployee, type Employee } from '@/lib/services/employees.service';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { CreatableSelect, type SelectOption } from '@/components/ui/select';
-import { ArrowLeft, UserPlus } from 'lucide-react';
+import { ArrowLeft, Save } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
 
-export default function CreateEmployeePage() {
+export default function EditEmployeePage() {
+    const params = useParams();
     const router = useRouter();
+    const employeeId = params.id as string;
     const { t } = useLanguage();
-    const [loading, setLoading] = React.useState(false);
+    const [loading, setLoading] = React.useState(true);
+    const [saving, setSaving] = React.useState(false);
     const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
 
     const [formData, setFormData] = React.useState({
@@ -29,6 +32,11 @@ export default function CreateEmployeePage() {
         phoneNumber: '',
         status: 'Active' as 'Active' | 'Inactive' | 'Resigned',
     });
+
+    // Fetch employee data on load
+    React.useEffect(() => {
+        fetchEmployeeData();
+    }, [employeeId]);
 
     // Fetch dropdown options on load
     React.useEffect(() => {
@@ -57,6 +65,36 @@ export default function CreateEmployeePage() {
 
         fetchDropdownOptions();
     }, []);
+
+    const fetchEmployeeData = async () => {
+        setLoading(true);
+        try {
+            const idStr = String(employeeId);
+            const response = await getEmployeeById(idStr);
+            if (response.success && response.data) {
+                const employee = response.data;
+                setFormData({
+                    employeeId: employee.employeeId || '',
+                    firstName: employee.firstName || '',
+                    lastName: employee.lastName || '',
+                    position: employee.position || '',
+                    department: employee.department || '',
+                    email: employee.email || '',
+                    phoneNumber: employee.phoneNumber || '',
+                    status: employee.status || 'Active',
+                });
+            } else {
+                toast.error('Failed to load employee data');
+                router.push('/karyawan');
+            }
+        } catch (error: any) {
+            console.error('Error fetching employee:', error);
+            toast.error(error.message || 'Failed to load employee data');
+            router.push('/karyawan');
+        } finally {
+            setLoading(false);
+        }
+    };
 
     // Handle creating new dropdown option
     const handleCreateOption = async (fieldName: string, value: string) => {
@@ -119,9 +157,10 @@ export default function CreateEmployeePage() {
             return;
         }
 
-        setLoading(true);
+        setSaving(true);
         try {
-            const response = await createEmployee({
+            const idStr = String(employeeId);
+            const response = await updateEmployee(idStr, {
                 employeeId: formData.employeeId.trim().toUpperCase() || undefined,
                 firstName: formData.firstName.trim(),
                 lastName: formData.lastName.trim(),
@@ -133,16 +172,16 @@ export default function CreateEmployeePage() {
             });
 
             if (response.success && response.data) {
-                toast.success(t('createEmployee.validation.createSuccess'));
-                router.push('/karyawan');
+                toast.success('Employee updated successfully');
+                router.push(`/karyawan/${employeeId}`);
             } else {
-                toast.error(t('createEmployee.validation.createFailed'));
+                toast.error('Failed to update employee');
             }
         } catch (error: any) {
-            console.error('Error creating employee:', error);
-            toast.error(error.message || t('createEmployee.validation.createFailed'));
+            console.error('Error updating employee:', error);
+            toast.error(error.message || 'Failed to update employee');
         } finally {
-            setLoading(false);
+            setSaving(false);
         }
     };
 
@@ -150,15 +189,22 @@ export default function CreateEmployeePage() {
         setFormData((prev) => ({ ...prev, [field]: value }));
     };
 
+    if (loading) {
+        return (
+            <div className="container py-8">
+                <div className="text-center">Loading employee data...</div>
+            </div>
+        );
+    }
+
     return (
         <div className="space-y-6 m-3">
-
             {/* Page Header */}
             <div className="mb-6">
                 <div className='flex justify-between'>
                     <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <UserPlus className="h-8 w-8" />
-                        {t('createEmployee.title')}
+                        <Save className="h-8 w-8" />
+                        Edit Employee
                     </h1>
                     {/* Back Button */}
                     <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
@@ -167,7 +213,7 @@ export default function CreateEmployeePage() {
                     </Button>
                 </div>
                 <p className="text-muted-foreground mt-2">
-                    {t('createEmployee.description')}
+                    Update employee information
                 </p>
             </div>
 
@@ -175,9 +221,9 @@ export default function CreateEmployeePage() {
             <Card className=" mx-auto">
                 <form onSubmit={handleSubmit}>
                     <CardHeader>
-                        <CardTitle>{t('createEmployee.formTitle')}</CardTitle>
+                        <CardTitle>Edit Employee</CardTitle>
                         <CardDescription>
-                            {t('createEmployee.formDescription')}
+                            Update the employee's information below
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
@@ -192,7 +238,7 @@ export default function CreateEmployeePage() {
                                     placeholder="Enter employee ID"
                                 />
                                 <p className="text-xs text-muted-foreground">
-                                    Leave blank for auto-generation.
+                                    Leave blank to keep current ID.
                                 </p>
                             </div>
 
@@ -289,13 +335,13 @@ export default function CreateEmployeePage() {
                                     type="button"
                                     variant="outline"
                                     onClick={() => router.back()}
-                                    disabled={loading}
+                                    disabled={saving}
                                     className="flex-1"
                                 >
                                     {t('createEmployee.cancel')}
                                 </Button>
-                                <Button type="submit" disabled={loading} className="flex-1">
-                                    {loading ? t('createEmployee.creating') : t('createEmployee.createButton')}
+                                <Button type="submit" disabled={saving} className="flex-1">
+                                    {saving ? 'Saving...' : 'Update Employee'}
                                 </Button>
                             </div>
                         </div>

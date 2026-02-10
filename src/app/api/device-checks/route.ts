@@ -69,6 +69,7 @@ export async function GET(request: NextRequest) {
 
     if (search) {
       query.$or = [
+        { 'employeeSnapshot.employeeId': { $regex: search, $options: 'i' } },
         { 'employeeSnapshot.fullName': { $regex: search, $options: 'i' } },
         { 'deviceDetail.deviceBrand': { $regex: search, $options: 'i' } },
         { 'deviceDetail.deviceModel': { $regex: search, $options: 'i' } },
@@ -186,6 +187,7 @@ export async function POST(request: NextRequest) {
 
     // Create employee snapshot
     const employeeSnapshot = {
+      employeeId: employee.employeeId,
       fullName: employee.fullName,
       position: employee.position,
       department: employee.department,

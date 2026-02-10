@@ -89,7 +89,8 @@ export default function EmployeesPage() {
   const filteredEmployees = employees.filter((employee) => {
     const matchesSearch =
       employee.fullName.toLowerCase().includes(searchTerm.toLowerCase()) ||
-      employee.position.toLowerCase().includes(searchTerm.toLowerCase());
+      employee.position.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      employee.employeeId.toLowerCase().includes(searchTerm.toLowerCase());
 
     const matchesDept = !filterDept || employee.department === filterDept;
     const matchesStatus = !filterStatus || employee.status === filterStatus;
@@ -241,6 +242,9 @@ function EmployeeCard({
               <CardTitle className="text-lg">{employee.fullName}</CardTitle>
               <p className="text-sm text-muted-foreground">
                 {employee.position}
+              </p>
+              <p className="text-xs text-muted-foreground">
+                {t('employee.employeeId')}: {employee.employeeId}
               </p>
             </div>
           </div>
