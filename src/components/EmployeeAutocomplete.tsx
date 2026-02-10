@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useDebounce } from '@/hooks/useDebounce';
 import { searchEmployees, createEmployee, type Employee } from '@/lib/services/employees.service';
+import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { toast } from 'sonner';
 import { UserPlus } from 'lucide-react';
@@ -18,6 +19,7 @@ import {
 } from './ui/dialog';
 import { Input } from './ui/input';
 import { Label } from './ui/label';
+import { useLanguage } from '@/contexts/LanguageContext';
 
 interface EmployeeAutocompleteProps {
   value?: string;
@@ -34,12 +36,14 @@ export default function EmployeeAutocomplete({
   disabled = false,
   className,
 }: EmployeeAutocompleteProps) {
+  const { t } = useLanguage();
   const [options, setOptions] = React.useState<SelectOption[]>([]);
   const [loading, setLoading] = React.useState(false);
   const [searchTerm, setSearchTerm] = React.useState('');
   const [isCreateModalOpen, setIsCreateModalOpen] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<Employee | null>(null);
   const [hasLoadedInitial, setHasLoadedInitial] = React.useState(false);
+  const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
 
   const debouncedSearch = useDebounce(searchTerm, 300);
   const abortControllerRef = React.useRef<AbortController | null>(null);
@@ -69,10 +73,38 @@ export default function EmployeeAutocomplete({
     loadInitialEmployees();
   }, []);
 
+  // Fetch dropdown options on load
+  React.useEffect(() => {
+    const fetchDropdownOptions = async () => {
+      const fields = ['position', 'department'];
+      const options: Record<string, SelectOption[]> = {};
+
+      for (let i = 0; i < fields.length; i++) {
+        const field = fields[i];
+        try {
+          const response = await getDropdownOptions(field);
+          if (response.success && response.data) {
+            options[field] = response.data.map((opt) => ({
+              value: opt.value,
+              label: opt.value,
+              _id: opt._id,
+            }));
+          }
+        } catch (error) {
+          console.error(`Error fetching ${field} options:`, error);
+        }
+      }
+
+      setDropdownOptions(options);
+    };
+
+    fetchDropdownOptions();
+  }, []);
+
   // Search employees when typing
   React.useEffect(() => {
     const searchEmployeesEffect = async () => {
-      if (!hasLoadedInitial) return; // Don't search while initial load is in progress
+      if (!hasLoadedInitial) return;
 
       if (abortControllerRef.current) {
         abortControllerRef.current.abort();
@@ -80,7 +112,6 @@ export default function EmployeeAutocomplete({
 
       abortControllerRef.current = new AbortController();
 
-      // If debouncedSearch is empty, reload initial employees
       if (!debouncedSearch) {
         setLoading(true);
         try {
@@ -101,7 +132,6 @@ export default function EmployeeAutocomplete({
         return;
       }
 
-      // Search with the term
       setLoading(true);
       try {
         const response = await searchEmployees(debouncedSearch, 10);
@@ -131,9 +161,10 @@ export default function EmployeeAutocomplete({
     onChange(employeeId);
   };
 
-  const handleCreateEmployee = async (firstName: string, lastName: string, position: string, department: string) => {
+  const handleCreateEmployee = async (employeeId: string, firstName: string, lastName: string, position: string, department: string) => {
     try {
       const response = await createEmployee({
+        employeeId: employeeId.trim().toUpperCase() || undefined,
         firstName,
         lastName,
         position,
@@ -142,17 +173,16 @@ export default function EmployeeAutocomplete({
       });
 
       if (response.success && response.data) {
-        toast.success('Employee created successfully');
+        toast.success(t('createEmployee.validation.createSuccess'));
         setIsCreateModalOpen(false);
-        // Ensure ID is a string
-        const employeeId = String(response.data._id);
-        handleEmployeeSelect(employeeId);
+        const empId = String(response.data._id);
+        handleEmployeeSelect(empId);
       } else {
-        toast.error('Failed to create employee');
+        toast.error(t('createEmployee.validation.createFailed'));
       }
     } catch (error: any) {
       console.error('Error creating employee:', error);
-      toast.error(error.message || 'Failed to create employee');
+      toast.error(error.message || t('createEmployee.validation.createFailed'));
     }
   };
 
@@ -165,8 +195,8 @@ export default function EmployeeAutocomplete({
     const firstName = names[0] || '';
     const lastName = names.slice(1).join(' ') || '';
 
-    // Open create modal with pre-filled data
     setCreateFormData({
+      employeeId: '',
       firstName,
       lastName,
       position: '',
@@ -175,7 +205,57 @@ export default function EmployeeAutocomplete({
     setIsCreateModalOpen(true);
   };
 
+  // Handle creating new dropdown option
+  const handleCreateOption = async (fieldName: string, value: string) => {
+    try {
+      const normalizedValue = value.trim().toUpperCase();
+
+      setDropdownOptions((prev) => {
+        const currentOptions = prev[fieldName] || [];
+        const optionExists = currentOptions.some((opt) => opt.value === normalizedValue);
+
+        if (optionExists) {
+          return prev;
+        }
+
+        return {
+          ...prev,
+          [fieldName]: [
+            ...currentOptions,
+            { value: normalizedValue, label: normalizedValue }
+          ],
+        };
+      });
+
+      toast.success(`"${normalizedValue}" ${t('form.toast.optionAdded')}`);
+
+      saveDropdownOption(fieldName, normalizedValue)
+        .then(() => {
+          getDropdownOptions(fieldName).then((response) => {
+            if (response.success && response.data) {
+              setDropdownOptions((prev) => ({
+                ...prev,
+                [fieldName]: response.data!.map((opt: any) => ({
+                  value: opt.value,
+                  label: opt.value,
+                  _id: opt._id,
+                })),
+              }));
+            }
+          });
+        })
+        .catch((error) => {
+          console.error('Error saving option to backend:', error);
+          toast.error(t('form.toast.optionSaveFailed'));
+        });
+    } catch (error) {
+      console.error('Error creating option:', error);
+      toast.error(t('createEmployee.validation.createFailed'));
+    }
+  };
+
   const [createFormData, setCreateFormData] = React.useState({
+    employeeId: '',
     firstName: '',
     lastName: '',
     position: '',
@@ -190,7 +270,7 @@ export default function EmployeeAutocomplete({
         onChange={handleEmployeeSelect}
         onCreate={handleCreateFromSearch}
         onInputChange={handleSearch}
-        placeholder="Search or create employee..."
+        placeholder={t('form.employeeInfo.selectEmployee')}
         disabled={disabled}
       />
 
@@ -204,7 +284,7 @@ export default function EmployeeAutocomplete({
                 {selectedEmployee.department && ` • ${selectedEmployee.department}`}
               </p>
               <p className="text-xs text-muted-foreground mt-1">
-                Total Checks: {selectedEmployee.totalDeviceChecks}
+                {t('employee.totalChecks')}: {selectedEmployee.totalDeviceChecks}
               </p>
             </div>
             {selectedEmployee.totalDeviceChecks > 0 && (
@@ -214,7 +294,7 @@ export default function EmployeeAutocomplete({
                 asChild
               >
                 <a href={`/data-pengecekan/${selectedEmployee._id}`}>
-                  View History
+                  {t('employeeDetail.deviceChecks')}
                 </a>
               </Button>
             )}
@@ -230,7 +310,9 @@ export default function EmployeeAutocomplete({
         open={isCreateModalOpen}
         onOpenChange={setIsCreateModalOpen}
         onCreate={handleCreateEmployee}
+        onCreateOption={handleCreateOption}
         initialData={createFormData}
+        dropdownOptions={dropdownOptions}
       />
     </div>
   );
@@ -240,13 +322,18 @@ function CreateEmployeeModal({
   open,
   onOpenChange,
   onCreate,
+  onCreateOption,
   initialData,
+  dropdownOptions,
 }: {
   open: boolean;
   onOpenChange: (open: boolean) => void;
-  onCreate: (firstName: string, lastName: string, position: string, department: string) => void;
-  initialData: { firstName: string; lastName: string; position: string; department: string };
+  onCreate: (employeeId: string, firstName: string, lastName: string, position: string, department: string) => void;
+  onCreateOption: (fieldName: string, value: string) => void;
+  initialData: { employeeId: string; firstName: string; lastName: string; position: string; department: string };
+  dropdownOptions: Record<string, SelectOption[]>;
 }) {
+  const { t } = useLanguage();
   const [formData, setFormData] = React.useState(initialData);
   const [loading, setLoading] = React.useState(false);
 
@@ -258,66 +345,91 @@ function CreateEmployeeModal({
     e.preventDefault();
 
     if (!formData.firstName || !formData.lastName || !formData.position) {
-      toast.error('Please fill in all required fields');
+      toast.error(t('createEmployee.validation.requiredFields'));
       return;
     }
 
     setLoading(true);
     try {
-      await onCreate(formData.firstName, formData.lastName, formData.position, formData.department);
+      await onCreate(formData.employeeId, formData.firstName, formData.lastName, formData.position, formData.department);
     } finally {
       setLoading(false);
     }
+  };
+
+  const handleInputChange = (field: string, value: string) => {
+    setFormData((prev) => ({ ...prev, [field]: value }));
   };
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
       <DialogContent className="sm:max-w-[425px]">
         <DialogHeader>
-          <DialogTitle>Create New Employee</DialogTitle>
+          <DialogTitle>{t('createEmployee.formTitle')}</DialogTitle>
           <DialogDescription>
-            Add a new employee to the system. This will allow you to create device checks for them.
+            {t('createEmployee.formDescription')}
           </DialogDescription>
         </DialogHeader>
         <form onSubmit={handleSubmit}>
           <div className="grid gap-4 py-4">
+            {/* Employee ID */}
+            <div className="space-y-2">
+              <Label htmlFor="employeeId">{t('employee.employeeId')}</Label>
+              <Input
+                id="employeeId"
+                value={formData.employeeId}
+                onChange={(e) => handleInputChange('employeeId', e.target.value.toUpperCase())}
+                placeholder={t('createEmployee.placeholders.employeeId')}
+              />
+              <p className="text-xs text-muted-foreground">
+                {t('createEmployee.employeeIdHint')}
+              </p>
+            </div>
+
             <div className="grid grid-cols-2 gap-4">
               <div className="space-y-2">
-                <Label htmlFor="firstName">First Name *</Label>
+                <Label htmlFor="firstName">{t('createEmployee.firstName')} {t('createEmployee.required')}</Label>
                 <Input
                   id="firstName"
                   value={formData.firstName}
-                  onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
+                  onChange={(e) => handleInputChange('firstName', e.target.value)}
                   required
+                  placeholder={t('createEmployee.placeholders.firstName')}
                 />
               </div>
               <div className="space-y-2">
-                <Label htmlFor="lastName">Last Name *</Label>
+                <Label htmlFor="lastName">{t('createEmployee.lastName')} {t('createEmployee.required')}</Label>
                 <Input
                   id="lastName"
                   value={formData.lastName}
-                  onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
+                  onChange={(e) => handleInputChange('lastName', e.target.value)}
                   required
+                  placeholder={t('createEmployee.placeholders.lastName')}
                 />
               </div>
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="position">Position *</Label>
-              <Input
-                id="position"
+              <Label htmlFor="position">{t('createEmployee.position')} {t('createEmployee.required')}</Label>
+              <CreatableSelect
+                key="position"
+                options={dropdownOptions['position'] || []}
                 value={formData.position}
-                onChange={(e) => setFormData({ ...formData, position: e.target.value })}
-                placeholder="e.g., Software Engineer"
-                required
+                onChange={(val) => handleInputChange('position', val)}
+                onCreate={(val) => onCreateOption('position', val)}
+                placeholder={t('createEmployee.placeholders.position')}
               />
             </div>
+
             <div className="space-y-2">
-              <Label htmlFor="department">Department</Label>
-              <Input
-                id="department"
+              <Label htmlFor="department">{t('createEmployee.department')}</Label>
+              <CreatableSelect
+                key="department"
+                options={dropdownOptions['department'] || []}
                 value={formData.department}
-                onChange={(e) => setFormData({ ...formData, department: e.target.value })}
-                placeholder="e.g., IT, HR, Marketing"
+                onChange={(val) => handleInputChange('department', val)}
+                onCreate={(val) => onCreateOption('department', val)}
+                placeholder={t('createEmployee.placeholders.department')}
               />
             </div>
           </div>
@@ -327,10 +439,10 @@ function CreateEmployeeModal({
               variant="outline"
               onClick={() => onOpenChange(false)}
             >
-              Cancel
+              {t('createEmployee.cancel')}
             </Button>
             <Button type="submit" disabled={loading}>
-              {loading ? 'Creating...' : 'Create Employee'}
+              {loading ? t('createEmployee.creating') : t('createEmployee.createButton')}
             </Button>
           </DialogFooter>
         </form>

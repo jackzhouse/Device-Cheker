@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import {
   User, UserPlus, Edit, Trash2, History, PlusCircle, Search
@@ -108,8 +107,7 @@ export default function EmployeesPage() {
   }
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6 m-3">
+    <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <div className="flex items-center justify-between">
@@ -199,8 +197,7 @@ export default function EmployeesPage() {
           ))}
         </div>
       )}
-      </div>
-    </TooltipProvider>
+    </div>
   );
 }
 
@@ -275,32 +272,17 @@ function EmployeeCard({
         </div>
 
         <div className="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link href={`/data-pengecekan/${employee._id}`}>
-                  <History className="h-4 w-4" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.viewHistory')}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
-                <Edit className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.editEmployee')}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.deleteEmployee')}</TooltipContent>
-          </Tooltip>
+          <Button variant="outline" size="sm" className="flex-1" asChild>
+            <Link href={`/data-pengecekan/${employee._id}`}>
+              <History className="h-4 w-4" />
+            </Link>
+          </Button>
+          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>

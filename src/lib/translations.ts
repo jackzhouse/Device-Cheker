@@ -19,34 +19,6 @@ export interface Translations {
     next: string;
     add: string;
     remove: string;
-    tooltips: {
-      deleteOption: string;
-      addItem: string;
-      viewDetails: string;
-      downloadPDF: string;
-      editCheck: string;
-      deleteCheck: string;
-      viewHistory: string;
-      editEmployee: string;
-      deleteEmployee: string;
-      addWorkApp: string;
-      addNonWorkApp: string;
-      addAntivirus: string;
-      addVPN: string;
-      removeItem: string;
-    };
-    select: {
-      navigate: string;
-      select: string;
-      createNew: string;
-      toCreate: string;
-      toNavigate: string;
-      toSelect: string;
-      navigateOptions: string;
-      selectOption: string;
-      placeholder: string;
-      keyboardHint: string;
-    };
   };
   header: {
     title: string;
@@ -183,29 +155,27 @@ export interface Translations {
       };
       otherNotesPlaceholder: string;
     };
-      validation: {
-        employeeRequired: string;
-        checkDateRequired: string;
-        deviceTypeRequired: string;
-        ownershipRequired: string;
-        deviceBrandRequired: string;
-        deviceModelRequired: string;
-        serialNumberRequired: string;
-        osTypeRequired: string;
-        osVersionRequired: string;
-        osLicenseRequired: string;
-        deviceSuitabilityRequired: string;
-        passwordUsageRequired: string;
-        inspectorPICNameRequired: string;
-      };
-      toast: {
-        createSuccess: string;
-        createFailed: string;
-        selectEmployee: string;
-        selectInspector: string;
-        optionAdded: string;
-        optionSaveFailed: string;
-      };
+    validation: {
+      employeeRequired: string;
+      checkDateRequired: string;
+      deviceTypeRequired: string;
+      ownershipRequired: string;
+      deviceBrandRequired: string;
+      deviceModelRequired: string;
+      serialNumberRequired: string;
+      osTypeRequired: string;
+      osVersionRequired: string;
+      osLicenseRequired: string;
+      deviceSuitabilityRequired: string;
+      passwordUsageRequired: string;
+    };
+    toast: {
+      createSuccess: string;
+      createFailed: string;
+      selectEmployee: string;
+      optionAdded: string;
+      optionSaveFailed: string;
+    };
     placeholders: {
       deviceBrand: string;
       deviceModel: string;
@@ -314,25 +284,27 @@ export interface Translations {
       pdfFailed: string;
     };
   };
-  createEmployee: {
-    title: string;
-    description: string;
-    formTitle: string;
-    formDescription: string;
-    firstName: string;
-    lastName: string;
-    position: string;
-    department: string;
-    email: string;
-    phoneNumber: string;
-    status: string;
-    statusOptions: {
+    createEmployee: {
+      title: string;
+      description: string;
+      formTitle: string;
+      formDescription: string;
+      firstName: string;
+      lastName: string;
+      position: string;
+      department: string;
+      email: string;
+      phoneNumber: string;
+      status: string;
+      employeeIdHint: string;
+      statusOptions: {
       active: string;
       inactive: string;
       resigned: string;
     };
     required: string;
     placeholders: {
+        employeeId: string,
       firstName: string;
       lastName: string;
       position: string;
@@ -340,11 +312,11 @@ export interface Translations {
       email: string;
       phoneNumber: string;
     };
-    backToEmployees: string;
-    cancel: string;
-    createButton: string;
-    creating: string;
-    validation: {
+      backToEmployees: string;
+      cancel: string;
+      createButton: string;
+      creating: string;
+      validation: {
       requiredFields: string;
       createSuccess: string;
       createFailed: string;
@@ -377,34 +349,6 @@ export const translations: Record<Language, Translations> = {
       next: 'Next',
       add: 'Add',
       remove: 'Remove',
-      tooltips: {
-        deleteOption: 'Delete option',
-        addItem: 'Add item',
-        viewDetails: 'View details',
-        downloadPDF: 'Download PDF',
-        editCheck: 'Edit check',
-        deleteCheck: 'Delete check',
-        viewHistory: 'View history',
-        editEmployee: 'Edit employee',
-        deleteEmployee: 'Delete employee',
-        addWorkApp: 'Add work application',
-        addNonWorkApp: 'Add non-work application',
-        addAntivirus: 'Add antivirus',
-        addVPN: 'Add VPN',
-        removeItem: 'Remove item',
-      },
-      select: {
-        navigate: 'navigate',
-        select: 'select',
-        createNew: 'create new',
-        toCreate: 'to create',
-        toNavigate: 'to navigate',
-        toSelect: 'to select',
-        navigateOptions: 'Navigate options',
-        selectOption: 'Select option',
-        placeholder: 'Select or type to create...',
-        keyboardHint: 'Keyboard shortcuts',
-      },
     },
     header: {
       title: 'Device Checking System',
@@ -554,13 +498,11 @@ export const translations: Record<Language, Translations> = {
         osLicenseRequired: 'OS license is required',
         deviceSuitabilityRequired: 'Device suitability is required',
         passwordUsageRequired: 'Password usage is required',
-        inspectorPICNameRequired: 'Inspector PIC name is required',
       },
       toast: {
         createSuccess: 'Device check created successfully',
         createFailed: 'Failed to create device check',
         selectEmployee: 'Please select an employee',
-        selectInspector: 'Please select an inspector PIC',
         optionAdded: 'added successfully',
         optionSaveFailed: 'Failed to save option to database',
       },
@@ -587,7 +529,7 @@ export const translations: Record<Language, Translations> = {
       title: 'Device Check Data',
       description: 'View and manage all device checking records',
       filters: {
-        searchPlaceholder: 'Search by employee name, employee id, device brand or model...',
+        searchPlaceholder: 'Search by employee, device brand or model...',
         allConditions: 'All Conditions',
         allOwnership: 'All Ownership',
         clearFilters: 'Clear Filters',
@@ -691,6 +633,7 @@ export const translations: Record<Language, Translations> = {
       },
       required: '*',
       placeholders: {
+        employeeId: 'Enter employee id',
         firstName: 'Enter first name',
         lastName: 'Enter last name',
         position: 'e.g., Software Engineer',
@@ -702,6 +645,7 @@ export const translations: Record<Language, Translations> = {
       cancel: 'Cancel',
       createButton: 'Create Employee',
       creating: 'Creating...',
+      employeeIdHint: 'Leave blank for auto-generation.',
       validation: {
         requiredFields: 'Please fill in all required fields',
         createSuccess: 'Employee created successfully',
@@ -733,34 +677,6 @@ export const translations: Record<Language, Translations> = {
       next: 'Lanjut',
       add: 'Tambah',
       remove: 'Hapus',
-      tooltips: {
-        deleteOption: 'Hapus opsi',
-        addItem: 'Tambah item',
-        viewDetails: 'Lihat detail',
-        downloadPDF: 'Unduh PDF',
-        editCheck: 'Edit pengecekan',
-        deleteCheck: 'Hapus pengecekan',
-        viewHistory: 'Lihat riwayat',
-        editEmployee: 'Edit karyawan',
-        deleteEmployee: 'Hapus karyawan',
-        addWorkApp: 'Tambah aplikasi kerja',
-        addNonWorkApp: 'Tambah aplikasi non-kerja',
-        addAntivirus: 'Tambah antivirus',
-        addVPN: 'Tambah VPN',
-        removeItem: 'Hapus item',
-      },
-      select: {
-        navigate: 'navigasi',
-        select: 'pilih',
-        createNew: 'buat baru',
-        toCreate: 'untuk membuat',
-        toNavigate: 'untuk menavigasi',
-        toSelect: 'untuk memilih',
-        navigateOptions: 'Navigasi opsi',
-        selectOption: 'Pilih opsi',
-        placeholder: 'Pilih atau ketik untuk membuat...',
-        keyboardHint: 'Pintasan keyboard',
-      },
     },
     header: {
       title: 'Sistem Pengecekan Perangkat',
@@ -910,13 +826,11 @@ export const translations: Record<Language, Translations> = {
         osLicenseRequired: 'Lisensi OS wajib diisi',
         deviceSuitabilityRequired: 'Kesesuaian perangkat wajib diisi',
         passwordUsageRequired: 'Penggunaan password wajib diisi',
-        inspectorPICNameRequired: 'Nama PIC pemeriksa wajib diisi',
       },
       toast: {
         createSuccess: 'Pengecekan perangkat berhasil dibuat',
         createFailed: 'Gagal membuat pengecekan perangkat',
         selectEmployee: 'Silakan pilih karyawan',
-        selectInspector: 'Silakan pilih nama PIC pemeriksa',
         optionAdded: 'berhasil ditambahkan',
         optionSaveFailed: 'Gagal menyimpan opsi ke database',
       },
@@ -943,7 +857,7 @@ export const translations: Record<Language, Translations> = {
       title: 'Data Pengecekan Perangkat',
       description: 'Lihat dan kelola semua catatan pengecekan perangkat',
       filters: {
-        searchPlaceholder: 'Cari berdasarkan nama karyawan, id karyawan, merk atau model perangkat...',
+        searchPlaceholder: 'Cari berdasarkan karyawan, merk atau model perangkat...',
         allConditions: 'Semua Kondisi',
         allOwnership: 'Semua Kepemilikan',
         clearFilters: 'Hapus Filter',
@@ -1047,6 +961,7 @@ export const translations: Record<Language, Translations> = {
       },
       required: '*',
       placeholders: {
+        employeeId: 'Masukkan id karyawan',
         firstName: 'Masukkan nama depan',
         lastName: 'Masukkan nama belakang',
         position: 'cth: Software Engineer',
@@ -1058,6 +973,7 @@ export const translations: Record<Language, Translations> = {
       cancel: 'Batal',
       createButton: 'Tambah Karyawan',
       creating: 'Membuat...',
+      employeeIdHint: 'Kosongkan untuk pembuatan otomatis.',
       validation: {
         requiredFields: 'Silakan isi semua bidang wajib',
         createSuccess: 'Karyawan berhasil ditambahkan',

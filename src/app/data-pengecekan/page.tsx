@@ -6,7 +6,6 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import { Tooltip, TooltipContent, TooltipTrigger, TooltipProvider } from '@/components/ui/tooltip';
 import { toast } from 'sonner';
 import {
   Edit, Trash2, Eye, Download, Filter,
@@ -166,8 +165,7 @@ export default function CheckDataPage() {
   }
 
   return (
-    <TooltipProvider>
-      <div className="space-y-6 m-3">
+    <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('checkData.title')}</h1>
@@ -314,8 +312,7 @@ export default function CheckDataPage() {
           ))}
         </div>
       )}
-      </div>
-    </TooltipProvider>
+    </div>
   );
 }
 
@@ -447,42 +444,22 @@ function CheckCard({
         </div>
 
         <div className="flex gap-2">
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" asChild>
-                <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
-                  <Eye className="h-4 w-4" />
-                </Link>
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.viewDetails')}</TooltipContent>
-          </Tooltip>
+          <Button variant="outline" size="sm" className="flex-1" asChild>
+            <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
+              <Eye className="h-4 w-4" />
+            </Link>
+          </Button>
           {onDownload && (
-            <Tooltip>
-              <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
-                  <Download className="h-4 w-4" />
-                </Button>
-              </TooltipTrigger>
-              <TooltipContent>{t('common.tooltips.downloadPDF')}</TooltipContent>
-            </Tooltip>
+            <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
+              <Download className="h-4 w-4" />
+            </Button>
           )}
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
-                <Edit className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.editCheck')}</TooltipContent>
-          </Tooltip>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
-                <Trash2 className="h-4 w-4" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('common.tooltips.deleteCheck')}</TooltipContent>
-          </Tooltip>
+          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+            <Edit className="h-4 w-4" />
+          </Button>
+          <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+            <Trash2 className="h-4 w-4" />
+          </Button>
         </div>
       </CardContent>
     </Card>
