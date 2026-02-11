@@ -133,8 +133,8 @@ export default function CheckDataPage() {
       check.deviceDetail.deviceBrand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceModel.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability === filters.suitability;
-    const matchesOwnership = !filters.ownership || check.deviceDetail.ownership === filters.ownership;
+    const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability?.toLowerCase() === filters.suitability?.toLowerCase();
+    const matchesOwnership = !filters.ownership || check.deviceDetail.ownership?.toLowerCase() === filters.ownership?.toLowerCase();
 
     return matchesSearch && matchesSuitability && matchesOwnership;
   });
@@ -243,7 +243,7 @@ export default function CheckDataPage() {
         </Card>
       ) : groupByEmployee ? (
         // Grouped View
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto h-[50vh]">
           {groupedChecks.map(({ employeeId, checks: employeeChecks }) => {
             const firstCheck = employeeChecks[0];
             const employee = firstCheck.employeeSnapshot;
