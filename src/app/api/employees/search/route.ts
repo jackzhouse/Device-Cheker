@@ -19,6 +19,7 @@ export async function GET(request: NextRequest) {
     if (q) {
       query.$or = [
         { fullName: { $regex: q, $options: 'i' } },
+        { employeeId: { $regex: q, $options: 'i' } },
         { firstName: { $regex: q, $options: 'i' } },
         { lastName: { $regex: q, $options: 'i' } },
       ];
