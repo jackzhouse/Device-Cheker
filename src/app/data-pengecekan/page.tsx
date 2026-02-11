@@ -196,8 +196,8 @@ export default function CheckDataPage() {
             >
               <option value="">{t('checkData.filters.allConditions')}</option>
               <option value="suitable">{t('checkData.suitability.suitable')}</option>
-              <option value="limitedSuitability">{t('checkData.suitability.limitedSuitability')}</option>
-              <option value="needsRepair">{t('checkData.suitability.needsRepair')}</option>
+              <option value="limited Suitability">{t('checkData.suitability.limitedSuitability')}</option>
+              <option value="needs Repair">{t('checkData.suitability.needsRepair')}</option>
               <option value="unsuitable">{t('checkData.suitability.unsuitable')}</option>
             </select>
             <select
