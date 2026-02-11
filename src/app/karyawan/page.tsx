@@ -8,12 +8,20 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
-  User, UserPlus, Edit, Trash2, History, PlusCircle, Search
+  User, UserPlus, Edit, Trash2, History, PlusCircle, Search, Upload, Download, FileSpreadsheet
 } from 'lucide-react';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function EmployeesPage() {
   const router = useRouter();
@@ -24,9 +32,96 @@ export default function EmployeesPage() {
   const [filterDept, setFilterDept] = useState('');
   const [filterStatus, setFilterStatus] = useState('');
 
+  // Import states
+  const [importModalOpen, setImportModalOpen] = useState(false);
+  const [importFile, setImportFile] = useState<File | null>(null);
+  const [importing, setImporting] = useState(false);
+  const [importResults, setImportResults] = useState<any>(null);
+
   React.useEffect(() => {
     fetchEmployees();
   }, []);
+
+  const handleDownloadTemplate = async () => {
+    try {
+      const response = await fetch('/api/employees/import/template');
+      if (!response.ok) throw new Error('Failed to download template');
+
+      const blob = await response.blob();
+      const url = window.URL.createObjectURL(blob);
+      const a = document.createElement('a');
+      a.href = url;
+      a.download = 'template_import_karyawan.xlsx';
+      document.body.appendChild(a);
+      a.click();
+      window.URL.revokeObjectURL(url);
+      document.body.removeChild(a);
+
+      toast.success('Template downloaded successfully');
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to download template');
+    }
+  };
+
+  const handleImportFile = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const file = e.target.files?.[0];
+    if (file) {
+      setImportFile(file);
+    }
+  };
+
+  const handleImport = async () => {
+    if (!importFile) {
+      toast.error('Please select a file to import');
+      return;
+    }
+
+    setImporting(true);
+    setImportResults(null);
+
+    try {
+      const formData = new FormData();
+      formData.append('file', importFile);
+
+      const response = await fetch('/api/employees/import', {
+        method: 'POST',
+        body: formData,
+      });
+
+      const result = await response.json();
+
+      if (!response.ok) {
+        throw new Error(result.error || 'Import failed');
+      }
+
+      setImportResults(result.results);
+      toast.success(
+        `Imported ${result.results.imported} employees successfully. ${result.results.failed} failed.`
+      );
+
+      // Refresh employee list
+      fetchEmployees();
+
+      // Close modal after 2 seconds if no errors
+      if (result.results.failed === 0) {
+        setTimeout(() => {
+          setImportModalOpen(false);
+          setImportFile(null);
+          setImportResults(null);
+        }, 2000);
+      }
+    } catch (error: any) {
+      toast.error(error.message || 'Failed to import employees');
+    } finally {
+      setImporting(false);
+    }
+  };
+
+  const handleCloseImportModal = () => {
+    setImportModalOpen(false);
+    setImportFile(null);
+    setImportResults(null);
+  };
 
   const fetchEmployees = async () => {
     setLoading(true);
@@ -117,12 +212,22 @@ export default function EmployeesPage() {
               {t('employee.description')}
             </p>
           </div>
-          <Button asChild>
-            <Link href="/karyawan/new">
-              <UserPlus className="mr-2 h-4 w-4" />
-              {t('employee.addButton')}
-            </Link>
-          </Button>
+          <div className="flex gap-2">
+            <Button variant="outline" onClick={handleDownloadTemplate}>
+              <Download className="mr-2 h-4 w-4" />
+              Download Template
+            </Button>
+            <Button variant="outline" onClick={() => setImportModalOpen(true)}>
+              <FileSpreadsheet className="mr-2 h-4 w-4" />
+              Import Excel
+            </Button>
+            <Button asChild>
+              <Link href="/karyawan/new">
+                <UserPlus className="mr-2 h-4 w-4" />
+                {t('employee.addButton')}
+              </Link>
+            </Button>
+          </div>
         </div>
       </div>
 
@@ -186,7 +291,7 @@ export default function EmployeesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto h-[60vh]">
           {filteredEmployees.map((employee) => (
             <EmployeeCard
               key={employee._id}
@@ -197,6 +302,117 @@ export default function EmployeesPage() {
           ))}
         </div>
       )}
+
+      {/* Import Modal */}
+      <Dialog open={importModalOpen} onOpenChange={handleCloseImportModal}>
+        <DialogContent className="sm:max-w-[600px] max-h-[80vh] overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>Import Employees from Excel</DialogTitle>
+            <DialogDescription>
+              Upload an Excel file with employee data. Only columns "Nama Lengkap" and "Bagian" are required.
+            </DialogDescription>
+          </DialogHeader>
+
+          <div className="space-y-4 py-4">
+            {!importResults ? (
+              <div className="space-y-4">
+                <div className="flex flex-col items-center justify-center border-2 border-dashed rounded-lg p-8">
+                  <FileSpreadsheet className="h-12 w-12 text-muted-foreground mb-4" />
+                  <Input
+                    type="file"
+                    accept=".xlsx,.xls"
+                    onChange={handleImportFile}
+                    className="max-w-sm"
+                    disabled={importing}
+                  />
+                  {importFile && (
+                    <p className="text-sm text-muted-foreground mt-2">
+                      Selected: {importFile.name}
+                    </p>
+                  )}
+                </div>
+                <div className="text-sm text-muted-foreground">
+                  <p className="font-medium mb-2">Required columns:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li><strong>Nama Lengkap</strong> - Full name (auto-splits to first/last name)</li>
+                    <li><strong>Bagian</strong> - Position/Job title</li>
+                  </ul>
+                  <p className="font-medium mt-3 mb-2">Optional columns:</p>
+                  <ul className="list-disc list-inside space-y-1">
+                    <li><strong>Departemen/Divisi</strong> - Department</li>
+                    <li><strong>Nomor Induk Karyawan</strong> - Employee ID (auto-generated if empty)</li>
+                  </ul>
+                </div>
+              </div>
+            ) : (
+              <div className="space-y-4">
+                <div className="grid grid-cols-3 gap-4 text-center">
+                  <div className="p-4 bg-green-50 rounded-lg">
+                    <p className="text-2xl font-bold text-green-700">{importResults.imported}</p>
+                    <p className="text-sm text-green-600">Imported</p>
+                  </div>
+                  <div className="p-4 bg-red-50 rounded-lg">
+                    <p className="text-2xl font-bold text-red-700">{importResults.failed}</p>
+                    <p className="text-sm text-red-600">Failed</p>
+                  </div>
+                  <div className="p-4 bg-blue-50 rounded-lg">
+                    <p className="text-2xl font-bold text-blue-700">{importResults.total}</p>
+                    <p className="text-sm text-blue-600">Total</p>
+                  </div>
+                </div>
+
+                {importResults.failed > 0 && (
+                  <div>
+                    <p className="font-medium mb-2">Failed rows:</p>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {importResults.failedData.map((item: any, idx: number) => (
+                        <div key={idx} className="p-3 bg-red-50 rounded-lg text-sm">
+                          <p className="font-medium text-red-700">Row {item.row}: {item.error}</p>
+                          <pre className="text-xs text-muted-foreground mt-1 overflow-x-auto">
+                            {JSON.stringify(item.data, null, 2)}
+                          </pre>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+
+                {importResults.imported > 0 && (
+                  <div>
+                    <p className="font-medium mb-2">Successfully imported:</p>
+                    <div className="max-h-48 overflow-y-auto space-y-2">
+                      {importResults.successData.map((item: any, idx: number) => (
+                        <div key={idx} className="p-3 bg-green-50 rounded-lg text-sm">
+                          <p className="font-medium text-green-700">
+                            Row {item.row}: {item.name} ({item.employeeId})
+                          </p>
+                        </div>
+                      ))}
+                    </div>
+                  </div>
+                )}
+              </div>
+            )}
+          </div>
+
+          <DialogFooter>
+            {!importResults ? (
+              <>
+                <Button variant="outline" onClick={handleCloseImportModal} disabled={importing}>
+                  Cancel
+                </Button>
+                <Button onClick={handleImport} disabled={!importFile || importing}>
+                  {importing ? 'Importing...' : 'Import'}
+                </Button>
+              </>
+            ) : (
+              <Button onClick={handleCloseImportModal}>
+                Close
+              </Button>
+            )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }
