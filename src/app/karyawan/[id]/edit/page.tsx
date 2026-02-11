@@ -152,7 +152,7 @@ export default function EditEmployeePage() {
     const handleSubmit = async (e: React.FormEvent) => {
         e.preventDefault();
 
-        if (!formData.firstName || !formData.lastName || !formData.position) {
+        if (!formData.firstName || !formData.position) {
             toast.error(t('createEmployee.validation.requiredFields'));
             return;
         }
@@ -255,12 +255,11 @@ export default function EditEmployeePage() {
                                     />
                                 </div>
                                 <div className="space-y-2">
-                                    <Label htmlFor="lastName">{t('createEmployee.lastName')} {t('createEmployee.required')}</Label>
+                                    <Label htmlFor="lastName">{t('createEmployee.lastName')}</Label>
                                     <Input
                                         id="lastName"
                                         value={formData.lastName}
                                         onChange={(e) => handleInputChange('lastName', e.target.value)}
-                                        required
                                         placeholder={t('createEmployee.placeholders.lastName')}
                                     />
                                 </div>
