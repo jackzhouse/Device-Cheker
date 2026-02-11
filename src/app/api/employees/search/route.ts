@@ -31,7 +31,7 @@ export async function GET(request: NextRequest) {
 
     // Execute query with lean for performance
     const employees = await Employee.find(query)
-      .select('fullName firstName lastName position department totalDeviceChecks lastCheckDate')
+      .select('fullName employeeId firstName lastName position department totalDeviceChecks lastCheckDate')
       .sort({ fullName: 1 })
       .limit(limit)
       .lean();
