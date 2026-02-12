@@ -12,6 +12,9 @@ const inter = Inter({ subsets: ["latin"] });
 export const metadata: Metadata = {
   title: "Device Checking System",
   description: "Employee Device Checking Application",
+  icons: {
+    icon: "/logo-tki.png",
+  },
 };
 
 export default function RootLayout({
