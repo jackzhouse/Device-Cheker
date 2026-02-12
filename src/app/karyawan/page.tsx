@@ -10,6 +10,7 @@ import { toast } from 'sonner';
 import {
   User, UserPlus, Edit, Trash2, History, PlusCircle, Search, Upload, Download, FileSpreadsheet
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import { useRouter } from 'next/navigation';
 import { useState } from 'react';
@@ -488,17 +489,32 @@ function EmployeeCard({
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1" asChild>
-            <Link href={`/data-pengecekan/${employee._id}`}>
-              <History className="h-4 w-4" />
-            </Link>
-          </Button>
-          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Link href={`/data-pengecekan/${employee._id}`}>
+                  <History className="h-4 w-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.viewHistory')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.editEmployee')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.deleteEmployee')}</TooltipContent>
+          </Tooltip>
         </div>
       </CardContent>
     </Card>

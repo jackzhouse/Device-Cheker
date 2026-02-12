@@ -11,6 +11,7 @@ import {
   Edit, Trash2, Eye, Download, Filter,
   Laptop, HardDrive, Calendar, User, Building
 } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -444,22 +445,42 @@ function CheckCard({
         </div>
 
         <div className="flex gap-2">
-          <Button variant="outline" size="sm" className="flex-1" asChild>
-            <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
-              <Eye className="h-4 w-4" />
-            </Link>
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1" asChild>
+                <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
+                  <Eye className="h-4 w-4" />
+                </Link>
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.viewDetails')}</TooltipContent>
+          </Tooltip>
           {onDownload && (
-            <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
-              <Download className="h-4 w-4" />
-            </Button>
+            <Tooltip>
+              <TooltipTrigger asChild>
+                <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
+                  <Download className="h-4 w-4" />
+                </Button>
+              </TooltipTrigger>
+              <TooltipContent>{t('common.tooltips.downloadPDF')}</TooltipContent>
+            </Tooltip>
           )}
-          <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
-            <Edit className="h-4 w-4" />
-          </Button>
-          <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
-            <Trash2 className="h-4 w-4" />
-          </Button>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+                <Edit className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.editCheck')}</TooltipContent>
+          </Tooltip>
+          <Tooltip>
+            <TooltipTrigger asChild>
+              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+                <Trash2 className="h-4 w-4" />
+              </Button>
+            </TooltipTrigger>
+            <TooltipContent>{t('common.tooltips.deleteCheck')}</TooltipContent>
+          </Tooltip>
         </div>
       </CardContent>
     </Card>

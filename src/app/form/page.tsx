@@ -3,7 +3,7 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
-import { createDeviceCheck, type DeviceCheck } from '@/lib/services/device-checks.service';
+import { createDeviceCheck, getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-checks.service';
 import { normalizeDataForSubmission } from '@/lib/utils/data-normalizer';
 import EmployeeAutocomplete from '@/components/EmployeeAutocomplete';
 import { Button } from '@/components/ui/button';
@@ -14,6 +14,7 @@ import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
 import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
+import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -86,6 +87,8 @@ function FormContent() {
   const [loading, setLoading] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
+  const [useLastVersion, setUseLastVersion] = React.useState(false);
+  const [loadingLastVersion, setLoadingLastVersion] = React.useState(false);
 
   const { register, control, watch, handleSubmit, setValue, formState: { errors } } = useForm<FormData>({
     defaultValues: {
@@ -303,6 +306,140 @@ function FormContent() {
     };
   };
 
+  // Fetch and populate form with last check data
+  React.useEffect(() => {
+    const fetchLastVersionData = async () => {
+      if (!useLastVersion || !selectedEmployee?._id) {
+        return;
+      }
+
+      setLoadingLastVersion(true);
+      try {
+        const response = await getEmployeeChecks(selectedEmployee._id, {
+          limit: 1,
+          sortBy: 'checkDate',
+          sortOrder: 'desc',
+        });
+
+        if (response.success && response.data?.checks && response.data.checks.length > 0) {
+          const lastCheck = response.data.checks[0];
+
+          // Helper function to normalize enum values for form
+          const normalizeEnumValue = (value: string): string => {
+            if (!value) return value;
+            // Convert "PC" to "pc", "Laptop" to "laptop", etc.
+            return value.toLowerCase().replace(/\s+/g, '');
+          };
+
+          // Populate device details
+          setValue('deviceDetail.deviceType', normalizeEnumValue(lastCheck.deviceDetail?.deviceType || 'laptop'));
+          setValue('deviceDetail.ownership', normalizeEnumValue(lastCheck.deviceDetail?.ownership || 'company'));
+          setValue('deviceDetail.deviceBrand', lastCheck.deviceDetail?.deviceBrand || '');
+          setValue('deviceDetail.deviceModel', lastCheck.deviceDetail?.deviceModel || '');
+          setValue('deviceDetail.serialNumber', lastCheck.deviceDetail?.serialNumber || '');
+
+          // Populate operating system
+          setValue('operatingSystem.osType', normalizeEnumValue(lastCheck.operatingSystem?.osType || 'windows'));
+          setValue('operatingSystem.osVersion', lastCheck.operatingSystem?.osVersion || '');
+          setValue('operatingSystem.osLicense', normalizeEnumValue(lastCheck.operatingSystem?.osLicense || 'original'));
+          setValue('operatingSystem.osRegularUpdate', lastCheck.operatingSystem?.osRegularUpdate ?? true);
+
+          // Populate specification
+          setValue('specification.ramCapacity', lastCheck.specification?.ramCapacity || '');
+          setValue('specification.memoryType', normalizeEnumValue(lastCheck.specification?.memoryType || 'hdd'));
+          setValue('specification.memoryCapacity', lastCheck.specification?.memoryCapacity || '');
+          setValue('specification.processor', lastCheck.specification?.processor || '');
+
+          // Populate device condition
+          setValue('deviceCondition.deviceSuitability', normalizeEnumValue(lastCheck.deviceCondition?.deviceSuitability || 'suitable'));
+          setValue('deviceCondition.batterySuitability', lastCheck.deviceCondition?.batterySuitability || '');
+          setValue('deviceCondition.keyboardCondition', lastCheck.deviceCondition?.keyboardCondition || '');
+          setValue('deviceCondition.touchpadCondition', lastCheck.deviceCondition?.touchpadCondition || '');
+          setValue('deviceCondition.monitorCondition', lastCheck.deviceCondition?.monitorCondition || '');
+          setValue('deviceCondition.wifiCondition', lastCheck.deviceCondition?.wifiCondition || '');
+
+          // Populate work applications
+          // Clear existing fields first
+          while (workAppFields.length > 0) {
+            removeWorkApp(0);
+          }
+          // Add new fields from last check
+          if (lastCheck.workApplications && lastCheck.workApplications.length > 0) {
+            lastCheck.workApplications.forEach((app: any) => {
+              appendWorkApp({
+                applicationName: app.applicationName || '',
+                license: normalizeEnumValue(app.license || 'original'),
+                notes: app.notes || '',
+              });
+            });
+          }
+
+          // Populate non-work applications
+          while (nonWorkAppFields.length > 0) {
+            removeNonWorkApp(0);
+          }
+          if (lastCheck.nonWorkApplications && lastCheck.nonWorkApplications.length > 0) {
+            lastCheck.nonWorkApplications.forEach((app: any) => {
+              appendNonWorkApp({
+                applicationName: app.applicationName || '',
+                license: normalizeEnumValue(app.license || 'original'),
+                notes: app.notes || '',
+              });
+            });
+          }
+
+          // Populate security - antivirus
+          setValue('security.antivirus.status', normalizeEnumValue(lastCheck.security?.antivirus?.status || 'active'));
+          while (antivirusFields.length > 0) {
+            removeAntivirus(0);
+          }
+          if (lastCheck.security?.antivirus?.list && lastCheck.security.antivirus.list.length > 0) {
+            lastCheck.security.antivirus.list.forEach((app: any) => {
+              appendAntivirus({
+                applicationName: app.applicationName || '',
+                license: normalizeEnumValue(app.license || 'original'),
+                notes: app.notes || '',
+              });
+            });
+          }
+
+          // Populate security - vpn
+          setValue('security.vpn.status', normalizeEnumValue(lastCheck.security?.vpn?.status || 'available'));
+          while (vpnFields.length > 0) {
+            removeVpn(0);
+          }
+          if (lastCheck.security?.vpn?.list && lastCheck.security.vpn.list.length > 0) {
+            lastCheck.security.vpn.list.forEach((vpn: any) => {
+              appendVpn({
+                vpnName: vpn.vpnName || '',
+                license: normalizeEnumValue(vpn.license || 'original'),
+                notes: vpn.notes || '',
+              });
+            });
+          }
+
+          // Populate additional info
+          setValue('additionalInfo.passwordUsage', normalizeEnumValue(lastCheck.additionalInfo?.passwordUsage || 'available'));
+          setValue('additionalInfo.inspectorPICName', lastCheck.additionalInfo?.inspectorPICName || '');
+          setValue('additionalInfo.otherNotes', lastCheck.additionalInfo?.otherNotes || '');
+
+          toast.success(t('form.employeeInfo.lastVersionLoaded'));
+        } else {
+          toast.info(t('form.employeeInfo.noPreviousRecord'));
+          setUseLastVersion(false);
+        }
+      } catch (error) {
+        console.error('Error fetching last version data:', error);
+        toast.error(t('errors.generic'));
+        setUseLastVersion(false);
+      } finally {
+        setLoadingLastVersion(false);
+      }
+    };
+
+    fetchLastVersionData();
+  }, [useLastVersion, selectedEmployee?._id]);
+
   const onSubmit = async (data: any) => {
     if (!data.employeeId) {
       toast.error(t('form.toast.selectEmployee'));
@@ -416,6 +553,21 @@ function FormContent() {
                 {errors.checkDate?.message && (
                   <p className="text-sm text-destructive mt-1">{errors.checkDate.message as string}</p>
                 )}
+              </div>
+
+              {/* Use Last Version Checkbox */}
+              <div className="flex items-center gap-2">
+                <input
+                  type="checkbox"
+                  id="useLastVersion"
+                  checked={useLastVersion}
+                  onChange={(e) => setUseLastVersion(e.target.checked)}
+                  disabled={!selectedEmployee || loadingLastVersion}
+                  className="h-4 w-4"
+                />
+                <Label htmlFor="useLastVersion" className={`cursor-pointer ${!selectedEmployee ? 'opacity-50' : ''}`}>
+                  {loadingLastVersion ? t('form.employeeInfo.loadingLastVersion') : t('form.employeeInfo.useLastVersion')}
+                </Label>
               </div>
             </CardContent>
           </Card>
@@ -694,15 +846,20 @@ function FormContent() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <Label>{t('form.applications.workApplications')}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendWorkApp({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendWorkApp({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addWorkApp')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {workAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -724,14 +881,19 @@ function FormContent() {
                       {...register(`workApplications.${index}.notes` as any)}
                     />
                     {workAppFields.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeWorkApp(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeWorkApp(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -741,15 +903,20 @@ function FormContent() {
               <div>
                 <div className="flex items-center justify-between mb-3">
                   <Label>{t('form.applications.nonWorkApplications')}</Label>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendNonWorkApp({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendNonWorkApp({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addNonWorkApp')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {nonWorkAppFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -771,14 +938,19 @@ function FormContent() {
                       {...register(`nonWorkApplications.${index}.notes` as any)}
                     />
                     {nonWorkAppFields.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeNonWorkApp(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeNonWorkApp(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -809,15 +981,20 @@ function FormContent() {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-full"></div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendAntivirus({ applicationName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendAntivirus({ applicationName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addAntivirus')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {antivirusFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -839,14 +1016,19 @@ function FormContent() {
                       {...register(`security.antivirus.list.${index}.notes` as any)}
                     />
                     {antivirusFields.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeAntivirus(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeAntivirus(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
@@ -866,15 +1048,20 @@ function FormContent() {
                 </div>
                 <div className="flex items-center justify-between mb-3">
                   <div className="w-full"></div>
-                  <Button
-                    type="button"
-                    variant="outline"
-                    size="sm"
-                    onClick={() => appendVpn({ vpnName: '', license: 'original', notes: '' })}
-                  >
-                    <Plus className="h-4 w-4 mr-1" />
-                    {t('common.add')}
-                  </Button>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendVpn({ vpnName: '', license: 'original', notes: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addVPN')}</TooltipContent>
+                  </Tooltip>
                 </div>
                 {vpnFields.map((field, index) => (
                   <div key={field.id} className="grid md:grid-cols-[1fr_1fr_2fr_auto] gap-2 mb-2 items-start">
@@ -896,14 +1083,19 @@ function FormContent() {
                       {...register(`security.vpn.list.${index}.notes` as any)}
                     />
                     {vpnFields.length > 0 && (
-                      <Button
-                        type="button"
-                        variant="ghost"
-                        size="icon"
-                        onClick={() => removeVpn(index)}
-                      >
-                        <Trash2 className="h-4 w-4" />
-                      </Button>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeVpn(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
                     )}
                   </div>
                 ))}
