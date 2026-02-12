@@ -37,6 +37,8 @@
 
 @layer base {
   :root {
+    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
+    
     /* TailAdmin Light Style */
     --background: 210 40% 98%; /* #F1F5F9 */
     --foreground: 222.2 84% 4.9%;
@@ -96,6 +98,11 @@
   body {
     @apply bg-background text-foreground antialiased;
     font-feature-settings: "rlig" 1, "calt" 1;
+    padding-bottom: var(--safe-area-inset-bottom);
+  }
+  
+  .safe-area-bottom {
+    padding-bottom: max(0.5rem, var(--safe-area-inset-bottom));
   }
 }
 

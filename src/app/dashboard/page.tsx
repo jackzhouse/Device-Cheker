@@ -244,7 +244,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <FadeIn delay={100}>
           <Card>
             <CardContent className="pt-6">
@@ -285,9 +285,9 @@ export default function DashboardPage() {
                   <div className="text-3xl font-bold text-purple-600">
                     <AnimatedCounter value={data.deviceTypes.PC + data.deviceTypes.Laptop} />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">
-                    {data.deviceTypes.PC} {t('dashboard.summary.totalPCs')} • {data.deviceTypes.Laptop} {t('dashboard.summary.totalLaptops')}
-                  </div>
+              <div className="text-xs sm:text-sm text-muted-foreground mt-1">
+                {data.deviceTypes.PC} {t('dashboard.summary.totalPCs')} • {data.deviceTypes.Laptop} {t('dashboard.summary.totalLaptops')}
+              </div>
                 </div>
                 <TrendingUp className="h-12 w-12 text-purple-600" />
               </div>
@@ -313,7 +313,7 @@ export default function DashboardPage() {
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Device Type Pie Chart */}
         <FadeIn delay={500}>
           <Card>
@@ -321,7 +321,7 @@ export default function DashboardPage() {
               <CardTitle>{t('dashboard.charts.deviceType')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+                  <ResponsiveContainer width="100%" height={250} minHeight={200}>
                 <PieChart>
                   <Pie data={deviceTypeData} label nameKey="name" dataKey="value">
                     {deviceTypeData.map((entry, index) => (

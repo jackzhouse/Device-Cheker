@@ -220,9 +220,9 @@ export default function EmployeeHistoryPage() {
   const { employee, checks, summary } = data;
 
   return (
-    <div className="container">
+    <div className="container py-4 sm:py-8">
       {/* Back Button */}
-      <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+      <Button variant="ghost" className="mb-4" size="sm" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-2" />
         {t('common.back')}
       </Button>
@@ -230,28 +230,26 @@ export default function EmployeeHistoryPage() {
       {/* Employee Header */}
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <div className="flex items-start justify-between">
-            <div>
-              <div className="flex items-center gap-3 mb-2">
-                <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
-                  <User className="h-8 w-8 text-primary" />
-                </div>
-                <div>
-                  <h1 className="text-2xl font-bold">{employee.fullName}</h1>
-                  <p className="text-sm text-muted-foreground">
-                    {employee.position}
-                    {employee.department && ` • ${employee.department}`}
-                  </p>
-                  <Badge variant={employee.status === 'Active' ? 'success' : 'secondary'} className="mt-2">
-                    {employee.status}
-                  </Badge>
-                  <p className="text-xs text-muted-foreground mt-1">
-                    ID: {employee.employeeId}
-                  </p>
-                </div>
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
+            <div className="flex items-center gap-3">
+              <div className="h-16 w-16 rounded-full bg-primary/10 flex items-center justify-center">
+                <User className="h-8 w-8 text-primary" />
+              </div>
+              <div className="flex-1">
+                <h1 className="text-xl sm:text-2xl font-bold">{employee.fullName}</h1>
+                <p className="text-xs sm:text-sm text-muted-foreground">
+                  {employee.position}
+                  {employee.department && ` • ${employee.department}`}
+                </p>
+                <Badge variant={employee.status === 'Active' ? 'success' : 'secondary'} className="mt-2">
+                  {employee.status}
+                </Badge>
+                <p className="text-xs text-muted-foreground mt-1">
+                  ID: {employee.employeeId}
+                </p>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={() => router.push(`/form?employeeId=${employeeId}`)}>
                 {t('employeeHistory.addNewCheck')}
               </Button>
@@ -261,29 +259,29 @@ export default function EmployeeHistoryPage() {
       </Card>
 
       {/* Summary Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4 mb-6">
+      <div className="grid grid-cols-2 gap-3 sm:grid-cols-2 md:grid-cols-4 mb-6">
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.totalChecks}</div>
-            <div className="text-sm text-muted-foreground">{t('checkData.summary.totalChecks')}</div>
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.totalChecks}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">{t('checkData.summary.totalChecks')}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.deviceTypes.PC || 0}</div>
-            <div className="text-sm text-muted-foreground">{t('checkData.summary.pcDevices')}</div>
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.deviceTypes.PC || 0}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">{t('checkData.summary.pcDevices')}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.deviceTypes.Laptop || 0}</div>
-            <div className="text-sm text-muted-foreground">{t('checkData.summary.laptops')}</div>
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.deviceTypes.Laptop || 0}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">{t('checkData.summary.laptops')}</div>
           </CardContent>
         </Card>
         <Card>
-          <CardContent className="pt-6">
-            <div className="text-2xl font-bold">{summary.ownership.Company || 0}</div>
-            <div className="text-sm text-muted-foreground">{t('checkData.summary.companyOwned')}</div>
+          <CardContent className="pt-4 sm:pt-6">
+            <div className="text-xl sm:text-2xl font-bold">{summary.ownership.Company || 0}</div>
+            <div className="text-xs sm:text-sm text-muted-foreground">{t('checkData.summary.companyOwned')}</div>
           </CardContent>
         </Card>
       </div>
@@ -305,7 +303,7 @@ export default function EmployeeHistoryPage() {
           {checks.length === 0 ? (
             <p className="text-center py-12 text-muted-foreground">{t('checkData.noChecks')}</p>
           ) : (
-            <div className="space-y-6 overflow-y-auto h-[33vh]">
+            <div className="space-y-6">
               {checks.map((check, index) => (
                 <div key={check._id} className="relative pl-8 pb-6 border-l-2 border-muted">
                   {/* Timeline Dot */}
@@ -317,8 +315,8 @@ export default function EmployeeHistoryPage() {
                       {/* Employee Name Section */}
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-2">
-                          <User className="h-5 w-5 text-primary" />
-                          <h3 className="text-lg font-semibold">{employee.fullName}</h3>
+                          <User className="h-4 w-4 sm:h-5 sm:w-5 text-primary" />
+                          <h3 className="text-base sm:text-lg font-semibold">{employee.fullName}</h3>
                         </div>
                         <div className="flex items-center gap-2 text-sm text-muted-foreground">
                           <Badge variant="outline">v{check.version}</Badge>
@@ -347,11 +345,11 @@ export default function EmployeeHistoryPage() {
                       </div>
 
                       {/* Suitability and Actions */}
-                      <div className="flex items-start justify-between">
+                      <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-3">
                         <div>
                           {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
                         </div>
-                        <div className="flex gap-2">
+                        <div className="flex gap-2 flex-wrap">
                           <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(check)}>
                             <Download className="h-4 w-4" />
                           </Button>

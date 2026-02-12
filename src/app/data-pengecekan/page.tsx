@@ -190,8 +190,8 @@ export default function CheckDataPage() {
     <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <h1 className="text-3xl font-bold tracking-tight">{t('checkData.title')}</h1>
-        <p className="text-muted-foreground">
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('checkData.title')}</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
           {t('checkData.description')}
         </p>
       </div>
@@ -265,7 +265,7 @@ export default function CheckDataPage() {
         </Card>
       ) : groupByEmployee ? (
         // Grouped View
-        <div className="space-y-6 overflow-y-auto h-[50vh]">
+        <div className="space-y-6">
           {groupedChecks.map(({ employeeId, checks: employeeChecks }) => {
             const firstCheck = employeeChecks[0];
             const employee = firstCheck.employeeSnapshot;
@@ -280,7 +280,7 @@ export default function CheckDataPage() {
                         <User className="h-5 w-5" />
                         {employee.fullName}
                       </CardTitle>
-                      <p className="text-sm text-muted-foreground mt-1">
+                      <p className="text-xs sm:text-sm text-muted-foreground mt-1">
                         ID: {displayEmployeeId} • {employee.position}
                         {employee.department && ` • ${employee.department}`}
                       </p>
@@ -322,7 +322,7 @@ export default function CheckDataPage() {
         </div>
       ) : (
         // Card Grid View
-        <div className="grid gap-6 md:grid-cols-2 lg:grid-cols-3">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredChecks.map((check) => (
             <CheckCard
               key={check._id}
@@ -450,11 +450,11 @@ function CheckCard({
       <CardHeader>
         <div className="flex items-start justify-between">
           <div className="flex-1">
-            <CardTitle className="flex items-center gap-2 text-lg">
+            <CardTitle className="flex items-center gap-2 text-base sm:text-lg">
               <User className="h-5 w-5 text-primary" />
               {check.employeeSnapshot.fullName}
             </CardTitle>
-            <p className="text-sm text-muted-foreground mt-1">
+            <p className="text-xs sm:text-sm text-muted-foreground mt-1">
               ID: {check.employeeSnapshot?.employeeId || check.employee?.employeeId || 'N/A'} • {check.deviceDetail.deviceBrand} - {check.deviceDetail.deviceModel}
             </p>
           </div>
@@ -464,8 +464,8 @@ function CheckCard({
       <CardContent>
         {!compact && (
 
-          <div className="space-y-3 mb-4">
-            <div className="flex items-center gap-2 text-sm">
+          <div className="space-y-2 mb-4">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <Laptop className="h-4 w-4 text-muted-foreground" />
               <span className="font-medium">{getDeviceTypeLabel(check.deviceDetail.deviceType)}</span>
             </div>
@@ -488,10 +488,10 @@ function CheckCard({
           {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Button variant="outline" size="sm" className="flex-1 min-w-[40px]" asChild>
                 <Link href={`/data-pengecekan/${check.employeeId?.toString() || ''}`}>
                   <Eye className="h-4 w-4" />
                 </Link>
@@ -502,7 +502,7 @@ function CheckCard({
           {onDownload && (
             <Tooltip>
               <TooltipTrigger asChild>
-                <Button variant="outline" size="sm" className="flex-1" onClick={onDownload}>
+                <Button variant="outline" size="sm" className="flex-1 min-w-[40px]" onClick={onDownload}>
                   <Download className="h-4 w-4" />
                 </Button>
               </TooltipTrigger>
@@ -511,7 +511,7 @@ function CheckCard({
           )}
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+              <Button variant="outline" size="sm" className="flex-1 min-w-[40px]" onClick={onEdit}>
                 <Edit className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -519,7 +519,7 @@ function CheckCard({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+              <Button variant="destructive" size="sm" className="flex-1 min-w-[40px]" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>

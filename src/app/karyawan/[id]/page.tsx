@@ -105,23 +105,23 @@ export default function EmployeeDetailPage() {
   }
 
   return (
-    <div className="container py-8">
+    <div className="container py-4 sm:py-8">
       {/* Back Button */}
-      <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+      <Button variant="ghost" className="mb-4" size="sm" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-2" />
-        Back to Employees
+        Back
       </Button>
 
       {/* Employee Header Card */}
       <Card className="mb-6">
         <CardContent className="pt-6">
-          <div className="flex items-start justify-between">
+          <div className="flex flex-col sm:flex-row sm:items-start justify-between gap-4">
             <div className="flex items-center gap-4">
-              <div className="h-20 w-20 rounded-full bg-primary/10 flex items-center justify-center">
+              <div className="h-16 w-16 sm:h-20 sm:w-20 rounded-full bg-primary/10 flex items-center justify-center">
                 <User className="h-10 w-10 text-primary" />
               </div>
               <div>
-                <h1 className="text-3xl font-bold mb-1">{employee.fullName}</h1>
+                <h1 className="text-xl sm:text-3xl font-bold mb-1">{employee.fullName}</h1>
                 <div className="flex items-center gap-2 text-muted-foreground mb-2">
                   <Building className="h-4 w-4" />
                   <span>{employee.position}</span>
@@ -137,7 +137,7 @@ export default function EmployeeDetailPage() {
                 </Badge>
               </div>
             </div>
-            <div className="flex gap-2">
+            <div className="flex gap-2 flex-wrap">
               <Button variant="outline" onClick={() => router.push(`/form?employeeId=${employeeId}`)}>
                 <Plus className="h-4 w-4 mr-2" />
                 Add Check
@@ -152,7 +152,7 @@ export default function EmployeeDetailPage() {
       </Card>
 
       {/* Employee Details */}
-      <div className="grid md:grid-cols-2 gap-6 mb-6">
+      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
         {/* Personal Information */}
         <Card>
           <CardHeader>
@@ -306,7 +306,7 @@ export default function EmployeeDetailPage() {
       </Card>
 
       {/* Actions */}
-      <div className="flex gap-4 mt-6">
+      <div className="flex flex-col sm:flex-row gap-4 mt-6">
         <Button
           variant="outline"
           className="flex-1"

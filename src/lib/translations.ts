@@ -76,6 +76,11 @@ export interface Translations {
       additionalInfo: string;
     };
     formSections: string;
+    progress: {
+      title: string;
+      complete: string;
+      sectionsComplete: string;
+    };
     employeeInfo: {
       title: string;
       fullName: string;
@@ -232,6 +237,78 @@ export interface Translations {
       notes: string;
       inspectorName: string;
       otherNotes: string;
+    };
+    help: {
+      tooltip: string;
+      title: string;
+      description: string;
+      about: {
+        title: string;
+        description1: string;
+        description2: string;
+      };
+      howToFill: {
+        title: string;
+        step1: {
+          title: string;
+          description: string;
+        };
+        step2: {
+          title: string;
+          description: string;
+        };
+        step3: {
+          title: string;
+          description: string;
+        };
+        step4: {
+          title: string;
+          description: string;
+        };
+        step5: {
+          title: string;
+          description: string;
+        };
+        step6: {
+          title: string;
+          description: string;
+        };
+        step7: {
+          title: string;
+          description: string;
+        };
+        step8: {
+          title: string;
+          description: string;
+        };
+      };
+      keyboardShortcuts: {
+        title: string;
+        nextField: string;
+        prevField: string;
+        submitForm: string;
+        closeModal: string;
+        newLine: string;
+        jumpSection: string;
+        saveForm: string;
+        toggleHelp: string;
+        jumpToSection: string;
+      };
+      proTips: {
+        title: string;
+        tip1: string;
+        tip2: string;
+        tip3: string;
+        tip4: string;
+      };
+      floatingPanel: {
+        title: string;
+        showAll: string;
+        hidePanel: string;
+      };
+      submitButton: {
+        tooltip: string;
+      };
     };
   };
   checkData: {
@@ -486,6 +563,11 @@ export const translations: Record<Language, Translations> = {
         additionalInfo: "Additional Info",
       },
       formSections: "Form Sections",
+      progress: {
+        title: "Form Progress",
+        complete: "Complete",
+        sectionsComplete: "sections completed"
+      },
       employeeInfo: {
         title: "Employee Information",
         fullName: "Full Name",
@@ -643,6 +725,78 @@ export const translations: Record<Language, Translations> = {
         inspectorName: "Select or create inspector name...",
         otherNotes: "Enter any additional notes...",
       },
+      help: {
+        tooltip: "Form Help & Instructions",
+        title: "Form Help & Instructions",
+        description: "Learn how to fill the device check form and use keyboard shortcuts to work faster.",
+        about: {
+          title: "About This Form",
+          description1: "This form is used to record device check information for employees. It captures details about the device, operating system, specifications, condition, installed applications, and security status.",
+          description2: "Fill out all required fields (marked with *) and ensure accuracy for proper device tracking and compliance.",
+        },
+        howToFill: {
+          title: "How to Fill Form",
+          step1: {
+            title: "1. Employee Information",
+            description: "Select an employee from the autocomplete dropdown. Their information will display automatically. Choose the check date. Optionally, check \"Use Last Version\" to auto-fill with previous device check data.",
+          },
+          step2: {
+            title: "2. Device Details",
+            description: "Enter device type (PC/Laptop), ownership (company/personal), brand, model, and serial number. The brand field allows you to create new options if needed.",
+          },
+          step3: {
+            title: "3. Operating System",
+            description: "Specify the OS type (Windows/Linux/Mac), version, license status, and whether regular updates are enabled.",
+          },
+          step4: {
+            title: "4. Specifications",
+            description: "Enter RAM capacity, processor type, and storage information. You can add multiple storage entries (HDD/SSD) with different capacities by clicking the Add button.",
+          },
+          step5: {
+            title: "5. Device Condition",
+            description: "Assess the overall device suitability and provide condition details for battery, keyboard, touchpad, monitor, and WiFi. Use descriptive terms like \"Good\", \"Fair\", \"Needs Replacement\".",
+          },
+          step6: {
+            title: "6. Applications",
+            description: "List all work-related and non-work applications. For each application, specify the name, license type (Original/Pirated/Open Source/Unknown), and any notes.",
+          },
+          step7: {
+            title: "7. Security",
+            description: "Set antivirus status (Active/Inactive) and list installed antivirus software with license details. Set VPN status (Available/Not Available) and list VPN connections with license information.",
+          },
+          step8: {
+            title: "8. Additional Information",
+            description: "Indicate if device passwords are available, enter the inspector PIC name, and add any other notes. Press Enter in the notes field to submit the form quickly.",
+          },
+        },
+        keyboardShortcuts: {
+          title: "Keyboard Shortcuts",
+          nextField: "Move to next field",
+          prevField: "Move to previous field",
+          submitForm: "Submit form (in notes)",
+          closeModal: "Close modal",
+          newLine: "New line (in notes)",
+          jumpSection: "Jump to section",
+          saveForm: "Save form",
+          toggleHelp: "Toggle help",
+          jumpToSection: "Jump to section (Alt + 1-8)",
+        },
+        floatingPanel: {
+          title: "Keyboard Shortcuts",
+          showAll: "View all shortcuts",
+          hidePanel: "Hide panel",
+        },
+        submitButton: {
+          tooltip: "Press Ctrl/Cmd + S to save",
+        },
+        proTips: {
+          title: "Pro Tips",
+          tip1: "Use the sidebar navigation on large screens to quickly jump between form sections.",
+          tip2: "Creatable select dropdowns remember your entries for faster data entry next time.",
+          tip3: "The \"Use Last Version\" feature saves time by auto-filling with previous check data.",
+          tip4: "All dropdown selections are saved and become available for future use.",
+        },
+      },
     },
     checkData: {
       title: "Device Check Data",
@@ -776,8 +930,8 @@ export const translations: Record<Language, Translations> = {
     },
     createEmployee: {
       title: "Create New Employee",
-      description:
-        "Add a new employee to the system. This will allow you to create device checks for them.",
+        description:
+          "Add a new employee to the system. This will allow you to create device checks for them.",
       formTitle: "Employee Information",
       formDescription:
         "Fill in required fields marked with *. Contact information and status are optional.",
@@ -896,6 +1050,11 @@ export const translations: Record<Language, Translations> = {
         additionalInfo: "Info Tambahan",
       },
       formSections: "Bagian Formulir",
+      progress: {
+        title: "Progres Formulir",
+        complete: "Selesai",
+        sectionsComplete: "bagian selesai"
+      },
       employeeInfo: {
         title: "Informasi Karyawan",
         fullName: "Nama Lengkap",
@@ -1055,6 +1214,78 @@ export const translations: Record<Language, Translations> = {
         inspectorName: "Pilih atau buat nama pemeriksa...",
         otherNotes: "Masukkan catatan tambahan...",
       },
+      help: {
+        tooltip: "Bantuan & Instruksi Formulir",
+        title: "Bantuan & Instruksi Formulir",
+        description: "Pelajari cara mengisi formulir pengecekan perangkat dan gunakan pintasan keyboard untuk bekerja lebih cepat.",
+        about: {
+          title: "Tentang Formulir Ini",
+          description1: "Formulir ini digunakan untuk merekam informasi pengecekan perangkat karyawan. Ini menangkap detail tentang perangkat, sistem operasi, spesifikasi, kondisi, aplikasi yang diinstal, dan status keamanan.",
+          description2: "Isi semua bidang wajib (ditandai dengan *) dan pastikan akurasi untuk pelacakan perangkat dan kepatuhan yang tepat.",
+        },
+        howToFill: {
+          title: "Cara Mengisi Formulir",
+          step1: {
+            title: "1. Informasi Karyawan",
+            description: "Pilih karyawan dari dropdown autocomplete. Informasi mereka akan tampil secara otomatis. Pilih tanggal pengecekan. Opsional, centang \"Gunakan Versi Terakhir\" untuk mengisi otomatis dengan data pengecekan sebelumnya.",
+          },
+          step2: {
+            title: "2. Detail Perangkat",
+            description: "Masukkan tipe perangkat (PC/Laptop), kepemilikan (perusahaan/pribadi), merek, model, dan nomor seri. Bidang merek memungkinkan Anda membuat opsi baru jika diperlukan.",
+          },
+          step3: {
+            title: "3. Sistem Operasi",
+            description: "Tentukan tipe OS (Windows/Linux/Mac), versi, status lisensi, dan apakah update berkala diaktifkan.",
+          },
+          step4: {
+            title: "4. Spesifikasi",
+            description: "Masukkan kapasitas RAM, jenis prosesor, dan informasi penyimpanan. Anda dapat menambahkan beberapa entri penyimpanan (HDD/SSD) dengan kapasitas berbeda dengan mengklik tombol Tambah.",
+          },
+          step5: {
+            title: "5. Kondisi Perangkat",
+            description: "Tilai kesesuaian perangkat secara keseluruhan dan berikan detail kondisi untuk baterai, keyboard, touchpad, monitor, dan WiFi. Gunakan istilah deskriptif seperti \"Baik\", \"Cukup\", \"Perlu Penggantian\".",
+          },
+          step6: {
+            title: "6. Aplikasi",
+            description: "Daftarkan semua aplikasi kerja dan non-kerja. Untuk setiap aplikasi, tentukan nama, jenis lisensi (Original/Bajakan/Open Source/Tidak Diketahui), dan catatan apa pun.",
+          },
+          step7: {
+            title: "7. Keamanan",
+            description: "Tetapkan status antivirus (Aktif/Tidak Aktif) dan daftarkan perangkat lunak antivirus yang diinstal dengan detail lisensi. Tetapkan status VPN (Tersedia/Tidak Tersedia) dan daftarkan koneksi VPN dengan informasi lisensi.",
+          },
+          step8: {
+            title: "8. Informasi Tambahan",
+            description: "Indikasikan apakah password perangkat tersedia, masukkan nama PIC pemeriksa, dan tambahkan catatan lainnya. Tekan Enter di bidang catatan untuk mengirimkan formulir dengan cepat.",
+          },
+        },
+        keyboardShortcuts: {
+          title: "Pintasan Keyboard",
+          nextField: "Pindah ke bidang berikutnya",
+          prevField: "Pindah ke bidang sebelumnya",
+          submitForm: "Kirim formulir (di catatan)",
+          closeModal: "Tutup modal",
+          newLine: "Baris baru (di catatan)",
+          jumpSection: "Lompat ke bagian",
+          saveForm: "Simpan formulir",
+          toggleHelp: "Toggle bantuan",
+          jumpToSection: "Lompat ke bagian (Alt + 1-8)",
+        },
+        floatingPanel: {
+          title: "Pintasan Keyboard",
+          showAll: "Lihat semua pintasan",
+          hidePanel: "Sembunyikan panel",
+        },
+        submitButton: {
+          tooltip: "Tekan Ctrl/Cmd + S untuk menyimpan",
+        },
+        proTips: {
+          title: "Tips Pro",
+          tip1: "Gunakan navigasi sidebar pada layar besar untuk melompat cepat antar bagian formulir.",
+          tip2: "Dropdown yang bisa dibuat mengingat entri Anda untuk pengisian data yang lebih cepat lain kali.",
+          tip3: "Fitur \"Gunakan Versi Terakhir\" menghemat waktu dengan mengisi otomatis dengan data pengecekan sebelumnya.",
+          tip4: "Semua pilihan dropdown disimpan dan tersedia untuk penggunaan masa depan.",
+        },
+      },
     },
     checkData: {
       title: "Data Pengecekan Perangkat",
@@ -1191,8 +1422,8 @@ export const translations: Record<Language, Translations> = {
     },
     createEmployee: {
       title: "Tambah Karyawan Baru",
-      description:
-        "Tambahkan karyawan baru ke sistem. Ini akan memungkinkan Anda membuat pengecekan perangkat untuk mereka.",
+        description:
+          "Tambahkan karyawan baru ke sistem. Ini akan memungkinkan Anda membuat pengecekan perangkat untuk mereka.",
       formTitle: "Informasi Karyawan",
       formDescription:
         "Isi bidang wajib ditandai dengan *. Informasi kontak dan status adalah opsional.",

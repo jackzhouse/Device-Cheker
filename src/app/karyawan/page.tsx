@@ -221,29 +221,25 @@ export default function EmployeesPage() {
     <div className="space-y-6 m-3">
       {/* Page Header */}
       <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between">
-          <div className="flex flex-col gap-2">
-            <h1 className="text-3xl font-bold tracking-tight">{t('employee.title')}</h1>
-            <p className="text-muted-foreground">
-              {t('employee.description')}
-            </p>
-          </div>
-          <div className="flex gap-2">
-            <Button variant="outline" onClick={handleDownloadTemplate}>
-              <Download className="mr-2 h-4 w-4" />
-              Download Template
-            </Button>
-            <Button variant="outline" onClick={() => setImportModalOpen(true)}>
-              <FileSpreadsheet className="mr-2 h-4 w-4" />
-              Import Excel
-            </Button>
-            <Button asChild>
-              <Link href="/karyawan/new">
-                <UserPlus className="mr-2 h-4 w-4" />
-                {t('employee.addButton')}
-              </Link>
-            </Button>
-          </div>
+        <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('employee.title')}</h1>
+        <p className="text-muted-foreground text-sm sm:text-base">
+          {t('employee.description')}
+        </p>
+        <div className="flex flex-wrap gap-2 mt-2">
+          <Button variant="outline" size="sm" onClick={handleDownloadTemplate}>
+            <Download className="mr-2 h-4 w-4" />
+            Download
+          </Button>
+          <Button variant="outline" size="sm" onClick={() => setImportModalOpen(true)}>
+            <FileSpreadsheet className="mr-2 h-4 w-4" />
+            Import
+          </Button>
+          <Button asChild className="flex-1 sm:flex-none">
+            <Link href="/karyawan/new">
+              <UserPlus className="mr-2 h-4 w-4" />
+              {t('employee.addButton')}
+            </Link>
+          </Button>
         </div>
       </div>
 
@@ -307,7 +303,7 @@ export default function EmployeesPage() {
           </CardContent>
         </Card>
       ) : (
-        <div className="grid gap-4 md:grid-cols-2 lg:grid-cols-3 overflow-y-auto h-[60vh]">
+        <div className="grid gap-4 sm:grid-cols-2 lg:grid-cols-3">
           {filteredEmployees.map((employee) => (
             <EmployeeCard
               key={employee._id}
@@ -496,11 +492,11 @@ function EmployeeCard({
               <User className="h-6 w-6 text-primary" />
             </div>
             <div>
-              <CardTitle className="text-lg">{employee.fullName}</CardTitle>
-              <p className="text-sm text-muted-foreground">
+              <CardTitle className="text-base sm:text-lg">{employee.fullName}</CardTitle>
+              <p className="text-xs sm:text-sm text-muted-foreground">
                 {employee.position}
               </p>
-              <p className="text-xs text-muted-foreground">
+              <p className="text-[10px] sm:text-xs text-muted-foreground">
                 {t('employee.employeeId')}: {employee.employeeId}
               </p>
             </div>
@@ -511,7 +507,7 @@ function EmployeeCard({
       <CardContent>
         <div className="space-y-3 mb-4">
           {employee.department && (
-            <div className="flex items-center gap-2 text-sm">
+            <div className="flex items-center gap-2 text-xs sm:text-sm">
               <span className="text-muted-foreground">{t('employee.department')}:</span>
               <span className="font-medium">{employee.department}</span>
             </div>
@@ -528,10 +524,10 @@ function EmployeeCard({
           </div>
         </div>
 
-        <div className="flex gap-2">
+        <div className="flex gap-2 flex-wrap">
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" asChild>
+              <Button variant="outline" size="sm" className="flex-1 min-w-[40px]" asChild>
                 <Link href={`/data-pengecekan/${employee._id}`}>
                   <History className="h-4 w-4" />
                 </Link>
@@ -541,7 +537,7 @@ function EmployeeCard({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="outline" size="sm" className="flex-1" onClick={onEdit}>
+              <Button variant="outline" size="sm" className="flex-1 min-w-[40px]" onClick={onEdit}>
                 <Edit className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
@@ -549,7 +545,7 @@ function EmployeeCard({
           </Tooltip>
           <Tooltip>
             <TooltipTrigger asChild>
-              <Button variant="destructive" size="sm" className="flex-1" onClick={onDelete}>
+              <Button variant="destructive" size="sm" className="flex-1 min-w-[40px]" onClick={onDelete}>
                 <Trash2 className="h-4 w-4" />
               </Button>
             </TooltipTrigger>
