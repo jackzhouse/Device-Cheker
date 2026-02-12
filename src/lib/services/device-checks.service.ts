@@ -36,8 +36,6 @@ export interface DeviceCheck {
   };
   specification?: {
     ramCapacity?: string;
-    memoryType?: "HDD" | "SSD";
-    memoryCapacity?: string;
     processor?: string;
     storage?: Array<{
       type: "HDD" | "SSD";

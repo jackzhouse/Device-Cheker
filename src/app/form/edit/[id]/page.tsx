@@ -178,9 +178,8 @@ export default function EditFormPage() {
           operatingSystem: normalizedCheck.operatingSystem,
           specification: normalizedCheck.specification || {
             ramCapacity: '',
-            memoryType: 'hdd',
-            memoryCapacity: '',
             processor: '',
+            storage: [],
           },
           deviceCondition: normalizedCheck.deviceCondition,
           workApplications: normalizedCheck.workApplications,

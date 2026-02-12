@@ -62,6 +62,67 @@ function drawLabelValue(doc: jsPDF, label: string, value: string, x: number, y: 
 }
 
 /**
+ * Helper function to add footer to a page
+ */
+function addPageFooter(
+  doc: jsPDF,
+  pageWidth: number,
+  pageHeight: number,
+  leftMargin: number,
+  rightMargin: number
+) {
+  const footerY = pageHeight - 15;
+  doc.setFillColor(...COLORS.lightGray);
+  doc.rect(0, pageHeight - 20, pageWidth, 20, 'F');
+
+  doc.setTextColor(...COLORS.darkGray);
+  doc.setFontSize(8);
+  doc.setFont('helvetica', 'normal');
+  
+  const generatedTime = `Generated: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`;
+  doc.text(generatedTime, leftMargin, footerY);
+  
+  doc.text('Teknologi Kartu Indonesia - Device Checking System', pageWidth / 2, footerY, { align: 'center' });
+  
+  const pageCount = doc.getNumberOfPages();
+  // doc.text(`Page ${pageCount}`, pageWidth - rightMargin, footerY, { align: 'right' });
+}
+
+/**
+ * Helper function to check space availability and create new page if needed
+ * Returns the new yPos (either same or at top of new page)
+ */
+function checkAndAddPage(
+  doc: jsPDF,
+  currentYPos: number,
+  requiredSpace: number,
+  pageHeight: number,
+  bottomMargin: number,
+  topMargin: number,
+  pageWidth: number,
+  leftMargin: number,
+  rightMargin: number
+): { yPos: number; pageAdded: boolean } {
+  const availableSpace = pageHeight - bottomMargin - currentYPos;
+  
+  if (availableSpace < requiredSpace) {
+    // Add footer to current page
+    addPageFooter(doc, pageWidth, pageHeight, leftMargin, rightMargin);
+    
+    // Add new page
+    doc.addPage();
+    
+    // Add header bar to new page
+    doc.setFillColor(...COLORS.primaryDark);
+    doc.rect(0, 0, pageWidth, 20, 'F');
+    
+    return { yPos: topMargin + 20, pageAdded: true };
+  }
+  
+  return { yPos: currentYPos, pageAdded: false };
+}
+
+/**
  * Generate a PDF for a single device check with professional design
  */
 export async function generateDeviceCheckPDF(check: DeviceCheck) {
@@ -195,7 +256,11 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   
   yPos += 10;
 
-  // 4. Specifications & Device Condition (Side by Side)
+  // 4. Check if we need new page before Specifications (move to page 2)
+  let specResult = checkAndAddPage(doc, yPos, 80, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+  yPos = specResult.yPos;
+
+  // Specifications & Device Condition (Side by Side)
   const columnWidth = (contentWidth - 10) / 2;
   const leftColumnX = leftMargin;
   const rightColumnX = leftMargin + columnWidth + 10;
@@ -209,13 +274,15 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       drawLabelValue(doc, 'RAM', check.specification.ramCapacity, leftColumnX, yPos);
       yPos += 7;
     }
-    if (check.specification.memoryType) {
-      drawLabelValue(doc, 'Memory Type', check.specification.memoryType, leftColumnX, yPos);
-      yPos += 7;
-    }
-    if (check.specification.memoryCapacity) {
-      drawLabelValue(doc, 'Storage', check.specification.memoryCapacity, leftColumnX, yPos);
-      yPos += 7;
+    // Render storage array format
+    if (check.specification.storage && check.specification.storage.length > 0) {
+      check.specification.storage.forEach((item, index) => {
+        const storageLabel = check.specification!.storage!.length > 1 
+          ? `Storage ${index + 1}` 
+          : 'Storage';
+        drawLabelValue(doc, storageLabel, `${item.type} - ${item.size}`, leftColumnX, yPos);
+        yPos += 7;
+      });
     }
     if (check.specification.processor) {
       drawLabelValue(doc, 'Processor', check.specification.processor, leftColumnX, yPos);
@@ -223,56 +290,22 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     }
   }
 
-  // Overall Status (Right Column - Top)
-  doc.setTextColor(...COLORS.black);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Overall Status:', rightColumnX, yPos - 21);
-
-  const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable' 
-    ? COLORS.accentGreen 
-    : check.deviceCondition.deviceSuitability === 'Unsuitable' 
-    ? COLORS.red 
-    : COLORS.secondaryBlue;
-  
-  doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
-  doc.setFont('helvetica', 'normal');
-  doc.text(check.deviceCondition.deviceSuitability, rightColumnX + 40, yPos - 21);
-
-  // Device Condition (Right Column)
-  doc.setTextColor(...COLORS.black);
-  doc.setFontSize(10);
-  doc.setFont('helvetica', 'bold');
-  doc.text('Device Condition:', rightColumnX, yPos);
-
-  yPos += 7;
-  const conditions = [
-    { label: 'Battery', value: check.deviceCondition.batterySuitability },
-    { label: 'Keyboard', value: check.deviceCondition.keyboardCondition },
-    { label: 'Touchpad', value: check.deviceCondition.touchpadCondition },
-    { label: 'Monitor', value: check.deviceCondition.monitorCondition },
-    { label: 'Wi-Fi', value: check.deviceCondition.wifiCondition },
-  ];
-
-  conditions.forEach((condition) => {
-    const isGood = condition.value.toLowerCase().includes('good') || condition.value.toLowerCase().includes('suitable');
-    drawStatusCircle(doc, rightColumnX, yPos + 1, isGood);
-    
-    doc.setTextColor(...COLORS.darkGray);
-    doc.setFontSize(10);
-    doc.setFont('helvetica', 'normal');
-    doc.text(`${condition.label}: ${condition.value}`, rightColumnX + 5, yPos + 3);
-    yPos += 7;
-  });
-
   yPos += 8;
 
   // 5. Work Applications
   if (check.workApplications && check.workApplications.length > 0) {
+    // Check if we need a new page (estimate ~40mm for section)
+    const result = checkAndAddPage(doc, yPos, 40, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = result.yPos;
+    
     yPos = drawSectionHeader(doc, 'Work Applications', yPos, leftMargin, pageWidth);
     yPos += 7;
 
     check.workApplications.forEach((app) => {
+      // Check space for each app (~15mm)
+      const spaceResult = checkAndAddPage(doc, yPos, 15, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+      yPos = spaceResult.yPos;
+      
       const licenseColor = app.license === 'Original' ? COLORS.accentGreen : 
                           app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
       
@@ -295,15 +328,23 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
         yPos += 5;
       }
     });
-    yPos += 8;
+    yPos += 12;
   }
 
-  // 6. Non-Work Applications
+  // 6. Non-Work Applications - Add buffer space to prevent overlap
   if (check.nonWorkApplications && check.nonWorkApplications.length > 0) {
+    // Check if we need a new page (estimate ~60mm for section with buffer)
+    const result = checkAndAddPage(doc, yPos, 60, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = result.yPos;
+    
     yPos = drawSectionHeader(doc, 'Non-Work Applications', yPos, leftMargin, pageWidth);
     yPos += 7;
 
     check.nonWorkApplications.forEach((app) => {
+      // Check space for each app (~15mm)
+      const spaceResult = checkAndAddPage(doc, yPos, 15, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+      yPos = spaceResult.yPos;
+      
       const licenseColor = app.license === 'Original' ? COLORS.accentGreen : 
                           app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
       
@@ -330,6 +371,10 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   }
 
   // 7. Security
+  // Check if we need a new page (estimate ~50mm for section)
+  let securityResult = checkAndAddPage(doc, yPos, 50, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+  yPos = securityResult.yPos;
+  
   yPos = drawSectionHeader(doc, 'Security', yPos, leftMargin, pageWidth);
   yPos += 7;
 
@@ -347,6 +392,10 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   if (check.security.antivirus.list && check.security.antivirus.list.length > 0) {
     check.security.antivirus.list.forEach((antivirus) => {
+      // Check space (~5mm per item)
+      const avResult = checkAndAddPage(doc, yPos, 8, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+      yPos = avResult.yPos;
+      
       doc.setTextColor(...COLORS.darkGray);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -370,6 +419,10 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   if (check.security.vpn.list && check.security.vpn.list.length > 0) {
     check.security.vpn.list.forEach((vpn) => {
+      // Check space (~5mm per item)
+      const vpnResult = checkAndAddPage(doc, yPos, 8, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+      yPos = vpnResult.yPos;
+      
       doc.setTextColor(...COLORS.darkGray);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -380,6 +433,10 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   yPos += 8;
 
   // 8. Additional Information
+  // Check if we need a new page (estimate ~40mm for section)
+  let infoResult = checkAndAddPage(doc, yPos, 40, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+  yPos = infoResult.yPos;
+  
   yPos = drawSectionHeader(doc, 'Additional Information', yPos, leftMargin, pageWidth);
   yPos += 7;
 
@@ -397,29 +454,92 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
     const splitText = doc.splitTextToSize(check.additionalInfo.otherNotes, contentWidth - 10);
+    
+    // Check space for notes
+    const notesHeight = splitText.length * 4 + 5;
+    let notesResult = checkAndAddPage(doc, yPos, notesHeight, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = notesResult.yPos;
+    
     doc.text(splitText, leftMargin + 10, yPos);
-    yPos += splitText.length * 4 + 5;
+    yPos += notesHeight;
   }
 
   if (check.additionalInfo.inspectorPICName) {
+    // Check space for inspector (~10mm)
+    let inspectorResult = checkAndAddPage(doc, yPos, 10, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = inspectorResult.yPos;
+    
     drawLabelValue(doc, 'Inspector', check.additionalInfo.inspectorPICName, leftMargin, yPos);
     yPos += 7;
   }
 
-  // ============ FOOTER SECTION (20mm height) ============
-  const footerY = pageHeight - 15;
-  doc.setFillColor(...COLORS.lightGray);
-  doc.rect(0, pageHeight - 20, pageWidth, 20, 'F');
+  yPos += 12;
 
-  doc.setTextColor(...COLORS.darkGray);
-  doc.setFontSize(8);
-  doc.setFont('helvetica', 'normal');
+  // 9. Overall Status and Device Condition - Moved to last page
+  let statusResult = checkAndAddPage(doc, yPos, 70, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+  yPos = statusResult.yPos;
+
+  yPos = drawSectionHeader(doc, 'Overall Status', yPos, leftMargin, pageWidth);
+  yPos += 7;
+
+  const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable' 
+    ? COLORS.accentGreen 
+    : check.deviceCondition.deviceSuitability === 'Unsuitable' 
+    ? COLORS.red 
+    : COLORS.secondaryBlue;
   
-  const generatedTime = `Generated: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`;
-  doc.text(generatedTime, leftMargin, footerY);
+  doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
+  doc.setFontSize(11);
+  doc.setFont('helvetica', 'bold');
+  doc.text(check.deviceCondition.deviceSuitability, leftMargin, yPos);
+  yPos += 10;
+
+  // Device Condition Details
+  yPos = drawSectionHeader(doc, 'Device Condition Details', yPos, leftMargin, pageWidth);
+  yPos += 7;
+
+  const conditions = [
+    { label: 'Battery', value: check.deviceCondition.batterySuitability },
+    { label: 'Keyboard', value: check.deviceCondition.keyboardCondition },
+    { label: 'Touchpad', value: check.deviceCondition.touchpadCondition },
+    { label: 'Monitor', value: check.deviceCondition.monitorCondition },
+    { label: 'Wi-Fi', value: check.deviceCondition.wifiCondition },
+  ];
+
+  conditions.forEach((condition) => {
+    // Check space for each condition (~8mm)
+    let conditionResult = checkAndAddPage(doc, yPos, 8, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = conditionResult.yPos;
+
+    const isGood = condition.value.toLowerCase().includes('good') || condition.value.toLowerCase().includes('suitable');
+    drawStatusCircle(doc, leftMargin + 5, yPos + 1, isGood);
+    
+    doc.setTextColor(...COLORS.black);
+    doc.setFontSize(10);
+    doc.setFont('helvetica', 'bold');
+    doc.text(`${condition.label}:`, leftMargin + 10, yPos);
+    
+    doc.setTextColor(...COLORS.darkGray);
+    doc.setFont('helvetica', 'normal');
+    doc.text(condition.value, leftMargin + 50, yPos);
+    yPos += 7;
+  });
+
+  // Add footer to current page
+  addPageFooter(doc, pageWidth, pageHeight, leftMargin, rightMargin);
   
-  doc.text('Teknologi Kartu Indonesia - Device Checking System', pageWidth / 2, footerY, { align: 'center' });
-  doc.text('Page 1', pageWidth - rightMargin, footerY, { align: 'right' });
+  // Update all page numbers
+  const totalPages = doc.getNumberOfPages();
+  for (let i = 1; i <= totalPages; i++) {
+    doc.setPage(i);
+    doc.setTextColor(...COLORS.darkGray);
+    doc.setFontSize(8);
+    doc.setFont('helvetica', 'normal');
+    
+    // Draw page numbers at bottom right
+    const footerY = pageHeight - 15;
+    doc.text(`Page ${i} of ${totalPages}`, pageWidth - rightMargin, footerY, { align: 'right' });
+  }
 
   // Save the PDF
   const fileName = `${check.employeeSnapshot.fullName.replace(/\s+/g, '_')}_v${check.version || 1}_device_check.pdf`;

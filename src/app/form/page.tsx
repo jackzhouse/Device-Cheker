@@ -365,19 +365,13 @@ function FormContent() {
           while (storageFields.length > 0) {
             removeStorage(0);
           }
-          // Handle new storage array format or convert old format
+          // Populate storage array
           if (lastCheck.specification?.storage && lastCheck.specification.storage.length > 0) {
             lastCheck.specification.storage.forEach((item: any) => {
               appendStorage({
                 type: normalizeEnumValue(item.type || 'hdd'),
                 size: item.size || '',
               });
-            });
-          } else if (lastCheck.specification?.memoryType || lastCheck.specification?.memoryCapacity) {
-            // Convert old format to new array format
-            appendStorage({
-              type: normalizeEnumValue(lastCheck.specification?.memoryType || 'hdd'),
-              size: lastCheck.specification?.memoryCapacity || '',
             });
           }
 
