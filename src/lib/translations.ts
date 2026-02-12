@@ -154,6 +154,7 @@ export interface Translations {
         notAvailable: string;
       };
       otherNotesPlaceholder: string;
+      pressEnter:String;
     };
     validation: {
       employeeRequired: string;
@@ -484,6 +485,7 @@ export const translations: Record<Language, Translations> = {
           notAvailable: 'Not Available',
         },
         otherNotesPlaceholder: 'Enter any additional notes...',
+        pressEnter:'Press Enter to save, Shift+Enter for new line'
       },
       validation: {
         employeeRequired: 'Please select an employee',
@@ -812,6 +814,7 @@ export const translations: Record<Language, Translations> = {
           notAvailable: 'Tidak Tersedia',
         },
         otherNotesPlaceholder: 'Masukkan catatan tambahan...',
+        pressEnter :'Tekan Enter untuk menyimpan, tekan Shift+Enter untuk membuat baris baru'
       },
       validation: {
         employeeRequired: 'Silakan pilih karyawan',

@@ -936,7 +936,7 @@ export default function EditFormPage() {
                   placeholder={t('form.placeholders.otherNotes')}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                  Press Enter to save, Shift+Enter for new line
+                   {t('form.additionalInfo.pressEnter')}
                 </p>
               </div>
             </CardContent>
