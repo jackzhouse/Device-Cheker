@@ -3,6 +3,7 @@
 import * as React from 'react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import { Suspense } from 'react';
+import { unstable_batchedUpdates } from 'react-dom';
 import { createDeviceCheck, getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-checks.service';
 import { normalizeDataForSubmission } from '@/lib/utils/data-normalizer';
 import EmployeeAutocomplete from '@/components/EmployeeAutocomplete';
@@ -345,103 +346,107 @@ function FormContent() {
             return value.toLowerCase().replace(/\s+/g, '');
           };
 
-          // Populate device details
-          setValue('deviceDetail.deviceType', normalizeEnumValue(lastCheck.deviceDetail?.deviceType || 'laptop'));
-          setValue('deviceDetail.ownership', normalizeEnumValue(lastCheck.deviceDetail?.ownership || 'company'));
-          setValue('deviceDetail.deviceBrand', lastCheck.deviceDetail?.deviceBrand || '');
-          setValue('deviceDetail.deviceModel', lastCheck.deviceDetail?.deviceModel || '');
-          setValue('deviceDetail.serialNumber', lastCheck.deviceDetail?.serialNumber || '');
+          // Batch all form updates together for better performance
+          unstable_batchedUpdates(() => {
+            // Populate device details
+            setValue('deviceDetail.deviceType', normalizeEnumValue(lastCheck.deviceDetail?.deviceType || 'laptop'));
+            setValue('deviceDetail.ownership', normalizeEnumValue(lastCheck.deviceDetail?.ownership || 'company'));
+            setValue('deviceDetail.deviceBrand', lastCheck.deviceDetail?.deviceBrand || '');
+            setValue('deviceDetail.deviceModel', lastCheck.deviceDetail?.deviceModel || '');
+            setValue('deviceDetail.serialNumber', lastCheck.deviceDetail?.serialNumber || '');
 
-          // Populate operating system
-          setValue('operatingSystem.osType', normalizeEnumValue(lastCheck.operatingSystem?.osType || 'windows'));
-          setValue('operatingSystem.osVersion', lastCheck.operatingSystem?.osVersion || '');
-          setValue('operatingSystem.osLicense', normalizeEnumValue(lastCheck.operatingSystem?.osLicense || 'original'));
-          setValue('operatingSystem.osRegularUpdate', lastCheck.operatingSystem?.osRegularUpdate ?? true);
+            // Populate operating system
+            setValue('operatingSystem.osType', normalizeEnumValue(lastCheck.operatingSystem?.osType || 'windows'));
+            setValue('operatingSystem.osVersion', lastCheck.operatingSystem?.osVersion || '');
+            setValue('operatingSystem.osLicense', normalizeEnumValue(lastCheck.operatingSystem?.osLicense || 'original'));
+            setValue('operatingSystem.osRegularUpdate', lastCheck.operatingSystem?.osRegularUpdate ?? true);
 
-          // Populate specification
-          setValue('specification.ramCapacity', lastCheck.specification?.ramCapacity || '');
-          setValue('specification.processor', lastCheck.specification?.processor || '');
+            // Populate specification
+            setValue('specification.ramCapacity', lastCheck.specification?.ramCapacity || '');
+            setValue('specification.processor', lastCheck.specification?.processor || '');
 
-          // Populate storage array
-          while (storageFields.length > 0) {
-            removeStorage(0);
-          }
-          // Populate storage array
-          if (lastCheck.specification?.storage && lastCheck.specification.storage.length > 0) {
-            lastCheck.specification.storage.forEach((item: any) => {
-              appendStorage({
-                type: normalizeEnumValue(item.type || 'hdd'),
-                size: item.size || '',
-              });
+            // Populate storage array efficiently
+            const storageToSet = (lastCheck.specification?.storage || []).map((item: any) => ({
+              type: normalizeEnumValue(item.type || 'hdd'),
+              size: item.size || '',
+            }));
+
+            // Clear old storage items
+            while (storageFields.length > 0) {
+              removeStorage(storageFields.length - 1);
+            }
+            // Add new storage items
+            storageToSet.forEach((item) => {
+              appendStorage(item);
             });
-          }
 
-          // Populate device condition
-          setValue('deviceCondition.deviceSuitability', normalizeEnumValue(lastCheck.deviceCondition?.deviceSuitability || 'suitable'));
-          setValue('deviceCondition.batterySuitability', lastCheck.deviceCondition?.batterySuitability || '');
-          setValue('deviceCondition.keyboardCondition', lastCheck.deviceCondition?.keyboardCondition || '');
-          setValue('deviceCondition.touchpadCondition', lastCheck.deviceCondition?.touchpadCondition || '');
-          setValue('deviceCondition.monitorCondition', lastCheck.deviceCondition?.monitorCondition || '');
-          setValue('deviceCondition.wifiCondition', lastCheck.deviceCondition?.wifiCondition || '');
+            // Populate device condition
+            setValue('deviceCondition.deviceSuitability', normalizeEnumValue(lastCheck.deviceCondition?.deviceSuitability || 'suitable'));
+            setValue('deviceCondition.batterySuitability', lastCheck.deviceCondition?.batterySuitability || '');
+            setValue('deviceCondition.keyboardCondition', lastCheck.deviceCondition?.keyboardCondition || '');
+            setValue('deviceCondition.touchpadCondition', lastCheck.deviceCondition?.touchpadCondition || '');
+            setValue('deviceCondition.monitorCondition', lastCheck.deviceCondition?.monitorCondition || '');
+            setValue('deviceCondition.wifiCondition', lastCheck.deviceCondition?.wifiCondition || '');
 
-          // Populate work applications
-          if (lastCheck.workApplications && lastCheck.workApplications.length > 0) {
-            replaceWorkApp(
-              lastCheck.workApplications.map((app: any) => ({
-                applicationName: app.applicationName || '',
-                license: normalizeEnumValue(app.license || 'original'),
-                notes: app.notes || '',
-              }))
-            );
-          } else {
-            replaceWorkApp([]);
-          }
+            // Populate work applications
+            if (lastCheck.workApplications && lastCheck.workApplications.length > 0) {
+              replaceWorkApp(
+                lastCheck.workApplications.map((app: any) => ({
+                  applicationName: app.applicationName || '',
+                  license: normalizeEnumValue(app.license || 'original'),
+                  notes: app.notes || '',
+                }))
+              );
+            } else {
+              replaceWorkApp([]);
+            }
 
-          // Populate non-work applications
-          if (lastCheck.nonWorkApplications && lastCheck.nonWorkApplications.length > 0) {
-            replaceNonWorkApp(
-              lastCheck.nonWorkApplications.map((app: any) => ({
-                applicationName: app.applicationName || '',
-                license: normalizeEnumValue(app.license || 'original'),
-                notes: app.notes || '',
-              }))
-            );
-          } else {
-            replaceNonWorkApp([]);
-          }
+            // Populate non-work applications
+            if (lastCheck.nonWorkApplications && lastCheck.nonWorkApplications.length > 0) {
+              replaceNonWorkApp(
+                lastCheck.nonWorkApplications.map((app: any) => ({
+                  applicationName: app.applicationName || '',
+                  license: normalizeEnumValue(app.license || 'original'),
+                  notes: app.notes || '',
+                }))
+              );
+            } else {
+              replaceNonWorkApp([]);
+            }
 
-          // Populate security - antivirus
-          setValue('security.antivirus.status', normalizeEnumValue(lastCheck.security?.antivirus?.status || 'active'));
-          if (lastCheck.security?.antivirus?.list && lastCheck.security.antivirus.list.length > 0) {
-            replaceAntivirus(
-              lastCheck.security.antivirus.list.map((app: any) => ({
-                applicationName: app.applicationName || '',
-                license: normalizeEnumValue(app.license || 'original'),
-                notes: app.notes || '',
-              }))
-            );
-          } else {
-            replaceAntivirus([]);
-          }
+            // Populate security - antivirus
+            setValue('security.antivirus.status', normalizeEnumValue(lastCheck.security?.antivirus?.status || 'active'));
+            if (lastCheck.security?.antivirus?.list && lastCheck.security.antivirus.list.length > 0) {
+              replaceAntivirus(
+                lastCheck.security.antivirus.list.map((app: any) => ({
+                  applicationName: app.applicationName || '',
+                  license: normalizeEnumValue(app.license || 'original'),
+                  notes: app.notes || '',
+                }))
+              );
+            } else {
+              replaceAntivirus([]);
+            }
 
-          // Populate security - vpn
-          setValue('security.vpn.status', normalizeEnumValue(lastCheck.security?.vpn?.status || 'available'));
-          if (lastCheck.security?.vpn?.list && lastCheck.security.vpn.list.length > 0) {
-            replaceVpn(
-              lastCheck.security.vpn.list.map((vpn: any) => ({
-                vpnName: vpn.vpnName || '',
-                license: normalizeEnumValue(vpn.license || 'original'),
-                notes: vpn.notes || '',
-              }))
-            );
-          } else {
-            replaceVpn([]);
-          }
+            // Populate security - vpn
+            setValue('security.vpn.status', normalizeEnumValue(lastCheck.security?.vpn?.status || 'available'));
+            if (lastCheck.security?.vpn?.list && lastCheck.security.vpn.list.length > 0) {
+              replaceVpn(
+                lastCheck.security.vpn.list.map((vpn: any) => ({
+                  vpnName: vpn.vpnName || '',
+                  license: normalizeEnumValue(vpn.license || 'original'),
+                  notes: vpn.notes || '',
+                }))
+              );
+            } else {
+              replaceVpn([]);
+            }
 
-          // Populate additional info
-          setValue('additionalInfo.passwordUsage', normalizeEnumValue(lastCheck.additionalInfo?.passwordUsage || 'available'));
-          setValue('additionalInfo.inspectorPICName', lastCheck.additionalInfo?.inspectorPICName || '');
-          setValue('additionalInfo.otherNotes', lastCheck.additionalInfo?.otherNotes || '');
+            // Populate additional info
+            setValue('additionalInfo.passwordUsage', normalizeEnumValue(lastCheck.additionalInfo?.passwordUsage || 'available'));
+            setValue('additionalInfo.inspectorPICName', lastCheck.additionalInfo?.inspectorPICName || '');
+            setValue('additionalInfo.otherNotes', lastCheck.additionalInfo?.otherNotes || '');
+          });
 
           toast.success(t('form.employeeInfo.lastVersionLoaded'));
         } else {
