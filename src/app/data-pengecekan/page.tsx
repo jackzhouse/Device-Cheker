@@ -133,8 +133,8 @@ export default function CheckDataPage() {
       check.deviceDetail.deviceBrand.toLowerCase().includes(searchTerm.toLowerCase()) ||
       check.deviceDetail.deviceModel.toLowerCase().includes(searchTerm.toLowerCase());
 
-    const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability === filters.suitability;
-    const matchesOwnership = !filters.ownership || check.deviceDetail.ownership === filters.ownership;
+    const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability?.toLowerCase() === filters.suitability?.toLowerCase();
+    const matchesOwnership = !filters.ownership || check.deviceDetail.ownership?.toLowerCase() === filters.ownership?.toLowerCase();
 
     return matchesSearch && matchesSuitability && matchesOwnership;
   });
@@ -196,8 +196,8 @@ export default function CheckDataPage() {
             >
               <option value="">{t('checkData.filters.allConditions')}</option>
               <option value="suitable">{t('checkData.suitability.suitable')}</option>
-              <option value="limitedSuitability">{t('checkData.suitability.limitedSuitability')}</option>
-              <option value="needsRepair">{t('checkData.suitability.needsRepair')}</option>
+              <option value="limited Suitability">{t('checkData.suitability.limitedSuitability')}</option>
+              <option value="needs Repair">{t('checkData.suitability.needsRepair')}</option>
               <option value="unsuitable">{t('checkData.suitability.unsuitable')}</option>
             </select>
             <select
@@ -243,7 +243,7 @@ export default function CheckDataPage() {
         </Card>
       ) : groupByEmployee ? (
         // Grouped View
-        <div className="space-y-6">
+        <div className="space-y-6 overflow-y-auto h-[50vh]">
           {groupedChecks.map(({ employeeId, checks: employeeChecks }) => {
             const firstCheck = employeeChecks[0];
             const employee = firstCheck.employeeSnapshot;

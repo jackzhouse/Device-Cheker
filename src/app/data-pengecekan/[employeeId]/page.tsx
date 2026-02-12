@@ -220,7 +220,7 @@ export default function EmployeeHistoryPage() {
   const { employee, checks, summary } = data;
 
   return (
-    <div className="container py-8">
+    <div className="container">
       {/* Back Button */}
       <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
         <ArrowLeft className="h-4 w-4 mr-2" />
@@ -305,7 +305,7 @@ export default function EmployeeHistoryPage() {
           {checks.length === 0 ? (
             <p className="text-center py-12 text-muted-foreground">{t('checkData.noChecks')}</p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-6 overflow-y-auto h-[33vh]">
               {checks.map((check, index) => (
                 <div key={check._id} className="relative pl-8 pb-6 border-l-2 border-muted">
                   {/* Timeline Dot */}

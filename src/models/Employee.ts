@@ -33,7 +33,6 @@ const EmployeeSchema = new Schema<IEmployee>(
     },
     lastName: {
       type: String,
-      required: [true, 'Last name is required'],
       trim: true,
     },
     fullName: {
