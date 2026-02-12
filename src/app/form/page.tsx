@@ -239,6 +239,7 @@ function FormContent() {
 
   // Handle employee selection
   const handleEmployeeSelect = async (employeeId: string) => {
+    setUseLastVersion(false)
     setValue('employeeId', employeeId);
 
     try {
