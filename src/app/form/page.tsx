@@ -13,7 +13,7 @@ import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
-import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar } from 'lucide-react';
+import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
@@ -148,24 +148,28 @@ function FormContent() {
     fields: workAppFields,
     append: appendWorkApp,
     remove: removeWorkApp,
+    replace: replaceWorkApp,
   } = useFieldArray({ control, name: 'workApplications' });
 
   const {
     fields: nonWorkAppFields,
     append: appendNonWorkApp,
     remove: removeNonWorkApp,
+    replace: replaceNonWorkApp,
   } = useFieldArray({ control, name: 'nonWorkApplications' });
 
   const {
     fields: antivirusFields,
     append: appendAntivirus,
     remove: removeAntivirus,
+    replace: replaceAntivirus,
   } = useFieldArray({ control, name: 'security.antivirus.list' });
 
   const {
     fields: vpnFields,
     append: appendVpn,
     remove: removeVpn,
+    replace: replaceVpn,
   } = useFieldArray({ control, name: 'security.vpn.list' });
 
   const {
@@ -386,63 +390,57 @@ function FormContent() {
           setValue('deviceCondition.wifiCondition', lastCheck.deviceCondition?.wifiCondition || '');
 
           // Populate work applications
-          // Clear existing fields first
-          while (workAppFields.length > 0) {
-            removeWorkApp(0);
-          }
-          // Add new fields from last check
           if (lastCheck.workApplications && lastCheck.workApplications.length > 0) {
-            lastCheck.workApplications.forEach((app: any) => {
-              appendWorkApp({
+            replaceWorkApp(
+              lastCheck.workApplications.map((app: any) => ({
                 applicationName: app.applicationName || '',
                 license: normalizeEnumValue(app.license || 'original'),
                 notes: app.notes || '',
-              });
-            });
+              }))
+            );
+          } else {
+            replaceWorkApp([]);
           }
 
           // Populate non-work applications
-          while (nonWorkAppFields.length > 0) {
-            removeNonWorkApp(0);
-          }
           if (lastCheck.nonWorkApplications && lastCheck.nonWorkApplications.length > 0) {
-            lastCheck.nonWorkApplications.forEach((app: any) => {
-              appendNonWorkApp({
+            replaceNonWorkApp(
+              lastCheck.nonWorkApplications.map((app: any) => ({
                 applicationName: app.applicationName || '',
                 license: normalizeEnumValue(app.license || 'original'),
                 notes: app.notes || '',
-              });
-            });
+              }))
+            );
+          } else {
+            replaceNonWorkApp([]);
           }
 
           // Populate security - antivirus
           setValue('security.antivirus.status', normalizeEnumValue(lastCheck.security?.antivirus?.status || 'active'));
-          while (antivirusFields.length > 0) {
-            removeAntivirus(0);
-          }
           if (lastCheck.security?.antivirus?.list && lastCheck.security.antivirus.list.length > 0) {
-            lastCheck.security.antivirus.list.forEach((app: any) => {
-              appendAntivirus({
+            replaceAntivirus(
+              lastCheck.security.antivirus.list.map((app: any) => ({
                 applicationName: app.applicationName || '',
                 license: normalizeEnumValue(app.license || 'original'),
                 notes: app.notes || '',
-              });
-            });
+              }))
+            );
+          } else {
+            replaceAntivirus([]);
           }
 
           // Populate security - vpn
           setValue('security.vpn.status', normalizeEnumValue(lastCheck.security?.vpn?.status || 'available'));
-          while (vpnFields.length > 0) {
-            removeVpn(0);
-          }
           if (lastCheck.security?.vpn?.list && lastCheck.security.vpn.list.length > 0) {
-            lastCheck.security.vpn.list.forEach((vpn: any) => {
-              appendVpn({
+            replaceVpn(
+              lastCheck.security.vpn.list.map((vpn: any) => ({
                 vpnName: vpn.vpnName || '',
                 license: normalizeEnumValue(vpn.license || 'original'),
                 notes: vpn.notes || '',
-              });
-            });
+              }))
+            );
+          } else {
+            replaceVpn([]);
           }
 
           // Populate additional info
@@ -500,7 +498,20 @@ function FormContent() {
   };
 
   return (
-    <div className="space-y-6">
+    <div className="space-y-6 relative">
+      {/* Loading Overlay */}
+      {loadingLastVersion && (
+        <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
+          <div className="bg-card border rounded-lg p-8 shadow-lg flex flex-col items-center gap-4">
+            <Loader2 className="h-12 w-12 animate-spin text-primary" />
+            <p className="text-lg font-medium">{t('form.employeeInfo.loadingLastVersion')}</p>
+            <p className="text-sm text-muted-foreground">
+              {t('form.employeeInfo.pleaseWait')}
+            </p>
+          </div>
+        </div>
+      )}
+
       {/* Page Header */}
       <div className="flex flex-col gap-2">
         <h1 className="text-3xl font-bold tracking-tight">{t('form.title')}</h1>
