@@ -51,6 +51,7 @@ export interface Translations {
   header: {
     title: string;
     form: string;
+    dashboard: string;
     checkData: string;
     employeeData: string;
     toggleTheme: string;
@@ -305,6 +306,46 @@ export interface Translations {
     noChecks: string;
     totalChecks: string;
   };
+  dashboard: {
+    title: string;
+    description: string;
+    timeRange: {
+      all: string;
+      last30Days: string;
+      last6Months: string;
+      last1Year: string;
+    };
+    summary: {
+      totalChecks: string;
+      totalEmployees: string;
+      totalPCs: string;
+      totalLaptops: string;
+      companyOwned: string;
+      personalOwned: string;
+      urgentDevices: string;
+    };
+    charts: {
+      deviceType: string;
+      ownership: string;
+      suitability: string;
+      osType: string;
+      osLicense: string;
+      antivirus: string;
+      vpn: string;
+      trendsOverTime: string;
+      departmentBreakdown: string;
+    };
+    urgentDevices: {
+      title: string;
+      noUrgent: string;
+      viewDetails: string;
+      needsRepair: string;
+      unsuitable: string;
+    };
+    toast: {
+      fetchFailed: string;
+    };
+  };
   employeeHistory: {
     title: string;
     fetchFailed: string;
@@ -418,6 +459,7 @@ export const translations: Record<Language, Translations> = {
     header: {
       title: "Device Checking System",
       form: "Form",
+      dashboard: "Dashboard",
       checkData: "Check Data",
       employeeData: "Employee Data",
       toggleTheme: "Toggle theme",
@@ -672,6 +714,46 @@ export const translations: Record<Language, Translations> = {
       noChecks: "No device checks found for this employee",
       totalChecks: "Total Checks",
     },
+    dashboard: {
+      title: "Device Checking Statistics",
+      description: "Overview of device checking data and trends",
+      timeRange: {
+        all: "All Time",
+        last30Days: "Last 30 Days",
+        last6Months: "Last 6 Months",
+        last1Year: "Last 1 Year",
+      },
+      summary: {
+        totalChecks: "Total Checks",
+        totalEmployees: "Total Employees",
+        totalPCs: "Total PCs",
+        totalLaptops: "Total Laptops",
+        companyOwned: "Company Owned",
+        personalOwned: "Personal Owned",
+        urgentDevices: "Urgent Devices",
+      },
+      charts: {
+        deviceType: "Device Type Distribution",
+        ownership: "Device Ownership",
+        suitability: "Device Suitability",
+        osType: "Operating System Distribution",
+        osLicense: "OS License Status",
+        antivirus: "Antivirus Status",
+        vpn: "VPN Status",
+        trendsOverTime: "Checks Over Time",
+        departmentBreakdown: "Department Breakdown",
+      },
+      urgentDevices: {
+        title: "⚠️ Urgent Devices",
+        noUrgent: "No urgent devices found",
+        viewDetails: "View Details",
+        needsRepair: "Needs Repair",
+        unsuitable: "Unsuitable",
+      },
+      toast: {
+        fetchFailed: "Failed to fetch statistics",
+      },
+    },
     employeeHistory: {
       title: "Employee History",
       fetchFailed: "Failed to fetch employee history",
@@ -785,6 +867,7 @@ export const translations: Record<Language, Translations> = {
     header: {
       title: "Sistem Pengecekan Perangkat",
       form: "Formulir",
+      dashboard: "Dashboard",
       checkData: "Data Pengecekan",
       employeeData: "Data Karyawan",
       toggleTheme: "Ganti tema",
@@ -1042,6 +1125,46 @@ export const translations: Record<Language, Translations> = {
       deviceChecks: "Pengecekan Perangkat",
       noChecks: "Tidak ada pengecekan perangkat ditemukan untuk karyawan ini",
       totalChecks: "Total Pengecekan",
+    },
+    dashboard: {
+      title: "Statistik Pengecekan Perangkat",
+      description: "Ringkasan data pengecekan perangkat dan tren",
+      timeRange: {
+        all: "Semua Waktu",
+        last30Days: "30 Hari Terakhir",
+        last6Months: "6 Bulan Terakhir",
+        last1Year: "1 Tahun Terakhir",
+      },
+      summary: {
+        totalChecks: "Total Pengecekan",
+        totalEmployees: "Total Karyawan",
+        totalPCs: "Total PC",
+        totalLaptops: "Total Laptop",
+        companyOwned: "Dimiliki Perusahaan",
+        personalOwned: "Dimiliki Pribadi",
+        urgentDevices: "Perangkat Urgent",
+      },
+      charts: {
+        deviceType: "Distribusi Tipe Perangkat",
+        ownership: "Kepemilikan Perangkat",
+        suitability: "Kesesuaian Perangkat",
+        osType: "Distribusi Sistem Operasi",
+        osLicense: "Status Lisensi OS",
+        antivirus: "Status Antivirus",
+        vpn: "Status VPN",
+        trendsOverTime: "Pengecekan Sepanjang Waktu",
+        departmentBreakdown: "Ringkasan Departemen",
+      },
+      urgentDevices: {
+        title: "⚠️ Perangkat Urgent",
+        noUrgent: "Tidak ada perangkat urgent ditemukan",
+        viewDetails: "Lihat Detail",
+        needsRepair: "Perlu Perbaikan",
+        unsuitable: "Tidak Sesuai",
+      },
+      toast: {
+        fetchFailed: "Gagal mengambil statistik",
+      },
     },
     employeeHistory: {
       title: "Riwayat Karyawan",
