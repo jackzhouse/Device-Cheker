@@ -240,7 +240,55 @@ function FormContent() {
   // Handle employee selection
   const handleEmployeeSelect = async (employeeId: string) => {
     setUseLastVersion(false)
-    setValue('employeeId', employeeId);
+
+    // Reset form to default values for new employee
+    reset({
+      employeeId: employeeId,
+      checkDate: new Date().toISOString().split('T')[0],
+      deviceDetail: {
+        deviceType: 'laptop',
+        ownership: 'company',
+        deviceBrand: '',
+        deviceModel: '',
+        serialNumber: '',
+      },
+      operatingSystem: {
+        osType: 'windows',
+        osVersion: '',
+        osLicense: 'original',
+        osRegularUpdate: true,
+      },
+      specification: {
+        ramCapacity: '',
+        storage: [],
+        processor: '',
+      },
+      deviceCondition: {
+        deviceSuitability: 'suitable',
+        batterySuitability: 'Good',
+        keyboardCondition: 'Good',
+        touchpadCondition: 'Good',
+        monitorCondition: 'Good',
+        wifiCondition: 'Good',
+      },
+      workApplications: [],
+      nonWorkApplications: [],
+      security: {
+        antivirus: {
+          status: 'active',
+          list: [],
+        },
+        vpn: {
+          status: 'available',
+          list: [],
+        },
+      },
+      additionalInfo: {
+        passwordUsage: 'available',
+        otherNotes: '',
+        inspectorPICName: '',
+      },
+    });
 
     try {
       const response = await getEmployeeById(employeeId);
