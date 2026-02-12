@@ -39,6 +39,10 @@ export interface DeviceCheck {
     memoryType?: "HDD" | "SSD";
     memoryCapacity?: string;
     processor?: string;
+    storage?: Array<{
+      type: "HDD" | "SSD";
+      size: string;
+    }>;
   };
   deviceCondition: {
     deviceSuitability:

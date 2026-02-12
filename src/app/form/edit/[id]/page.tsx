@@ -47,8 +47,7 @@ export default function EditFormPage() {
       },
       specification: {
         ramCapacity: '',
-        memoryType: 'hdd',
-        memoryCapacity: '',
+        storage: [] as any,
         processor: '',
       },
       deviceCondition: {
@@ -102,6 +101,12 @@ export default function EditFormPage() {
     append: appendVpn,
     remove: removeVpn,
   } = useFieldArray({ control, name: 'security.vpn.list' });
+
+  const {
+    fields: storageFields,
+    append: appendStorage,
+    remove: removeStorage,
+  } = useFieldArray({ control, name: 'specification.storage' });
 
   const sections = [
     { id: 'employee', title: t('form.sections.employee'), icon: User },
@@ -164,7 +169,7 @@ export default function EditFormPage() {
       if (response.success && response.data) {
         // Normalize old data format to new internal values
         const normalizedCheck = normalizeDataForForm(response.data);
-        
+
         // Pre-fill form with normalized check data
         reset({
           employeeId: normalizedCheck.employeeId.toString(),
@@ -207,7 +212,7 @@ export default function EditFormPage() {
   // Handle employee selection (disabled in edit mode)
   const handleEmployeeSelect = async (employeeId: string) => {
     setValue('employeeId', employeeId);
-    
+
     try {
       const response = await getEmployeeById(employeeId);
       if (response.success && response.data) {
@@ -223,16 +228,16 @@ export default function EditFormPage() {
     try {
       // Convert to uppercase
       const normalizedValue = value.trim().toUpperCase();
-      
+
       // Immediately update local state with new option (optimistic update)
       setDropdownOptions((prev) => {
         const currentOptions = prev[fieldName] || [];
         const optionExists = currentOptions.some((opt) => opt.value === normalizedValue);
-        
+
         if (optionExists) {
           return prev; // Don't add duplicate
         }
-        
+
         return {
           ...prev,
           [fieldName]: [
@@ -241,9 +246,9 @@ export default function EditFormPage() {
           ],
         };
       });
-      
+
       toast.success(`"${normalizedValue}" added successfully`);
-      
+
       // Save to backend in background (don't await)
       saveDropdownOption(fieldName, normalizedValue, category)
         .then(() => {
@@ -280,13 +285,13 @@ export default function EditFormPage() {
     try {
       // Ensure checkId is a string
       const idStr = String(checkId);
-      
+
       // Remove employeeId from update payload (cannot be changed after creation)
       const { employeeId, ...updateData } = data;
-      
+
       // Normalize data to match database enum values
       const normalizedData = normalizeDataForSubmission(updateData);
-      
+
       const response = await updateDeviceCheck(idStr, normalizedData);
       if (response.success && response.data) {
         toast.success('Device check updated successfully');
@@ -556,31 +561,6 @@ export default function EditFormPage() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="memoryType">{t('form.specification.memoryType')}</Label>
-                  <select
-                    id="memoryType"
-                    {...register('specification.memoryType')}
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                  >
-                    <option value="hdd">{t('form.specification.memoryTypeOptions.hdd')}</option>
-                    <option value="ssd">{t('form.specification.memoryTypeOptions.ssd')}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="memoryCapacity">{t('form.specification.storageCapacity')}</Label>
-                  <CreatableSelect
-                    key="memoryCapacity"
-                    options={dropdownOptions['memoryCapacity'] || []}
-                    value={watch('specification.memoryCapacity')}
-                    onChange={(val) => setValue('specification.memoryCapacity', val)}
-                    onCreate={(val) => handleCreateOption('memoryCapacity', val)}
-                    placeholder={t('form.placeholders.storageCapacity')}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="processor">{t('form.specification.processor')}</Label>
                   <CreatableSelect
                     key="processor"
@@ -591,6 +571,52 @@ export default function EditFormPage() {
                     placeholder={t('form.placeholders.processor')}
                   />
                 </div>
+              </div>
+
+              {/* Storage Section with Add/Delete */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label>{t('form.specification.storage')}</Label>
+                  <Button
+                    type="button"
+                    variant="outline"
+                    size="sm"
+                    onClick={() => appendStorage({ type: 'hdd', size: '' })}
+                  >
+                    <Plus className="h-4 w-4 mr-1" />
+                    {t('common.add')}
+                  </Button>
+                </div>
+                {storageFields.map((field, index) => (
+                  <div key={field.id} className="grid md:grid-cols-[1fr_1fr_auto] gap-2 mb-2 items-start">
+                    <select
+                      {...register(`specification.storage.${index}.type` as any)}
+                      className="h-10 rounded-md border bg-background px-3 text-sm"
+                    >
+                      <option value="hdd">{t('form.specification.memoryTypeOptions.hdd')}</option>
+                      <option value="ssd">{t('form.specification.memoryTypeOptions.ssd')}</option>
+                    </select>
+                    <CreatableSelect
+                      key={`storage-${field.id}`}
+                      inputType="number"
+                      options={dropdownOptions['memoryCapacity'] || []}
+                      value={watch(`specification.storage.${index}.size` as any)}
+                      onChange={(val) => setValue(`specification.storage.${index}.size` as any, val)}
+                      onCreate={(val) => handleCreateOption('memoryCapacity', val)}
+                      placeholder={`${t('form.specification.storageCapacity')} (GB)`}
+                    />
+                    {storageFields.length > 0 && (
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="icon"
+                        onClick={() => removeStorage(index)}
+                      >
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>
@@ -936,7 +962,7 @@ export default function EditFormPage() {
                   placeholder={t('form.placeholders.otherNotes')}
                 />
                 <p className="text-sm text-muted-foreground mt-1">
-                   {t('form.additionalInfo.pressEnter')}
+                  {t('form.additionalInfo.pressEnter')}
                 </p>
               </div>
             </CardContent>

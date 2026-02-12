@@ -23,8 +23,10 @@ export interface IDeviceCheck extends Document {
   };
   specification?: {
     ramCapacity?: string;
-    memoryType?: 'HDD' | 'SSD';
-    memoryCapacity?: string;
+    storage?: Array<{
+      type: 'HDD' | 'SSD';
+      size: string;
+    }>;
     processor?: string;
   };
   deviceCondition: {
@@ -151,14 +153,16 @@ const DeviceCheckSchema = new Schema<IDeviceCheck>(
         type: String,
         trim: true,
       },
-      memoryType: {
-        type: String,
-        enum: ['HDD', 'SSD'],
-      },
-      memoryCapacity: {
-        type: String,
-        trim: true,
-      },
+      storage: [{
+        type: {
+          type: String,
+          enum: ['HDD', 'SSD'],
+        },
+        size: {
+          type: String,
+          trim: true,
+        },
+      }],
       processor: {
         type: String,
         trim: true,

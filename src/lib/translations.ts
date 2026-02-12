@@ -19,22 +19,23 @@ export interface Translations {
     next: string;
     add: string;
     remove: string;
-    tooltips: {
-      deleteOption: string;
-      addItem: string;
-      viewDetails: string;
-      downloadPDF: string;
-      editCheck: string;
-      deleteCheck: string;
-      viewHistory: string;
-      editEmployee: string;
-      deleteEmployee: string;
-      addWorkApp: string;
-      addNonWorkApp: string;
-      addAntivirus: string;
-      addVPN: string;
-      removeItem: string;
-    };
+      tooltips: {
+        deleteOption: string;
+        addItem: string;
+        viewDetails: string;
+        downloadPDF: string;
+        editCheck: string;
+        deleteCheck: string;
+        viewHistory: string;
+        editEmployee: string;
+        deleteEmployee: string;
+        addWorkApp: string;
+        addNonWorkApp: string;
+        addAntivirus: string;
+        addVPN: string;
+        addStorage: string;
+        removeItem: string;
+      };
     select: {
       navigate: string;
       select: string;
@@ -128,6 +129,7 @@ export interface Translations {
       ramCapacity: string;
       memoryType: string;
       storageCapacity: string;
+      storage: string;
       processor: string;
       memoryTypeOptions: {
         hdd: string;
@@ -398,6 +400,7 @@ export const translations: Record<Language, Translations> = {
         addNonWorkApp: "Add non-work application",
         addAntivirus: "Add antivirus",
         addVPN: "Add VPN",
+        addStorage: "Add storage",
         removeItem: "Remove item",
       },
       select: {
@@ -493,6 +496,7 @@ export const translations: Record<Language, Translations> = {
         ramCapacity: "RAM Capacity",
         memoryType: "Memory Type",
         storageCapacity: "Storage Capacity",
+        storage: "Storage",
         processor: "Processor",
         memoryTypeOptions: {
           hdd: "HDD",
@@ -763,6 +767,7 @@ export const translations: Record<Language, Translations> = {
         addNonWorkApp: "Tambah aplikasi non-kerja",
         addAntivirus: "Tambah antivirus",
         addVPN: "Tambah VPN",
+        addStorage: "Tambah penyimpanan",
         removeItem: "Hapus item",
       },
       select: {
@@ -859,6 +864,7 @@ export const translations: Record<Language, Translations> = {
         ramCapacity: "Kapasitas RAM",
         memoryType: "Tipe Memori",
         storageCapacity: "Kapasitas Penyimpanan",
+        storage: "Penyimpanan",
         processor: "Prosesor",
         memoryTypeOptions: {
           hdd: "HDD",

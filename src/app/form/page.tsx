@@ -31,6 +31,11 @@ type VPNItem = {
   notes?: string;
 };
 
+type StorageItem = {
+  type: string;
+  size: string;
+};
+
 type FormData = {
   employeeId: string;
   checkDate: string;
@@ -49,8 +54,7 @@ type FormData = {
   };
   specification: {
     ramCapacity: string;
-    memoryType: string;
-    memoryCapacity: string;
+    storage: StorageItem[];
     processor: string;
   };
   deviceCondition: {
@@ -109,8 +113,7 @@ function FormContent() {
       },
       specification: {
         ramCapacity: '',
-        memoryType: 'hdd',
-        memoryCapacity: '',
+        storage: [],
         processor: '',
       },
       deviceCondition: {
@@ -164,6 +167,12 @@ function FormContent() {
     append: appendVpn,
     remove: removeVpn,
   } = useFieldArray({ control, name: 'security.vpn.list' });
+
+  const {
+    fields: storageFields,
+    append: appendStorage,
+    remove: removeStorage,
+  } = useFieldArray({ control, name: 'specification.storage' });
 
   // Handle URL params for pre-filling employee
   React.useEffect(() => {
@@ -346,9 +355,27 @@ function FormContent() {
 
           // Populate specification
           setValue('specification.ramCapacity', lastCheck.specification?.ramCapacity || '');
-          setValue('specification.memoryType', normalizeEnumValue(lastCheck.specification?.memoryType || 'hdd'));
-          setValue('specification.memoryCapacity', lastCheck.specification?.memoryCapacity || '');
           setValue('specification.processor', lastCheck.specification?.processor || '');
+
+          // Populate storage array
+          while (storageFields.length > 0) {
+            removeStorage(0);
+          }
+          // Handle new storage array format or convert old format
+          if (lastCheck.specification?.storage && lastCheck.specification.storage.length > 0) {
+            lastCheck.specification.storage.forEach((item: any) => {
+              appendStorage({
+                type: normalizeEnumValue(item.type || 'hdd'),
+                size: item.size || '',
+              });
+            });
+          } else if (lastCheck.specification?.memoryType || lastCheck.specification?.memoryCapacity) {
+            // Convert old format to new array format
+            appendStorage({
+              type: normalizeEnumValue(lastCheck.specification?.memoryType || 'hdd'),
+              size: lastCheck.specification?.memoryCapacity || '',
+            });
+          }
 
           // Populate device condition
           setValue('deviceCondition.deviceSuitability', normalizeEnumValue(lastCheck.deviceCondition?.deviceSuitability || 'suitable'));
@@ -723,33 +750,6 @@ function FormContent() {
                   />
                 </div>
                 <div>
-                  <Label htmlFor="memoryType">{t('form.specification.memoryType')}</Label>
-                  <select
-                    id="memoryType"
-                    {...register('specification.memoryType')}
-                    className="h-10 w-full rounded-md border bg-background px-3 text-sm"
-                  >
-                    <option value="hdd">{t('form.specification.memoryTypeOptions.hdd')}</option>
-                    <option value="ssd">{t('form.specification.memoryTypeOptions.ssd')}</option>
-                  </select>
-                </div>
-              </div>
-
-              <div className="grid md:grid-cols-2 gap-4">
-                <div>
-                  <Label htmlFor="memoryCapacity">{t('form.specification.storageCapacity')}&nbsp;(GB)</Label>
-                  <CreatableSelect
-                    key="memoryCapacity"
-                    inputType="number"
-                    options={dropdownOptions['memoryCapacity'] || []}
-                    value={watch('specification.memoryCapacity')}
-                    onChange={(val) => setValue('specification.memoryCapacity', val)}
-                    onCreate={(val) => handleCreateOption('memoryCapacity', val)}
-                    onDelete={handleDeleteOption('memoryCapacity')}
-                    placeholder={t('form.placeholders.storageCapacity')}
-                  />
-                </div>
-                <div>
                   <Label htmlFor="processor">{t('form.specification.processor')}</Label>
                   <CreatableSelect
                     key="processor"
@@ -761,6 +761,63 @@ function FormContent() {
                     placeholder={t('form.placeholders.processor')}
                   />
                 </div>
+              </div>
+
+              {/* Storage Section with Add/Delete */}
+              <div>
+                <div className="flex items-center justify-between mb-3">
+                  <Label>{t('form.specification.storage')}</Label>
+                  <Tooltip>
+                    <TooltipTrigger asChild>
+                      <Button
+                        type="button"
+                        variant="outline"
+                        size="sm"
+                        onClick={() => appendStorage({ type: 'hdd', size: '' })}
+                      >
+                        <Plus className="h-4 w-4 mr-1" />
+                        {t('common.add')}
+                      </Button>
+                    </TooltipTrigger>
+                    <TooltipContent>{t('common.tooltips.addStorage')}</TooltipContent>
+                  </Tooltip>
+                </div>
+                {storageFields.map((field, index) => (
+                  <div key={field.id} className="grid md:grid-cols-[1fr_1fr_auto] gap-2 mb-2 items-start">
+                    <select
+                      {...register(`specification.storage.${index}.type` as any)}
+                      className="h-10 rounded-md border bg-background px-3 text-sm"
+                    >
+                      <option value="hdd">{t('form.specification.memoryTypeOptions.hdd')}</option>
+                      <option value="ssd">{t('form.specification.memoryTypeOptions.ssd')}</option>
+                    </select>
+                    <CreatableSelect
+                      key={`storage-${field.id}`}
+                      inputType="number"
+                      options={dropdownOptions['memoryCapacity'] || []}
+                      value={watch(`specification.storage.${index}.size` as any)}
+                      onChange={(val) => setValue(`specification.storage.${index}.size` as any, val)}
+                      onCreate={(val) => handleCreateOption('memoryCapacity', val)}
+                      onDelete={handleDeleteOption('memoryCapacity')}
+                      placeholder={`${t('form.specification.storageCapacity')} (GB)`}
+                    />
+                    {storageFields.length > 0 && (
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button
+                            type="button"
+                            variant="ghost"
+                            size="icon"
+                            onClick={() => removeStorage(index)}
+                          >
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
+                    )}
+                  </div>
+                ))}
               </div>
             </CardContent>
           </Card>

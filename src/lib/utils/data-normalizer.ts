@@ -45,13 +45,40 @@ export const normalizeDataForForm = (data: any) => {
     normalized.operatingSystem.osLicense = osLicenseMap[normalized.operatingSystem.osLicense] || normalized.operatingSystem.osLicense;
   }
 
-  // Normalize memory type
-  if (normalized.specification?.memoryType) {
-    const memoryTypeMap: Record<string, string> = {
-      'HDD': 'hdd',
-      'SSD': 'ssd',
-    };
-    normalized.specification.memoryType = memoryTypeMap[normalized.specification.memoryType] || normalized.specification.memoryType;
+  // Normalize memory type (convert old format to new storage array format)
+  if (normalized.specification) {
+    // If old format exists, convert to new storage array format
+    const oldMemoryType = normalized.specification.memoryType;
+    const oldMemoryCapacity = normalized.specification.memoryCapacity;
+    
+    if (oldMemoryType || oldMemoryCapacity) {
+      // Convert old format to new storage array
+      if (!normalized.specification.storage || normalized.specification.storage.length === 0) {
+        const memoryTypeMap: Record<string, string> = {
+          'HDD': 'hdd',
+          'SSD': 'ssd',
+        };
+        normalized.specification.storage = [{
+          type: memoryTypeMap[oldMemoryType] || oldMemoryType?.toLowerCase() || 'hdd',
+          size: oldMemoryCapacity || '',
+        }];
+      }
+      // Remove old fields
+      delete normalized.specification.memoryType;
+      delete normalized.specification.memoryCapacity;
+    }
+    
+    // Normalize storage array items if they exist
+    if (normalized.specification.storage && Array.isArray(normalized.specification.storage)) {
+      const memoryTypeMap: Record<string, string> = {
+        'HDD': 'hdd',
+        'SSD': 'ssd',
+      };
+      normalized.specification.storage = normalized.specification.storage.map((item: any) => ({
+        type: memoryTypeMap[item.type] || item.type?.toLowerCase() || 'hdd',
+        size: item.size || '',
+      }));
+    }
   }
 
   // Normalize device suitability
@@ -202,13 +229,18 @@ export const normalizeDataForSubmission = (data: any) => {
     normalized.operatingSystem.osLicense = osLicenseMap[normalized.operatingSystem.osLicense.toLowerCase()] || normalized.operatingSystem.osLicense;
   }
 
-  // Normalize memory type
-  if (normalized.specification?.memoryType) {
+  // Normalize storage array items
+  if (normalized.specification?.storage && Array.isArray(normalized.specification.storage)) {
     const memoryTypeMap: Record<string, string> = {
       'hdd': 'HDD',
       'ssd': 'SSD',
     };
-    normalized.specification.memoryType = memoryTypeMap[normalized.specification.memoryType.toLowerCase()] || normalized.specification.memoryType;
+    normalized.specification.storage = normalized.specification.storage.map((item: any) => ({
+      type: memoryTypeMap[item.type?.toLowerCase()] || 'HDD',
+      size: item.size || '',
+    }));
+    // Remove empty storage entries
+    normalized.specification.storage = normalized.specification.storage.filter((item: any) => item.size);
   }
 
   // Normalize device suitability
