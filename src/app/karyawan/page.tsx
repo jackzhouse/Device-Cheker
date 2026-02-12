@@ -8,7 +8,7 @@ import { Input } from '@/components/ui/input';
 import { Badge } from '@/components/ui/badge';
 import { toast } from 'sonner';
 import {
-  User, UserPlus, Edit, Trash2, History, PlusCircle, Search, Upload, Download, FileSpreadsheet
+  User, UserPlus, Edit, Trash2, History, PlusCircle, Search, Upload, Download, FileSpreadsheet, AlertTriangle
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
 import Link from 'next/link';
@@ -38,6 +38,11 @@ export default function EmployeesPage() {
   const [importFile, setImportFile] = useState<File | null>(null);
   const [importing, setImporting] = useState(false);
   const [importResults, setImportResults] = useState<any>(null);
+  
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
+  const [deleteTargetChecks, setDeleteTargetChecks] = useState<number>(0);
 
   React.useEffect(() => {
     fetchEmployees();
@@ -138,23 +143,33 @@ export default function EmployeesPage() {
     }
   };
 
-  const handleDelete = async (id: string, totalChecks: number) => {
-    const confirmMsg = totalChecks > 0
-      ? 'This employee has device checks. Deleting will mark them as resigned. Continue?'
-      : t('employee.confirmDelete');
+  const handleDeleteClick = (id: string, totalChecks: number) => {
+    setDeleteTargetId(id);
+    setDeleteTargetChecks(totalChecks);
+    setDeleteModalOpen(true);
+  };
 
-    if (!confirm(confirmMsg)) {
-      return;
-    }
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
 
     try {
       const { deleteEmployee } = await import('@/lib/services/employees.service');
-      await deleteEmployee(id);
+      await deleteEmployee(deleteTargetId);
       toast.success(t('employee.toast.deleteSuccess'));
       fetchEmployees();
     } catch (error: any) {
       toast.error(error.message || t('employee.toast.deleteFailed'));
+    } finally {
+      setDeleteModalOpen(false);
+      setDeleteTargetId(null);
+      setDeleteTargetChecks(0);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setDeleteTargetId(null);
+    setDeleteTargetChecks(0);
   };
 
   const getStatusBadge = (status: string) => {
@@ -298,7 +313,7 @@ export default function EmployeesPage() {
               key={employee._id}
               employee={employee}
               onEdit={() => router.push(`/karyawan/${employee._id}/edit`)}
-              onDelete={() => handleDelete(employee._id, employee.totalDeviceChecks)}
+              onDelete={() => handleDeleteClick(employee._id, employee.totalDeviceChecks)}
             />
           ))}
         </div>
@@ -411,6 +426,31 @@ export default function EmployeesPage() {
                 Close
               </Button>
             )}
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <DialogTitle>{t('employee.confirmDelete')}</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription>
+            {deleteTargetChecks > 0
+              ? t('employee.confirmDeleteWithChecks').replace('{count}', deleteTargetChecks.toString())
+              : t('employee.confirmDelete')}
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              {t('common.delete')}
+            </Button>
           </DialogFooter>
         </DialogContent>
       </Dialog>

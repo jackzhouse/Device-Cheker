@@ -9,9 +9,17 @@ import { Input } from '@/components/ui/input';
 import { toast } from 'sonner';
 import {
   Edit, Trash2, Eye, Download, Filter,
-  Laptop, HardDrive, Calendar, User, Building
+  Laptop, HardDrive, Calendar, User, Building, AlertTriangle
 } from 'lucide-react';
 import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 import Link from 'next/link';
 import { useState } from 'react';
 import { useRouter } from 'next/navigation';
@@ -30,6 +38,8 @@ export default function CheckDataPage() {
     ownership: '',
   });
   const [groupByEmployee, setGroupByEmployee] = useState(false);
+  const [deleteModalOpen, setDeleteModalOpen] = useState(false);
+  const [deleteTargetId, setDeleteTargetId] = useState<string | null>(null);
 
   React.useEffect(() => {
     fetchChecks();
@@ -49,19 +59,30 @@ export default function CheckDataPage() {
     }
   };
 
-  const handleDelete = async (id: string) => {
-    if (!confirm(t('checkData.confirmDelete'))) {
-      return;
-    }
+  const handleDeleteClick = (id: string) => {
+    setDeleteTargetId(id);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
 
     try {
       const { deleteDeviceCheck } = await import('@/lib/services/device-checks.service');
-      await deleteDeviceCheck(id);
+      await deleteDeviceCheck(deleteTargetId);
       toast.success(t('checkData.toast.deleteSuccess'));
       fetchChecks();
     } catch (error: any) {
       toast.error(error.message || t('checkData.toast.deleteFailed'));
+    } finally {
+      setDeleteModalOpen(false);
+      setDeleteTargetId(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setDeleteTargetId(null);
   };
 
   const handleDownloadPDF = async (check: DeviceCheck) => {
@@ -281,7 +302,7 @@ export default function CheckDataPage() {
                         key={check._id}
                         check={check}
                         onEdit={() => router.push(`/form/edit/${check._id}`)}
-                        onDelete={() => handleDelete(check._id)}
+                        onDelete={() => handleDeleteClick(check._id)}
                         onDownload={() => handleDownloadPDF(check)}
                         compact
                       />
@@ -307,12 +328,35 @@ export default function CheckDataPage() {
               key={check._id}
               check={check}
               onEdit={() => router.push(`/form/edit/${check._id}`)}
-              onDelete={() => handleDelete(check._id)}
+              onDelete={() => handleDeleteClick(check._id)}
               onDownload={() => handleDownloadPDF(check)}
             />
           ))}
         </div>
       )}
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <DialogTitle>{t('checkData.confirmDelete')}</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription>
+            {t('checkData.confirmDelete')}
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              {t('common.delete')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

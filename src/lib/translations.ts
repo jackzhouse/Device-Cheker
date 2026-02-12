@@ -86,6 +86,7 @@ export interface Translations {
       checkDatePlaceholder: string;
       useLastVersion: string;
       loadingLastVersion: string;
+      pleaseWait: string;
       noPreviousRecord: string;
       lastVersionLoaded: string;
     };
@@ -289,6 +290,7 @@ export interface Translations {
     empty: string;
     totalChecks: string;
     confirmDelete: string;
+    confirmDeleteWithChecks: string;
     toast: {
       fetchFailed: string;
       deleteSuccess: string;
@@ -451,6 +453,7 @@ export const translations: Record<Language, Translations> = {
         checkDatePlaceholder: "Select check date",
         useLastVersion: "Use last checking data version",
         loadingLastVersion: "Loading last version...",
+        pleaseWait: "Please wait while we load the data...",
         noPreviousRecord: "No previous check data found for this employee",
         lastVersionLoaded: "Last check data loaded successfully",
       },
@@ -654,6 +657,7 @@ export const translations: Record<Language, Translations> = {
       empty: "No employees found",
       totalChecks: "Total Checks",
       confirmDelete: "Are you sure you want to delete this employee?",
+      confirmDeleteWithChecks: "This employee has {count} device check(s). Are you sure?",
       toast: {
         fetchFailed: "Failed to fetch employees",
         deleteSuccess: "Employee deleted successfully",
@@ -816,6 +820,7 @@ export const translations: Record<Language, Translations> = {
         checkDatePlaceholder: "Pilih tanggal pengecekan",
         useLastVersion: "Gunakan data versi terakhir",
         loadingLastVersion: "Memuat data terakhir...",
+        pleaseWait: "Mohon tunggu sebentar saat kami memuat data...",
         noPreviousRecord:
           "Tidak ada data pengecekan sebelumnya untuk karyawan ini",
         lastVersionLoaded: "Data pengecekan terakhir berhasil dimuat",
@@ -1023,6 +1028,7 @@ export const translations: Record<Language, Translations> = {
       empty: "Tidak ada karyawan ditemukan",
       totalChecks: "Total Pengecekan",
       confirmDelete: "Apakah Anda yakin ingin menghapus karyawan ini?",
+      confirmDeleteWithChecks: "Karyawan ini memiliki {count} pengecekan perangkat. Apakah Anda yakin?",
       toast: {
         fetchFailed: "Gagal mengambil data karyawan",
         deleteSuccess: "Karyawan berhasil dihapus",
