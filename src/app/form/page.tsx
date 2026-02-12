@@ -604,7 +604,7 @@ function FormContent() {
         toast.success(t('form.toast.createSuccess'));
         router.push('/data-pengecekan');
       } else {
-        toast.error(t('form.toast.createFailed'));
+        toast.error(t('form.toastm .createFailed'));
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
