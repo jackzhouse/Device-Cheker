@@ -226,15 +226,15 @@ export default function DashboardPage() {
   return (
     <div className="space-y-6 m-3">
       {/* Page Header */}
-      <div className="flex items-center justify-between">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
-          <p className="text-muted-foreground">{t('dashboard.description')}</p>
+          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('dashboard.title')}</h1>
+          <p className="text-sm sm:text-base text-muted-foreground">{t('dashboard.description')}</p>
         </div>
         <select
           value={timeRange}
           onChange={(e) => setTimeRange(e.target.value)}
-          className="h-10 rounded-md border bg-background px-3 text-sm"
+          className="h-10 rounded-md border bg-background px-3 text-sm w-full sm:w-auto"
         >
           <option value="all">{t('dashboard.timeRange.all')}</option>
           <option value="30days">{t('dashboard.timeRange.last30Days')}</option>
@@ -247,15 +247,15 @@ export default function DashboardPage() {
       <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-4 gap-4">
         <FadeIn delay={100}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-3xl font-bold text-blue-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-blue-600">
                     <AnimatedCounter value={data.totalChecks} />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">{t('dashboard.summary.totalChecks')}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.summary.totalChecks')}</div>
                 </div>
-                <BarChart3 className="h-12 w-12 text-blue-600" />
+                <BarChart3 className="h-10 w-10 sm:h-12 sm:w-12 text-blue-600" />
               </div>
             </CardContent>
           </Card>
@@ -263,15 +263,15 @@ export default function DashboardPage() {
 
         <FadeIn delay={200}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-3xl font-bold text-green-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-green-600">
                     <AnimatedCounter value={data.totalEmployees} />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">{t('dashboard.summary.totalEmployees')}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.summary.totalEmployees')}</div>
                 </div>
-                <Monitor className="h-12 w-12 text-green-600" />
+                <Monitor className="h-10 w-10 sm:h-12 sm:w-12 text-green-600" />
               </div>
             </CardContent>
           </Card>
@@ -279,17 +279,17 @@ export default function DashboardPage() {
 
         <FadeIn delay={300}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-3xl font-bold text-purple-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-purple-600">
                     <AnimatedCounter value={data.deviceTypes.PC + data.deviceTypes.Laptop} />
                   </div>
               <div className="text-xs sm:text-sm text-muted-foreground mt-1">
                 {data.deviceTypes.PC} {t('dashboard.summary.totalPCs')} • {data.deviceTypes.Laptop} {t('dashboard.summary.totalLaptops')}
               </div>
                 </div>
-                <TrendingUp className="h-12 w-12 text-purple-600" />
+                <TrendingUp className="h-10 w-10 sm:h-12 sm:w-12 text-purple-600" />
               </div>
             </CardContent>
           </Card>
@@ -297,15 +297,15 @@ export default function DashboardPage() {
 
         <FadeIn delay={400}>
           <Card>
-            <CardContent className="pt-6">
+            <CardContent className="pt-4 sm:pt-6">
               <div className="flex items-center justify-between">
                 <div>
-                  <div className="text-3xl font-bold text-red-600">
+                  <div className="text-2xl sm:text-3xl font-bold text-red-600">
                     <AnimatedCounter value={data.urgentDevices.length} />
                   </div>
-                  <div className="text-sm text-muted-foreground mt-1">{t('dashboard.summary.urgentDevices')}</div>
+                  <div className="text-xs sm:text-sm text-muted-foreground mt-1">{t('dashboard.summary.urgentDevices')}</div>
                 </div>
-                <AlertTriangle className="h-12 w-12 text-red-600" />
+                <AlertTriangle className="h-10 w-10 sm:h-12 sm:w-12 text-red-600" />
               </div>
             </CardContent>
           </Card>
@@ -340,10 +340,10 @@ export default function DashboardPage() {
         <FadeIn delay={600}>
           <Card>
             <CardHeader>
-              <CardTitle>{t('dashboard.charts.ownership')}</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.ownership')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} minHeight={200}>
                 <PieChart>
                   <Pie data={ownershipData} label nameKey="name" dataKey="value">
                     {ownershipData.map((entry, index) => (
@@ -363,10 +363,10 @@ export default function DashboardPage() {
           <FadeIn delay={700}>
             <Card>
               <CardHeader>
-                <CardTitle>{t('dashboard.charts.suitability')}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.suitability')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} minHeight={200}>
                   <BarChart data={suitabilityData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -389,10 +389,10 @@ export default function DashboardPage() {
           <FadeIn delay={800}>
             <Card>
               <CardHeader>
-                <CardTitle>{t('dashboard.charts.osType')}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.osType')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} minHeight={200}>
                   <PieChart>
                     <Pie data={osTypeData} label nameKey="name" dataKey="value">
                       {osTypeData.map((entry, index) => (
@@ -402,10 +402,10 @@ export default function DashboardPage() {
                     <Tooltip />
                     <Legend />
                   </PieChart>
-                </ResponsiveContainer>
-              </CardContent>
-            </Card>
-          </FadeIn>
+              </ResponsiveContainer>
+            </CardContent>
+          </Card>
+        </FadeIn>
         )}
 
         {/* OS License Bar Chart */}
@@ -413,10 +413,10 @@ export default function DashboardPage() {
           <FadeIn delay={900}>
             <Card>
               <CardHeader>
-                <CardTitle>{t('dashboard.charts.osLicense')}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.osLicense')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} minHeight={200}>
                   <BarChart data={osLicenseData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="name" />
@@ -438,10 +438,10 @@ export default function DashboardPage() {
         <FadeIn delay={1000}>
           <Card>
             <CardHeader>
-              <CardTitle>{t('dashboard.charts.antivirus')}</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.antivirus')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} minHeight={200}>
                 <PieChart>
                   <Pie data={antivirusData} label nameKey="name" dataKey="value">
                     {antivirusData.map((entry, index) => (
@@ -460,10 +460,10 @@ export default function DashboardPage() {
         <FadeIn delay={1100}>
           <Card>
             <CardHeader>
-              <CardTitle>{t('dashboard.charts.vpn')}</CardTitle>
+              <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.vpn')}</CardTitle>
             </CardHeader>
             <CardContent>
-              <ResponsiveContainer width="100%" height={300}>
+              <ResponsiveContainer width="100%" height={250} minHeight={200}>
                 <PieChart>
                   <Pie data={vpnData} label nameKey="name" dataKey="value">
                     {vpnData.map((entry, index) => (
@@ -483,10 +483,10 @@ export default function DashboardPage() {
           <FadeIn delay={1200}>
             <Card>
               <CardHeader>
-                <CardTitle>{t('dashboard.charts.trendsOverTime')}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.trendsOverTime')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} minHeight={200}>
                   <LineChart data={data.monthlyData}>
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis dataKey="month" />
@@ -505,14 +505,14 @@ export default function DashboardPage() {
           <FadeIn delay={1300}>
             <Card>
               <CardHeader>
-                <CardTitle>{t('dashboard.charts.departmentBreakdown')}</CardTitle>
+                <CardTitle className="text-base sm:text-lg">{t('dashboard.charts.departmentBreakdown')}</CardTitle>
               </CardHeader>
               <CardContent>
-                <ResponsiveContainer width="100%" height={300}>
+                <ResponsiveContainer width="100%" height={250} minHeight={200}>
                   <BarChart data={departmentData} layout="vertical">
                     <CartesianGrid strokeDasharray="3 3" />
                     <XAxis type="number" />
-                    <YAxis dataKey="name" type="category" width={150} />
+                    <YAxis dataKey="name" type="category" width={100} tick={{fontSize: 11}} />
                     <Tooltip />
                     <Bar dataKey="value" fill="#8b5cf6" name="Checks" />
                   </BarChart>
@@ -529,10 +529,10 @@ export default function DashboardPage() {
           <CardHeader className="border-b border-red-200 bg-red-50">
             <div className="flex items-center gap-2">
               <AlertTriangle className="h-5 w-5 text-red-600" />
-              <CardTitle className="text-red-800">{t('dashboard.urgentDevices.title')}</CardTitle>
+              <CardTitle className="text-red-800 text-base sm:text-lg">{t('dashboard.urgentDevices.title')}</CardTitle>
             </div>
           </CardHeader>
-          <CardContent className="pt-6">
+          <CardContent className="pt-4 sm:pt-6">
             {data.urgentDevices.length === 0 ? (
               <div className="text-center py-8 text-muted-foreground">
                 <p>{t('dashboard.urgentDevices.noUrgent')}</p>
@@ -542,11 +542,11 @@ export default function DashboardPage() {
                 {data.urgentDevices.map((device) => (
                   <div
                     key={device._id}
-                    className="flex items-start justify-between p-4 border-l-4 bg-red-50 rounded-lg"
+                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border-l-4 bg-red-50 rounded-lg"
                     style={{ borderLeftColor: device.suitability === 'Needs Repair' ? '#ef4444' : '#7c3aed' }}
                   >
                     <div className="flex-1">
-                      <div className="font-semibold text-lg">{device.employeeName}</div>
+                      <div className="font-semibold text-base sm:text-lg">{device.employeeName}</div>
                       <div className="text-sm text-muted-foreground">{device.employeePosition}</div>
                       <div className="mt-2 space-y-1 text-sm">
                         <div>
