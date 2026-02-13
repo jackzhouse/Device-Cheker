@@ -3,7 +3,7 @@
 import Link from 'next/link';
 import { usePathname } from 'next/navigation';
 import { Button } from '@/components/ui/button';
-import { BarChart3, Laptop, Database, Users, Menu, X, Moon, Sun, Globe } from 'lucide-react';
+import { BarChart3, Laptop, Database, Users, Menu, X, Moon, Sun, Globe, BookOpen } from 'lucide-react';
 import { useState, useEffect } from 'react';
 import { useTheme } from 'next-themes';
 import { useLanguage } from '@/contexts/LanguageContext';
@@ -29,6 +29,7 @@ export default function Header() {
     { href: '/form', label: t('header.form'), icon: Laptop },
     { href: '/data-pengecekan', label: t('header.checkData'), icon: Database },
     { href: '/karyawan', label: t('header.employeeData'), icon: Users },
+    { href: '/dokumentasi', label: t('header.documentation'), icon: BookOpen },
   ];
 
   const toggleLanguage = () => {

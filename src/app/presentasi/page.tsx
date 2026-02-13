@@ -867,7 +867,7 @@ export default function PresentationPage() {
                                   {subsection.fields && subsection.fields.length > 0 && (
                                     <ul className="mt-2 space-y-1">
                                       {subsection.fields.map(
-                                        (field: any, fieldIdx) => (
+                                        (field: any, fieldIdx: number) => (
                                           <li
                                             key={fieldIdx}
                                             className="text-sm text-muted-foreground"

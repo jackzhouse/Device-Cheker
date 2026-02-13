@@ -55,6 +55,7 @@ export interface Translations {
     dashboard: string;
     checkData: string;
     employeeData: string;
+    documentation: string;
     toggleTheme: string;
     toggleLanguage: string;
   };
@@ -542,6 +543,7 @@ export const translations: Record<Language, Translations> = {
       dashboard: "Dashboard",
       checkData: "Check Data",
       employeeData: "Employee Data",
+      documentation: "Documentation",
       toggleTheme: "Toggle theme",
       toggleLanguage: "Toggle language",
     },
@@ -1029,6 +1031,7 @@ export const translations: Record<Language, Translations> = {
       dashboard: "Dashboard",
       checkData: "Data Pengecekan",
       employeeData: "Data Karyawan",
+      documentation: "Dokumentasi",
       toggleTheme: "Ganti tema",
       toggleLanguage: "Ganti bahasa",
     },
