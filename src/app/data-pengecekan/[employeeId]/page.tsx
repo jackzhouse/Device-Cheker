@@ -6,11 +6,19 @@ import { getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-check
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download } from 'lucide-react';
+import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { generateDeviceCheckPDF, generateEmployeeHistoryPDF } from '@/lib/utils/pdf';
 import { useLanguage } from '@/contexts/LanguageContext';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 interface EmployeeCheckHistoryData {
   employee: {
@@ -61,6 +69,10 @@ export default function EmployeeHistoryPage() {
   const [data, setData] = React.useState<EmployeeCheckHistoryData | null>(null);
   const [loading, setLoading] = React.useState(true);
   const [error, setError] = React.useState<string | null>(null);
+  
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [deleteTargetId, setDeleteTargetId] = React.useState<string | null>(null);
 
   // Helper to get translated device type
   const getDeviceTypeLabel = (value: string) => {
@@ -147,19 +159,30 @@ export default function EmployeeHistoryPage() {
     }
   };
 
-  const handleDeleteCheck = async (checkId: string) => {
-    if (!confirm(t('employeeHistory.confirmDelete'))) {
-      return;
-    }
+  const handleDeleteCheckClick = (checkId: string) => {
+    setDeleteTargetId(checkId);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetId) return;
 
     try {
       const { deleteDeviceCheck } = await import('@/lib/services/device-checks.service');
-      await deleteDeviceCheck(checkId);
+      await deleteDeviceCheck(deleteTargetId);
       toast.success(t('employeeHistory.toast.deleteSuccess'));
       fetchEmployeeHistory();
     } catch (error: any) {
       toast.error(error.message || t('employeeHistory.toast.deleteFailed'));
+    } finally {
+      setDeleteModalOpen(false);
+      setDeleteTargetId(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setDeleteTargetId(null);
   };
 
   const handleDownloadPDF = async (check: any) => {
@@ -356,7 +379,7 @@ export default function EmployeeHistoryPage() {
                           <Button variant="outline" size="sm" onClick={() => router.push(`/form/edit/${check._id}`)}>
                             <Edit className="h-4 w-4" />
                           </Button>
-                          <Button variant="destructive" size="sm" onClick={() => handleDeleteCheck(check._id)}>
+                          <Button variant="destructive" size="sm" onClick={() => handleDeleteCheckClick(check._id)}>
                             <Trash2 className="h-4 w-4" />
                           </Button>
                         </div>
@@ -374,6 +397,29 @@ export default function EmployeeHistoryPage() {
           )}
         </CardContent>
       </Card>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <DialogTitle>{t('employeeHistory.confirmDelete')}</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription>
+            {t('employeeHistory.confirmDelete')}
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              {t('common.cancel')}
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm}>
+              {t('common.delete')}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

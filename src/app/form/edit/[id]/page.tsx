@@ -549,7 +549,7 @@ export default function EditFormPage() {
             <CardContent className="space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
-                  <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')}</Label>
+                  <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')} GB</Label>
                   <CreatableSelect
                     key="ramCapacity"
                     options={dropdownOptions['ramCapacity'] || []}

@@ -7,10 +7,18 @@ import { getEmployeeChecks } from '@/lib/services/device-checks.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, User, Building, Mail, Phone, Edit, Trash2, Plus, Calendar } from 'lucide-react';
+import { ArrowLeft, User, Building, Mail, Phone, Edit, Trash2, Plus, Calendar, AlertTriangle } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { deleteEmployee } from '@/lib/services/employees.service';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export default function EmployeeDetailPage() {
   const params = useParams();
@@ -20,6 +28,9 @@ export default function EmployeeDetailPage() {
   const [checks, setChecks] = React.useState<any[]>([]);
   const [loading, setLoading] = React.useState(true);
   const [deleting, setDeleting] = React.useState(false);
+  
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
 
   React.useEffect(() => {
     fetchData();
@@ -50,11 +61,11 @@ export default function EmployeeDetailPage() {
     }
   };
 
-  const handleDelete = async () => {
-    if (!confirm('Are you sure you want to delete this employee? This will also affect all associated device checks.')) {
-      return;
-    }
+  const handleDeleteClick = () => {
+    setDeleteModalOpen(true);
+  };
 
+  const handleDeleteConfirm = async () => {
     setDeleting(true);
     try {
       const response = await deleteEmployee(employeeId);
@@ -69,7 +80,12 @@ export default function EmployeeDetailPage() {
       toast.error(error.message || 'Failed to delete employee');
     } finally {
       setDeleting(false);
+      setDeleteModalOpen(false);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
   };
 
   const formatDate = (dateString: string) => {
@@ -318,13 +334,36 @@ export default function EmployeeDetailPage() {
         <Button
           variant="destructive"
           className="flex-1"
-          onClick={handleDelete}
+          onClick={handleDeleteClick}
           disabled={deleting}
         >
           <Trash2 className="h-4 w-4 mr-2" />
           {deleting ? 'Deleting...' : 'Delete Employee'}
         </Button>
       </div>
+
+      {/* Delete Confirmation Modal */}
+      <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+        <DialogContent>
+          <DialogHeader>
+            <div className="flex items-center gap-3">
+              <AlertTriangle className="h-8 w-8 text-destructive" />
+              <DialogTitle>Delete Employee</DialogTitle>
+            </div>
+          </DialogHeader>
+          <DialogDescription>
+            Are you sure you want to delete this employee? This will also affect all associated device checks.
+          </DialogDescription>
+          <DialogFooter>
+            <Button variant="outline" onClick={handleDeleteCancel}>
+              Cancel
+            </Button>
+            <Button variant="destructive" onClick={handleDeleteConfirm} disabled={deleting}>
+              {deleting ? 'Deleting...' : 'Delete'}
+            </Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
     </div>
   );
 }

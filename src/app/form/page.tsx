@@ -831,7 +831,7 @@ function FormContent() {
         </aside>
 
         {/* Form Content */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
           {/* Employee Section */}
           <Card id="employee">
             <CardHeader>
