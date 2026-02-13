@@ -67,19 +67,19 @@ export default function DokumentasiPage() {
     <div className="min-h-screen bg-background">
       {/* Header */}
       <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto px-4 py-4">
-          <div className="flex justify-between items-center">
-            <div>
-              <h1 className="text-3xl font-bold">
+        <div className="container mx-auto px-4 py-3 md:py-4">
+          <div className="flex justify-between items-center gap-4">
+            <div className="flex-1">
+              <h1 className="text-xl md:text-3xl font-bold">
                 {isIndonesian ? 'Panduan Pengguna' : 'User Manual'}
               </h1>
-              <p className="text-sm text-muted-foreground mt-1">
+              <p className="text-xs md:text-sm text-muted-foreground mt-1">
                 {isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}
               </p>
             </div>
-            <Button onClick={handlePrint} variant="outline" className="gap-2">
+            <Button onClick={handlePrint} variant="outline" className="gap-2 shrink-0">
               <Printer className="h-4 w-4" />
-              {isIndonesian ? 'Cetak' : 'Print'}
+              <span className="hidden sm:inline">{isIndonesian ? 'Cetak' : 'Print'}</span>
             </Button>
           </div>
         </div>
@@ -115,23 +115,23 @@ export default function DokumentasiPage() {
           {/* Content */}
           <main className="flex-1 max-w-4xl">
             {/* Version Info */}
-            <Card className="mb-8 p-6">
-              <div className="grid grid-cols-2 md:grid-cols-4 gap-4 text-sm">
+            <Card className="mb-8 p-4 md:p-6">
+              <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-xs md:text-sm">
                 <div>
                   <p className="text-muted-foreground">{isIndonesian ? 'Versi' : 'Version'}</p>
-                  <p className="font-semibold">1.0</p>
+                  <p className="font-semibold text-sm md:text-base">1.0</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">{isIndonesian ? 'Tanggal' : 'Date'}</p>
-                  <p className="font-semibold">13 Februari 2026</p>
+                  <p className="font-semibold text-sm md:text-base">13 Februari 2026</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">{isIndonesian ? 'Bahasa' : 'Language'}</p>
-                  <p className="font-semibold">{isIndonesian ? 'Indonesia' : 'English'}</p>
+                  <p className="font-semibold text-sm md:text-base">{isIndonesian ? 'Indonesia' : 'English'}</p>
                 </div>
                 <div>
                   <p className="text-muted-foreground">{isIndonesian ? 'Platform' : 'Platform'}</p>
-                  <p className="font-semibold">Web-based Application</p>
+                  <p className="font-semibold text-xs md:text-sm">Web-based</p>
                 </div>
               </div>
             </Card>
@@ -208,30 +208,32 @@ export default function DokumentasiPage() {
 
               {/* Header Mockup */}
               <div className="mt-6">
-                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-                  <div className="flex items-center justify-between">
+                <div className="bg-card border border-border rounded-lg p-3 md:p-4 shadow-sm">
+                  <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
                     {/* Logo */}
                     <div className="flex items-center gap-3">
-                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-                        <span className="text-white font-bold text-sm">TKI</span>
+                      <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center shrink-0">
+                        <span className="text-white font-bold text-xs md:text-sm">TKI</span>
                       </div>
-                      <span className="font-semibold text-lg">{isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}</span>
+                      <span className="font-semibold text-sm md:text-lg">{isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}</span>
                     </div>
 
-                    {/* Navigation */}
-                    <div className="flex items-center gap-1">
-                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Dashboard' : 'Dashboard'}</span>
-                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Formulir' : 'Form'}</span>
-                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Pengecekan' : 'Check Data'}</span>
-                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Karyawan' : 'Employee Data'}</span>
-                    </div>
+                    <div className="flex flex-col md:flex-row items-center gap-3 md:gap-1 w-full md:w-auto">
+                      {/* Navigation */}
+                      <div className="flex flex-wrap items-center justify-center gap-1 md:gap-1 w-full">
+                        <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Dashboard' : 'Dashboard'}</span>
+                        <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Formulir' : 'Form'}</span>
+                        <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Pengecekan' : 'Check Data'}</span>
+                        <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Karyawan' : 'Employee Data'}</span>
+                      </div>
 
-                    {/* Language Toggle */}
-                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg">
-                      <span>🌐</span>
-                      <span className="text-sm font-semibold text-primary">ID</span>
-                      <span className="text-muted-foreground">/</span>
-                      <span className="text-sm text-muted-foreground">EN</span>
+                      {/* Language Toggle */}
+                      <div className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-primary/10 rounded-lg shrink-0">
+                        <span>🌐</span>
+                        <span className="text-xs md:text-sm font-semibold text-primary">ID</span>
+                        <span className="text-muted-foreground">/</span>
+                        <span className="text-xs md:text-sm text-muted-foreground">EN</span>
+                      </div>
                     </div>
                   </div>
                 </div>
@@ -357,7 +359,7 @@ export default function DokumentasiPage() {
               </div>
 
               {/* Statistics Cards Mockup */}
-              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+              <div className="mt-6 grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
                 <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
                   <div className="flex items-start gap-3">
                     <div className="text-3xl">📊</div>

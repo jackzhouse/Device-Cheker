@@ -547,10 +547,10 @@ export default function PresentationPage() {
       </button>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-8 md:p-12">
-        <div className="w-full max-w-6xl">
+      <main className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8">
+        <div className="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl">
           {/* Slide Content */}
-          <div className="bg-card border border-border rounded-lg p-8 md:p-12 shadow-lg">
+          <div className="bg-card border border-border rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 shadow-lg">
             {currentSlideData.id === 1 && (
               <div className="text-center space-y-8">
                 <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
@@ -981,25 +981,25 @@ export default function PresentationPage() {
       <button
         onClick={goToPrev}
         disabled={currentSlide === 0}
-        className="fixed left-4 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-110"
+        className="fixed left-2 md:left-4 top-1/2 -translate-y-1/2 z-40 p-2 md:p-4 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-110"
         title="Previous"
       >
-        <ChevronLeft size={32} />
+        <ChevronLeft size={20} className="md:size-32" />
       </button>
 
       {/* Right Navigation Arrow - Floating */}
       <button
         onClick={goToNext}
         disabled={currentSlide === slides.length - 1}
-        className="fixed right-4 top-1/2 -translate-y-1/2 z-40 p-4 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-110"
+        className="fixed right-2 md:right-4 top-1/2 -translate-y-1/2 z-40 p-2 md:p-4 rounded-full bg-primary/90 hover:bg-primary text-primary-foreground disabled:opacity-30 disabled:cursor-not-allowed transition-all shadow-lg hover:shadow-xl hover:scale-110"
         title="Next"
       >
-        <ChevronRight size={32} />
+        <ChevronRight size={20} className="md:size-32" />
       </button>
 
       {/* Slide Number - Floating in Bottom Right */}
-      <div className="fixed bottom-8 right-8 z-40 bg-background/95 backdrop-blur border border-border px-6 py-3 rounded-full shadow-lg">
-        <p className="text-sm font-semibold">
+      <div className="fixed bottom-4 md:bottom-8 right-2 md:right-8 z-40 bg-background/95 backdrop-blur border border-border px-4 md:px-6 py-2 md:py-3 rounded-full shadow-lg">
+        <p className="text-xs md:text-sm font-semibold">
           {currentSlide + 1} / {slides.length}
         </p>
       </div>
@@ -1012,29 +1012,29 @@ export default function PresentationPage() {
 // Dashboard Mockup (Slide 1)
 function DashboardMockup() {
   return (
-    <div className="mt-6 space-y-4">
+    <div className="mt-4 md:mt-6 space-y-3 md:space-y-4">
       {/* Stats Cards */}
-      <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
-        <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary">
-          <p className="text-sm text-muted-foreground">Total Pengecekan</p>
-          <p className="text-2xl font-bold text-primary mt-1">156</p>
+      <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4">
+        <div className="bg-primary/10 p-3 md:p-4 rounded-lg border-2 border-primary">
+          <p className="text-xs md:text-sm text-muted-foreground">Total Pengecekan</p>
+          <p className="text-xl md:text-2xl font-bold text-primary mt-1">156</p>
         </div>
-        <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary">
-          <p className="text-sm text-muted-foreground">Total Karyawan</p>
-          <p className="text-2xl font-bold text-primary mt-1">42</p>
+        <div className="bg-primary/10 p-3 md:p-4 rounded-lg border-2 border-primary">
+          <p className="text-xs md:text-sm text-muted-foreground">Total Karyawan</p>
+          <p className="text-xl md:text-2xl font-bold text-primary mt-1">42</p>
         </div>
-        <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary">
-          <p className="text-sm text-muted-foreground">Total Perangkat</p>
-          <p className="text-2xl font-bold text-primary mt-1">38</p>
+        <div className="bg-primary/10 p-3 md:p-4 rounded-lg border-2 border-primary">
+          <p className="text-xs md:text-sm text-muted-foreground">Total Perangkat</p>
+          <p className="text-xl md:text-2xl font-bold text-primary mt-1">38</p>
         </div>
-        <div className="bg-red-500/10 p-4 rounded-lg border-2 border-red-500">
-          <p className="text-sm text-muted-foreground">Perangkat Urgent</p>
-          <p className="text-2xl font-bold text-red-600 mt-1">5</p>
+        <div className="bg-red-500/10 p-3 md:p-4 rounded-lg border-2 border-red-500">
+          <p className="text-xs md:text-sm text-muted-foreground">Perangkat Urgent</p>
+          <p className="text-xl md:text-2xl font-bold text-red-600 mt-1">5</p>
         </div>
       </div>
 
       {/* Charts Grid */}
-      <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+      <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
         <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
           <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Distribusi Tipe Perangkat</h4>
           <div className="h-32 flex items-center justify-center gap-6">
@@ -1097,31 +1097,33 @@ function DashboardMockup() {
 // Header Mockup (Slide 2)
 function HeaderMockup() {
   return (
-    <div className="mt-6">
-      <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
-        <div className="flex items-center justify-between">
+    <div className="mt-4 md:mt-6">
+      <div className="bg-card border border-border rounded-lg p-3 md:p-4 shadow-sm">
+        <div className="flex flex-col md:flex-row items-start md:items-center justify-between gap-4">
           {/* Logo */}
-          <div className="flex items-center gap-3">
-            <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
-              <span className="text-white font-bold text-sm">TKI</span>
+          <div className="flex items-center gap-2 md:gap-3">
+            <div className="w-8 h-8 md:w-10 md:h-10 bg-primary rounded-full flex items-center justify-center shrink-0">
+              <span className="text-white font-bold text-xs md:text-sm">TKI</span>
             </div>
-            <span className="font-semibold text-lg">Sistem Pengecekan Perangkat</span>
+            <span className="font-semibold text-sm md:text-lg">Sistem Pengecekan Perangkat</span>
           </div>
 
-          {/* Navigation */}
-          <div className="flex items-center gap-1">
-            <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Dashboard</span>
-            <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Formulir</span>
-            <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Data Pengecekan</span>
-            <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Data Karyawan</span>
-          </div>
+          <div className="flex flex-col md:flex-row items-center gap-3 md:gap-1 w-full md:w-auto">
+            {/* Navigation */}
+            <div className="flex flex-wrap items-center justify-center gap-1 md:gap-1">
+              <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Dashboard</span>
+              <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Formulir</span>
+              <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Data Pengecekan</span>
+              <span className="px-2 md:px-4 py-1.5 md:py-2 text-xs md:text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">Data Karyawan</span>
+            </div>
 
-          {/* Language Toggle */}
-          <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg">
-            <span>🌐</span>
-            <span className="text-sm font-semibold text-primary">ID</span>
-            <span className="text-muted-foreground">/</span>
-            <span className="text-sm text-muted-foreground">EN</span>
+            {/* Language Toggle */}
+            <div className="flex items-center gap-2 px-3 md:px-4 py-1.5 md:py-2 bg-primary/10 rounded-lg shrink-0">
+              <span>🌐</span>
+              <span className="text-xs md:text-sm font-semibold text-primary">ID</span>
+              <span className="text-muted-foreground">/</span>
+              <span className="text-xs md:text-sm text-muted-foreground">EN</span>
+            </div>
           </div>
         </div>
       </div>
@@ -1132,46 +1134,46 @@ function HeaderMockup() {
 // Statistics Cards Mockup (Slide 3)
 function StatisticsCardsMockup() {
   return (
-    <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
-      <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
-        <div className="flex items-start gap-3">
-          <div className="text-3xl">📊</div>
+    <div className="mt-4 md:mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-3 md:gap-4">
+      <div className="bg-primary/10 p-4 md:p-6 rounded-lg border-2 border-primary">
+        <div className="flex items-start gap-2 md:gap-3">
+          <div className="text-2xl md:text-3xl">📊</div>
           <div>
-            <p className="text-sm text-muted-foreground">Total Pengecekan</p>
-            <p className="text-2xl font-bold text-primary">156</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Total Pengecekan</p>
+            <p className="text-xl md:text-2xl font-bold text-primary">156</p>
             <p className="text-xs text-muted-foreground mt-1">Semua pengecekan perangkat</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
-        <div className="flex items-start gap-3">
-          <div className="text-3xl">👥</div>
+      <div className="bg-primary/10 p-4 md:p-6 rounded-lg border-2 border-primary">
+        <div className="flex items-start gap-2 md:gap-3">
+          <div className="text-2xl md:text-3xl">👥</div>
           <div>
-            <p className="text-sm text-muted-foreground">Total Karyawan</p>
-            <p className="text-2xl font-bold text-primary">42</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Total Karyawan</p>
+            <p className="text-xl md:text-2xl font-bold text-primary">42</p>
             <p className="text-xs text-muted-foreground mt-1">Karyawan terdaftar</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
-        <div className="flex items-start gap-3">
-          <div className="text-3xl">💻</div>
+      <div className="bg-primary/10 p-4 md:p-6 rounded-lg border-2 border-primary">
+        <div className="flex items-start gap-2 md:gap-3">
+          <div className="text-2xl md:text-3xl">💻</div>
           <div>
-            <p className="text-sm text-muted-foreground">Total Perangkat</p>
-            <p className="text-2xl font-bold text-primary">38</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Total Perangkat</p>
+            <p className="text-xl md:text-2xl font-bold text-primary">38</p>
             <p className="text-xs text-muted-foreground mt-1">25 PC, 13 Laptop</p>
           </div>
         </div>
       </div>
 
-      <div className="bg-red-500/10 p-6 rounded-lg border-2 border-red-500">
-        <div className="flex items-start gap-3">
-          <div className="text-3xl">⚠️</div>
+      <div className="bg-red-500/10 p-4 md:p-6 rounded-lg border-2 border-red-500">
+        <div className="flex items-start gap-2 md:gap-3">
+          <div className="text-2xl md:text-3xl">⚠️</div>
           <div>
-            <p className="text-sm text-muted-foreground">Perangkat Urgent</p>
-            <p className="text-2xl font-bold text-red-600">5</p>
+            <p className="text-xs md:text-sm text-muted-foreground">Perangkat Urgent</p>
+            <p className="text-xl md:text-2xl font-bold text-red-600">5</p>
             <p className="text-xs text-muted-foreground mt-1">Perlu perbaikan segera</p>
           </div>
         </div>
