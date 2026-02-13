@@ -1,12 +1,21 @@
 'use client';
 
 import * as React from 'react';
-import { ChevronDown, X, Trash2, Keyboard, ArrowUp, ArrowDown, CornerDownLeft } from 'lucide-react';
+import { ChevronDown, X, Trash2, Keyboard, ArrowUp, ArrowDown, CornerDownLeft, AlertTriangle } from 'lucide-react';
 import { cn } from '@/lib/utils';
 import { deleteDropdownOption } from '@/lib/services/dropdown-options.service';
 import { toast } from 'sonner';
 import { Tooltip, TooltipContent, TooltipProvider, TooltipTrigger } from '@/components/ui/tooltip';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { Button } from '@/components/ui/button';
+import {
+  Dialog,
+  DialogContent,
+  DialogDescription,
+  DialogFooter,
+  DialogHeader,
+  DialogTitle,
+} from '@/components/ui/dialog';
 
 export interface SelectOption {
   value: string;
@@ -48,6 +57,10 @@ export function CreatableSelect({
   const [lastCreatedValue, setLastCreatedValue] = React.useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  
+  // Delete modal states
+  const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
+  const [deleteTargetOption, setDeleteTargetOption] = React.useState<SelectOption | null>(null);
 
   const filteredOptions = React.useMemo(() => {
     if (!inputValue) return options;
@@ -125,37 +138,50 @@ export function CreatableSelect({
     }
   };
 
-  const handleDelete = async (e: React.MouseEvent, option: SelectOption) => {
-    e.stopPropagation(); // Prevent the option from being selected
+  const handleDeleteClick = (e: React.MouseEvent, option: SelectOption) => {
+    e.stopPropagation(); // Prevent option from being selected
 
     if (!option._id) {
       console.error('Cannot delete option without ID');
       return;
     }
 
-    // Confirm deletion
-    if (!confirm(`Are you sure you want to delete "${option.label}"?`)) {
+    // Open delete confirmation modal
+    setDeleteTargetOption(option);
+    setDeleteModalOpen(true);
+  };
+
+  const handleDeleteConfirm = async () => {
+    if (!deleteTargetOption || !deleteTargetOption._id) {
       return;
     }
 
     try {
-      await deleteDropdownOption(option._id);
-      toast.success(`"${option.label}" deleted successfully`);
+      await deleteDropdownOption(deleteTargetOption._id);
+      toast.success(`"${deleteTargetOption.label}" deleted successfully`);
 
       // Call parent callback if provided
       if (onDelete) {
-        onDelete(option._id);
+        onDelete(deleteTargetOption._id);
       }
 
       // Clear input if the deleted option was selected
-      if (value === option.value) {
+      if (value === deleteTargetOption.value) {
         onChange('');
         setInputValue('');
       }
     } catch (error: any) {
       console.error('Error deleting option:', error);
       toast.error(error.message || 'Failed to delete option');
+    } finally {
+      setDeleteModalOpen(false);
+      setDeleteTargetOption(null);
     }
+  };
+
+  const handleDeleteCancel = () => {
+    setDeleteModalOpen(false);
+    setDeleteTargetOption(null);
   };
 
   const handleInputChange = (newValue: string) => {
@@ -298,7 +324,7 @@ export function CreatableSelect({
                 {!option.isNew && option._id && (
                   <button
                     type="button"
-                    onClick={(e) => handleDelete(e, option)}
+                    onClick={(e) => handleDeleteClick(e, option)}
                     className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
                     title="Delete option"
                   >
@@ -325,6 +351,29 @@ export function CreatableSelect({
             </div>
           </div>
         )}
+
+        {/* Delete Confirmation Modal */}
+        <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>
+          <DialogContent>
+            <DialogHeader>
+              <div className="flex items-center gap-3">
+                <AlertTriangle className="h-8 w-8 text-destructive" />
+                <DialogTitle>Delete Option</DialogTitle>
+              </div>
+            </DialogHeader>
+            <DialogDescription>
+              Are you sure you want to delete "{deleteTargetOption?.label}"?
+            </DialogDescription>
+            <DialogFooter>
+              <Button variant="outline" onClick={handleDeleteCancel}>
+                {t('common.cancel')}
+              </Button>
+              <Button variant="destructive" onClick={handleDeleteConfirm}>
+                {t('common.delete')}
+              </Button>
+            </DialogFooter>
+          </DialogContent>
+        </Dialog>
       </div>
     </TooltipProvider>
   );
