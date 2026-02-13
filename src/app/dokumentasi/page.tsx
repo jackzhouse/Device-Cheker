@@ -206,17 +206,36 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              {/* Screenshot Placeholder A1 */}
-              <ScreenshotPlaceholder
-                id="A1"
-                label={isIndonesian ? 'Screenshot Header dan Navigasi' : 'Header and Navigation Screenshot'}
-                instructions={
-                  isIndonesian
-                    ? 'Ambil screenshot header dengan menu navigasi. Tampilkan semua 4 menu utama dan tombol toggle bahasa.'
-                    : 'Take screenshot of header with navigation menu. Show all 4 main menus and language toggle button.'
-                }
-                dimensions="1600x200"
-              />
+              {/* Header Mockup */}
+              <div className="mt-6">
+                <div className="bg-card border border-border rounded-lg p-4 shadow-sm">
+                  <div className="flex items-center justify-between">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3">
+                      <div className="w-10 h-10 bg-primary rounded-full flex items-center justify-center">
+                        <span className="text-white font-bold text-sm">TKI</span>
+                      </div>
+                      <span className="font-semibold text-lg">{isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}</span>
+                    </div>
+
+                    {/* Navigation */}
+                    <div className="flex items-center gap-1">
+                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Dashboard' : 'Dashboard'}</span>
+                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Formulir' : 'Form'}</span>
+                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Pengecekan' : 'Check Data'}</span>
+                      <span className="px-4 py-2 text-sm text-muted-foreground hover:bg-accent rounded-lg transition-colors cursor-pointer">{isIndonesian ? 'Data Karyawan' : 'Employee Data'}</span>
+                    </div>
+
+                    {/* Language Toggle */}
+                    <div className="flex items-center gap-2 px-4 py-2 bg-primary/10 rounded-lg">
+                      <span>🌐</span>
+                      <span className="text-sm font-semibold text-primary">ID</span>
+                      <span className="text-muted-foreground">/</span>
+                      <span className="text-sm text-muted-foreground">EN</span>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* Section 2: Memulai Sistem */}
@@ -337,12 +356,52 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              <ScreenshotPlaceholder
-                id="B1"
-                label={isIndonesian ? 'Screenshot Dashboard Statistik' : 'Dashboard Statistics Screenshot'}
-                instructions={isIndonesian ? 'Ambil screenshot kartu statistik di dashboard.' : 'Take screenshot of statistics cards on dashboard.'}
-                dimensions="1400x400"
-              />
+              {/* Statistics Cards Mockup */}
+              <div className="mt-6 grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">📊</div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{isIndonesian ? 'Total Pengecekan' : 'Total Checks'}</p>
+                      <p className="text-2xl font-bold text-primary">156</p>
+                      <p className="text-xs text-muted-foreground mt-1">{isIndonesian ? 'Semua pengecekan perangkat' : 'All device checks'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">👥</div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{isIndonesian ? 'Total Karyawan' : 'Total Employees'}</p>
+                      <p className="text-2xl font-bold text-primary">42</p>
+                      <p className="text-xs text-muted-foreground mt-1">{isIndonesian ? 'Karyawan terdaftar' : 'Registered employees'}</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 p-6 rounded-lg border-2 border-primary">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">💻</div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{isIndonesian ? 'Total Perangkat' : 'Total Devices'}</p>
+                      <p className="text-2xl font-bold text-primary">38</p>
+                      <p className="text-xs text-muted-foreground mt-1">25 PC, 13 Laptop</p>
+                    </div>
+                  </div>
+                </div>
+
+                <div className="bg-red-500/10 p-6 rounded-lg border-2 border-red-500">
+                  <div className="flex items-start gap-3">
+                    <div className="text-3xl">⚠️</div>
+                    <div>
+                      <p className="text-sm text-muted-foreground">{isIndonesian ? 'Perangkat Urgent' : 'Urgent Devices'}</p>
+                      <p className="text-2xl font-bold text-red-600">5</p>
+                      <p className="text-xs text-muted-foreground mt-1">{isIndonesian ? 'Perlu perbaikan segera' : 'Needs immediate repair'}</p>
+                    </div>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* Section 4: Manajemen Karyawan */}
@@ -394,12 +453,40 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              <ScreenshotPlaceholder
-                id="C1"
-                label={isIndonesian ? 'Screenshot Halaman Karyawan' : 'Employee Page Screenshot'}
-                instructions={isIndonesian ? 'Ambil screenshot halaman Data Karyawan dengan grid kartu.' : 'Take screenshot of Data Karyawan page with card grid.'}
-                dimensions="1600x800"
-              />
+              {/* Employee Cards Mockup */}
+              <div className="mt-6">
+                <p className="text-sm text-muted-foreground mb-4">{isIndonesian ? 'Daftar karyawan di sistem:' : 'Employee list in system:'}</p>
+                <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
+                  {[
+                    { name: "Ahmad Wijaya", pos: isIndonesian ? 'IT Support' : 'IT Support', dept: 'IT', status: 'Aktif' },
+                    { name: "Dewi Lestari", pos: isIndonesian ? 'HR Manager' : 'HR Manager', dept: 'HR', status: 'Aktif' },
+                    { name: "Eko Prasetyo", pos: isIndonesian ? 'Accountant' : 'Accountant', dept: 'Finance', status: 'Aktif' },
+                    { name: "Fani Rahmawati", pos: 'Marketing', dept: 'Marketing', status: isIndonesian ? 'Cuti' : 'Leave' },
+                  ].map((emp, idx) => (
+                    <div key={idx} className="bg-card border border-border rounded-lg p-4 shadow-sm">
+                      <div className="flex items-center gap-3 mb-3">
+                        <div className="w-12 h-12 bg-primary/20 rounded-full flex items-center justify-center">
+                          <span className="text-lg font-bold text-primary">{emp.name.charAt(0)}</span>
+                        </div>
+                        <div>
+                          <p className="font-semibold text-sm">{emp.name}</p>
+                          <p className="text-xs text-muted-foreground">{emp.pos}</p>
+                        </div>
+                      </div>
+                      <div className="flex items-center gap-2 mb-3">
+                        <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">{emp.dept}</span>
+                        <span className={`px-2 py-1 text-xs rounded-full ${emp.status === 'Aktif' || emp.status === 'Active' ? 'bg-green-500/10 text-green-600' : 'bg-yellow-500/10 text-yellow-600'}`}>{emp.status}</span>
+                      </div>
+                      <div className="flex gap-2">
+                        <span className="text-xs text-muted-foreground">👁️</span>
+                        <span className="text-xs text-muted-foreground">📥</span>
+                        <span className="text-xs text-muted-foreground">✏️</span>
+                        <span className="text-xs text-muted-foreground">🗑️</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </section>
 
             {/* Section 5: Formulir Pengecekan */}
@@ -448,12 +535,40 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              <ScreenshotPlaceholder
-                id="D1"
-                label={isIndonesian ? 'Screenshot Formulir Lengkap' : 'Complete Form Screenshot'}
-                instructions={isIndonesian ? 'Ambil screenshot halaman formulir lengkap dengan sidebar navigasi.' : 'Take screenshot of complete form page with navigation sidebar.'}
-                dimensions="1920x1080"
-              />
+              {/* Form Mockup */}
+              <div className="mt-6 space-y-3">
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <label className="text-sm font-semibold text-primary">{isIndonesian ? 'Pilih Karyawan' : 'Select Employee'}</label>
+                    <span className="text-red-500 font-bold">*</span>
+                  </div>
+                  <div className="bg-background border border-border rounded-lg p-3 flex items-center justify-between">
+                    <span className="text-sm text-muted-foreground">{isIndonesian ? 'Budi Santoso - IT Support' : 'Budi Santoso - IT Support'}</span>
+                    <span className="text-muted-foreground">▼</span>
+                  </div>
+                </div>
+
+                <div className="bg-muted p-4 rounded-lg">
+                  <div className="flex items-center gap-2 mb-2">
+                    <label className="text-sm font-semibold text-primary">{isIndonesian ? 'Tipe Perangkat' : 'Device Type'}</label>
+                    <span className="text-red-500 font-bold">*</span>
+                  </div>
+                  <div className="flex gap-2">
+                    <span className="px-3 py-1 text-sm rounded-full bg-primary text-primary-foreground">PC</span>
+                    <span className="px-3 py-1 text-sm rounded-full bg-background border border-border text-muted-foreground">Laptop</span>
+                  </div>
+                </div>
+
+                <div className="bg-primary/10 p-4 rounded-lg border-2 border-primary flex items-center gap-3">
+                  <div className="w-5 h-5 border-2 border-primary rounded flex items-center justify-center">
+                    <span className="text-primary text-sm">✓</span>
+                  </div>
+                  <div>
+                    <label className="text-sm font-semibold text-primary">{isIndonesian ? 'Gunakan Versi Terakhir' : 'Use Last Version'}</label>
+                    <p className="text-xs text-muted-foreground">{isIndonesian ? 'Auto-fill data pengecekan sebelumnya' : 'Auto-fill previous check data'}</p>
+                  </div>
+                </div>
+              </div>
             </section>
 
             {/* Section 6: Melihat Data Pengecekan */}
@@ -515,12 +630,46 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              <ScreenshotPlaceholder
-                id="E1"
-                label={isIndonesian ? 'Screenshot Data Pengecekan' : 'Check Data Screenshot'}
-                instructions={isIndonesian ? 'Ambil screenshot halaman Data Pengecekan dengan grid kartu.' : 'Take screenshot of Data Pengecekan page with card grid.'}
-                dimensions="1600x900"
-              />
+              {/* Check Data Page Mockup */}
+              <div className="mt-6 space-y-4">
+                {/* Search & Filter */}
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex-1 bg-muted rounded-lg p-3 flex items-center gap-2">
+                    <span className="text-muted-foreground">🔍</span>
+                    <span className="text-sm text-muted-foreground">{isIndonesian ? 'Cari nama, ID, merk...' : 'Search name, ID, brand...'}</span>
+                  </div>
+                  <div className="bg-background border border-border rounded-lg p-3 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{isIndonesian ? 'Filter Kondisi ▼' : 'Filter Condition ▼'}</span>
+                  </div>
+                  <div className="bg-background border border-border rounded-lg p-3 flex items-center gap-2">
+                    <span className="text-sm text-muted-foreground">{isIndonesian ? 'Filter Kepemilikan ▼' : 'Filter Ownership ▼'}</span>
+                  </div>
+                </div>
+
+                {/* Cards Grid */}
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                  {[
+                    { name: "Ahmad Wijaya", device: "Dell Latitude", status: isIndonesian ? "Sesuai" : "Suitable", color: "green" },
+                    { name: "Siti Aminah", device: "MacBook Pro", status: isIndonesian ? "Perlu Perbaikan" : "Needs Repair", color: "red" },
+                  ].map((item, idx) => (
+                    <div key={idx} className={`bg-card border ${item.color === 'red' ? 'border-red-500' : 'border-green-500'} rounded-lg p-4 shadow-sm`}>
+                      <div className="flex items-center justify-between mb-3">
+                        <div>
+                          <p className="font-semibold text-sm">{item.name}</p>
+                          <p className="text-xs text-muted-foreground">{item.device}</p>
+                        </div>
+                        <span className={`px-2 py-1 text-xs rounded-full ${item.color === 'red' ? 'bg-red-500/10 text-red-600' : 'bg-green-500/10 text-green-600'}`}>{item.status}</span>
+                      </div>
+                      <div className="flex gap-2 text-sm">
+                        <span className="text-muted-foreground">👁️</span>
+                        <span className="text-muted-foreground">📥</span>
+                        <span className="text-muted-foreground">✏️</span>
+                        <span className="text-muted-foreground">🗑️</span>
+                      </div>
+                    </div>
+                  ))}
+                </div>
+              </div>
             </section>
 
             {/* Section 7: Pintasan Keyboard */}
@@ -576,12 +725,54 @@ export default function DokumentasiPage() {
                 </div>
               </div>
 
-              <ScreenshotPlaceholder
-                id="F1"
-                label={isIndonesian ? 'Screenshot Modal Bantuan' : 'Help Modal Screenshot'}
-                instructions={isIndonesian ? 'Ambil screenshot modal bantuan/help dengan daftar pintasan keyboard.' : 'Take screenshot of help modal with keyboard shortcut list.'}
-                dimensions="1200x800"
-              />
+              {/* Help Modal Mockup */}
+              <div className="mt-6 space-y-4">
+                {/* Floating Panel */}
+                <div className="bg-background/95 backdrop-blur border border-border p-4 rounded-lg shadow-lg max-w-xs">
+                  <p className="text-sm font-semibold text-primary mb-2">{isIndonesian ? 'Pintasan Aktif' : 'Active Shortcuts'}</p>
+                  <div className="space-y-1">
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="bg-primary/10 px-2 py-1 rounded text-primary">Ctrl</span>
+                      <span className="text-muted-foreground">+</span>
+                      <span className="bg-primary/10 px-2 py-1 rounded text-primary">S</span>
+                      <span className="text-muted-foreground">{isIndonesian ? 'Simpan' : 'Save'}</span>
+                    </div>
+                    <div className="flex items-center gap-2 text-xs">
+                      <span className="bg-primary/10 px-2 py-1 rounded text-primary">Alt</span>
+                      <span className="text-muted-foreground">+</span>
+                      <span className="bg-primary/10 px-2 py-1 rounded text-primary">2</span>
+                      <span className="text-muted-foreground">{isIndonesian ? 'Detail Perangkat' : 'Device Details'}</span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Help Table */}
+                <div className="bg-muted p-6 rounded-lg">
+                  <h3 className="text-xl font-semibold text-primary mb-4">{isIndonesian ? 'Pintasan Keyboard' : 'Keyboard Shortcuts'}</h3>
+                  <table className="w-full text-sm">
+                    <thead>
+                      <tr className="border-b border-border">
+                        <th className="text-left pb-2 font-semibold">{isIndonesian ? 'Pintasan' : 'Shortcut'}</th>
+                        <th className="text-left pb-2 font-semibold">{isIndonesian ? 'Aksi' : 'Action'}</th>
+                      </tr>
+                    </thead>
+                    <tbody>
+                      {[
+                        { key: 'Ctrl/Cmd + S', action: isIndonesian ? 'Simpan formulir' : 'Save form' },
+                        { key: 'Alt + 1-8', action: isIndonesian ? 'Lompat ke bagian formulir' : 'Jump to form section' },
+                        { key: 'Tab', action: isIndonesian ? 'Pindah ke field berikutnya' : 'Move to next field' },
+                        { key: 'Enter', action: isIndonesian ? 'Submit formulir' : 'Submit form' },
+                        { key: 'Esc', action: isIndonesian ? 'Tutup modal' : 'Close modal' },
+                      ].map((s, idx) => (
+                        <tr key={idx} className="border-b border-border/50">
+                          <td className="py-3 font-mono bg-primary/10 rounded px-2 inline-block mr-2">{s.key}</td>
+                          <td className="py-3 text-muted-foreground">{s.action}</td>
+                        </tr>
+                      ))}
+                    </tbody>
+                  </table>
+                </div>
+              </div>
             </section>
 
             {/* Section 8: Pemecahan Masalah */}
@@ -715,7 +906,7 @@ export default function DokumentasiPage() {
                 <strong>{isIndonesian ? 'Versi:' : 'Version:'}</strong> 1.0 | <strong>{isIndonesian ? 'Tanggal:' : 'Date:'}</strong> 13 Februari 2026
               </p>
               <p>
-                {isIndonesian ? 'Dokumentasi dibuat oleh: Cline AI Assistant' : 'Documentation created by: Cline AI Assistant'}
+                {isIndonesian ? 'Dokumentasi dibuat oleh: Tim IT Wae' : 'Documentation created by: IT Team Wae'}
               </p>
               <p className="mt-4">
                 {isIndonesian ? '© 2026 Teknologi Kartu Indonesia' : '© 2026 Teknologi Kartu Indonesia'}

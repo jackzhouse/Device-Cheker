@@ -1604,7 +1604,7 @@ Setiap kartu pengecekan menampilkan:
 **Dokumen ini adalah Panduan Pengguna resmi untuk Sistem Pengecekan Perangkat**
 **Versi:** 1.0  
 **Tanggal:** 13 Februari 2026  
-**Dokumentasi dibuat oleh:** Cline AI Assistant  
+**Dokumentasi dibuat oleh:** Tim IT Wae  
 **Hak Cipta:** © 2026 Teknologi Kartu Indonesia
 
 ---
