@@ -91,6 +91,7 @@ export interface DeviceCheck {
   version: number;
   createdAt: string;
   updatedAt: string;
+  isMissingCheck?: boolean;
 }
 
 export interface DeviceCheckParams extends PaginationParams {
@@ -99,6 +100,8 @@ export interface DeviceCheckParams extends PaginationParams {
   ownership?: string;
   dateFrom?: string;
   dateTo?: string;
+  version?: string;
+  missingVersion?: string;
 }
 
 export async function getDeviceChecks(

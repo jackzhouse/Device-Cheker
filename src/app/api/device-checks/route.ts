@@ -63,6 +63,99 @@ export async function GET(request: NextRequest) {
     const dateTo = searchParams.get('dateTo') || '';
     const sortBy = searchParams.get('sortBy') || 'checkDate';
     const sortOrder = searchParams.get('sortOrder') || 'desc';
+    const version = searchParams.get('version') || '';
+    const missingVersion = searchParams.get('missingVersion');
+
+    // Handle missingVersion filter - return employees who haven't completed this version
+    if (missingVersion) {
+      const targetVersion = parseInt(missingVersion);
+      if (!isNaN(targetVersion)) {
+        // Get all active employees
+        const activeEmployees = await Employee.find({ status: 'Active' }).lean();
+        const employeeIds = activeEmployees.map(e => e._id);
+        
+        // Get latest version for each employee
+        const latestChecks = await DeviceCheck.aggregate([
+          { $match: { employeeId: { $in: employeeIds } } },
+          { $sort: { checkDate: -1, version: -1 } },
+          { $group: { 
+            _id: '$employeeId', 
+            latestVersion: { $first: '$version' },
+            latestCheckDate: { $first: '$checkDate' }
+          }}
+        ]);
+        
+        // Map employee ID to latest version
+        const versionMap = new Map(
+          latestChecks.map((lc: any) => [lc._id.toString(), lc.latestVersion])
+        );
+        
+        // Filter employees who don't have the target version
+        const missingVersionEmployees = activeEmployees.filter(employee => {
+          const latestVersion = versionMap.get(employee._id.toString());
+          return !latestVersion || latestVersion < targetVersion;
+        });
+        
+        // Return as device checks format (with employee data)
+        const transformedChecks = missingVersionEmployees.map((employee: any) => ({
+          _id: `missing-${employee._id}`,
+          employeeId: employee._id.toString(),
+          employeeSnapshot: {
+            employeeId: employee.employeeId,
+            fullName: employee.fullName,
+            position: employee.position,
+            department: employee.department,
+          },
+          employee: employee,
+          deviceDetail: {
+            deviceType: 'PC',
+            ownership: 'Company',
+            deviceBrand: '-',
+            deviceModel: '-',
+            serialNumber: '-',
+          },
+          operatingSystem: {
+            osType: 'Windows',
+            osVersion: '-',
+            osLicense: 'Unknown',
+            osRegularUpdate: false,
+          },
+          deviceCondition: {
+            deviceSuitability: 'Unknown',
+            batterySuitability: '-',
+            keyboardCondition: '-',
+            touchpadCondition: '-',
+            monitorCondition: '-',
+            wifiCondition: '-',
+          },
+          workApplications: [],
+          nonWorkApplications: [],
+          security: {
+            antivirus: { status: 'Inactive', list: [] },
+            vpn: { status: 'Not Available', list: [] },
+          },
+          additionalInfo: {
+            passwordUsage: 'Not Available',
+          },
+          checkDate: employee.lastCheckDate || new Date('2000-01-01'),
+          version: versionMap.get(employee._id.toString()) || 0,
+          createdAt: employee.createdAt,
+          updatedAt: employee.updatedAt,
+          isMissingCheck: true,
+        }));
+        
+        return NextResponse.json({
+          success: true,
+          data: transformedChecks,
+          pagination: {
+            page: 1,
+            limit: transformedChecks.length,
+            total: transformedChecks.length,
+            totalPages: 1,
+          },
+        });
+      }
+    }
 
     // Build query
     const query: any = {};
@@ -101,6 +194,11 @@ export async function GET(request: NextRequest) {
       if (dateTo) {
         query.checkDate.$lte = new Date(dateTo);
       }
+    }
+
+    // Filter by version
+    if (version) {
+      query.version = parseInt(version);
     }
 
     // Build sort object

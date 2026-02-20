@@ -36,6 +36,9 @@ export default function CheckDataPage() {
   const [filters, setFilters] = useState({
     suitability: '',
     ownership: '',
+    version: '',
+    showMissingVersion: false,
+    targetVersion: '2',
   });
   const [groupByEmployee, setGroupByEmployee] = useState(false);
   const [deleteModalOpen, setDeleteModalOpen] = useState(false);
@@ -43,12 +46,24 @@ export default function CheckDataPage() {
 
   React.useEffect(() => {
     fetchChecks();
-  }, []);
+  }, [filters]);
 
   const fetchChecks = async () => {
     setLoading(true);
     try {
-      const response = await getDeviceChecks({ limit: 100 });
+      const params: any = { limit: 100 };
+      
+      // Add version filter
+      if (filters.version && !filters.showMissingVersion) {
+        params.version = filters.version;
+      }
+      
+      // Add missing version filter
+      if (filters.showMissingVersion && filters.targetVersion) {
+        params.missingVersion = filters.targetVersion;
+      }
+      
+      const response = await getDeviceChecks(params);
       if (response.success && response.data) {
         setChecks(response.data);
       }
@@ -157,8 +172,9 @@ export default function CheckDataPage() {
 
     const matchesSuitability = !filters.suitability || check.deviceCondition.deviceSuitability?.toLowerCase() === filters.suitability?.toLowerCase();
     const matchesOwnership = !filters.ownership || check.deviceDetail.ownership?.toLowerCase() === filters.ownership?.toLowerCase();
+    const matchesVersion = !filters.version || check.version === parseInt(filters.version);
 
-    return matchesSearch && matchesSuitability && matchesOwnership;
+    return matchesSearch && matchesSuitability && matchesOwnership && matchesVersion;
   });
 
   // Group checks by employee
@@ -231,27 +247,63 @@ export default function CheckDataPage() {
               <option value="company">{t('form.deviceDetail.ownershipOptions.company')}</option>
               <option value="personal">{t('form.deviceDetail.ownershipOptions.personal')}</option>
             </select>
+            <select
+              value={filters.version}
+              onChange={(e) => setFilters({ ...filters, version: e.target.value, showMissingVersion: false })}
+              className="h-10 rounded-md border bg-background px-3 text-sm"
+              disabled={filters.showMissingVersion}
+            >
+              <option value="">All Versions</option>
+              <option value="1">v1</option>
+              <option value="2">v2</option>
+              <option value="3">v3</option>
+              <option value="4">v4</option>
+            </select>
             <Button
               variant="outline"
               onClick={() => {
-                setFilters({ suitability: '', ownership: '' });
+                setFilters({ suitability: '', ownership: '', version: '', showMissingVersion: false, targetVersion: '2' });
                 setSearchTerm('');
               }}
             >
               {t('checkData.filters.clearFilters')}
             </Button>
           </div>
-          <div className="mt-4 flex items-center gap-2">
-            <input
-              type="checkbox"
-              id="groupBy"
-              checked={groupByEmployee}
-              onChange={(e) => setGroupByEmployee(e.target.checked)}
-              className="h-4 w-4"
-            />
-            <label htmlFor="groupBy" className="text-sm cursor-pointer">
-              {t('checkData.filters.groupByEmployee')}
-            </label>
+          <div className="mt-4 flex flex-col sm:flex-row sm:items-center gap-2">
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="groupBy"
+                checked={groupByEmployee}
+                onChange={(e) => setGroupByEmployee(e.target.checked)}
+                className="h-4 w-4"
+              />
+              <label htmlFor="groupBy" className="text-sm cursor-pointer">
+                {t('checkData.filters.groupByEmployee')}
+              </label>
+            </div>
+            <div className="flex items-center gap-2">
+              <input
+                type="checkbox"
+                id="showMissingVersion"
+                checked={filters.showMissingVersion}
+                onChange={(e) => setFilters({ ...filters, showMissingVersion: e.target.checked, version: '' })}
+                className="h-4 w-4"
+              />
+              <label htmlFor="showMissingVersion" className="text-sm cursor-pointer">
+                Show Employees Missing Check Version
+              </label>
+              <select
+                value={filters.targetVersion}
+                onChange={(e) => setFilters({ ...filters, targetVersion: e.target.value })}
+                className="h-8 rounded-md border bg-background px-2 text-sm"
+              >
+                <option value="1">v1</option>
+                <option value="2">v2</option>
+                <option value="3">v3</option>
+                <option value="4">v4</option>
+              </select>
+            </div>
           </div>
         </CardContent>
       </Card>
@@ -270,7 +322,6 @@ export default function CheckDataPage() {
             const firstCheck = employeeChecks[0];
             const employee = firstCheck.employeeSnapshot;
             const displayEmployeeId = employee?.employeeId || firstCheck.employee?.employeeId || 'N/A';
-            console.log(employee, 'employee')
             return (
               <Card key={employeeId}>
                 <CardHeader>
@@ -463,7 +514,6 @@ function CheckCard({
       </CardHeader>
       <CardContent>
         {!compact && (
-
           <div className="space-y-2 mb-4">
             <div className="flex items-center gap-2 text-xs sm:text-sm">
               <Laptop className="h-4 w-4 text-muted-foreground" />

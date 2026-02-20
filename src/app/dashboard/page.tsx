@@ -54,8 +54,27 @@ interface StatisticsData {
     checkDate: string;
     version: number;
   }>;
+  missingVersionV2: Array<{
+    _id: string;
+    employeeId: string;
+    fullName: string;
+    position: string;
+    department?: string;
+    latestVersion: number;
+    lastCheckDate?: Date;
+  }>;
   monthlyData: Array<{ month: string; count: number }>;
   departmentBreakdown: Record<string, number>;
+  summary: {
+    totalChecks: number;
+    totalEmployees: number;
+    totalPCs: number;
+    totalLaptops: number;
+    companyOwned: number;
+    personalOwned: number;
+    urgentDevicesCount: number;
+    missingV2Count: number;
+  };
 }
 
 const COLORS = {
@@ -312,6 +331,58 @@ export default function DashboardPage() {
         </FadeIn>
       </div>
 
+      {/* Missing Version V2 Section */}
+      <FadeIn delay={500}>
+        <Card className="border-amber-200">
+          <CardHeader className="border-b border-amber-200 bg-amber-50">
+            <div className="flex items-center gap-2">
+              <AlertTriangle className="h-5 w-5 text-amber-600" />
+              <CardTitle className="text-amber-800 text-base sm:text-lg">
+                Employees Missing v2 Checks ({data.summary.missingV2Count})
+              </CardTitle>
+            </div>
+          </CardHeader>
+          <CardContent className="pt-4 sm:pt-6">
+            {data.missingVersionV2.length === 0 ? (
+              <div className="text-center py-8 text-muted-foreground">
+                <p>All employees have completed v2 checks</p>
+              </div>
+            ) : (
+              <div className="space-y-4 max-h-[60vh] overflow-y-auto">
+                {data.missingVersionV2.map((employee) => (
+                  <div
+                    key={employee._id}
+                    className="flex flex-col sm:flex-row sm:items-start sm:justify-between gap-3 p-4 border-l-4 bg-amber-50 rounded-lg"
+                    style={{ borderLeftColor: '#f59e0b' }}
+                  >
+                    <div className="flex-1">
+                      <div className="font-semibold text-base sm:text-lg">{employee.fullName}</div>
+                      <div className="text-sm text-muted-foreground">{employee.position}</div>
+                      {employee.department && (
+                        <div className="text-xs text-muted-foreground">{employee.department}</div>
+                      )}
+                      <div className="flex items-center gap-2 mt-2">
+                        <Badge variant="secondary">
+                          ID: {employee.employeeId}
+                        </Badge>
+                        <Badge variant={employee.latestVersion === 0 ? "destructive" : "secondary"}>
+                          Latest: v{employee.latestVersion}
+                        </Badge>
+                        {employee.lastCheckDate && (
+                          <span className="text-muted-foreground text-xs">
+                            Last: {new Date(employee.lastCheckDate).toLocaleDateString()}
+                          </span>
+                        )}
+                      </div>
+                    </div>
+                  </div>
+                ))}
+              </div>
+            )}
+          </CardContent>
+        </Card>
+      </FadeIn>
+
       {/* Charts Grid */}
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4">
         {/* Device Type Pie Chart */}
@@ -401,7 +472,7 @@ export default function DashboardPage() {
                     </Pie>
                     <Tooltip />
                     <Legend />
-                  </PieChart>
+                </PieChart>
               </ResponsiveContainer>
             </CardContent>
           </Card>

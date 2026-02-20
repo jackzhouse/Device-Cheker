@@ -167,6 +167,37 @@ export async function GET(request: Request) {
       return acc;
     }, {} as Record<string, number>);
 
+    // Get employees missing v2 checks
+    const activeEmployees = await Employee.find({ status: 'Active' }).lean();
+    const employeeIds = activeEmployees.map(e => e._id);
+    
+    const latestChecks = await DeviceCheck.aggregate([
+      { $match: { employeeId: { $in: employeeIds } } },
+      { $sort: { checkDate: -1, version: -1 } },
+      { $group: { 
+        _id: '$employeeId', 
+        latestVersion: { $first: '$version' },
+        latestCheckDate: { $first: '$checkDate' }
+      }}
+    ]);
+    
+    const versionMap = new Map(
+      latestChecks.map((lc: any) => [lc._id.toString(), lc.latestVersion])
+    );
+    
+    const missingVersionEmployees = activeEmployees.filter(employee => {
+      const latestVersion = versionMap.get(employee._id.toString());
+      return !latestVersion || latestVersion < 2;
+    }).map(employee => ({
+      _id: employee._id,
+      employeeId: employee.employeeId,
+      fullName: employee.fullName,
+      position: employee.position,
+      department: employee.department,
+      latestVersion: versionMap.get(employee._id.toString()) || 0,
+      lastCheckDate: employee.lastCheckDate,
+    }));
+
     return NextResponse.json({
       success: true,
       data: {
@@ -182,6 +213,7 @@ export async function GET(request: Request) {
         urgentDevices: urgentDevicesFormatted,
         monthlyData,
         departmentBreakdown,
+        missingVersionV2: missingVersionEmployees,
         summary: {
           totalChecks,
           totalEmployees,
@@ -190,6 +222,7 @@ export async function GET(request: Request) {
           companyOwned: ownership.Company,
           personalOwned: ownership.Personal,
           urgentDevicesCount: urgentDevices.length,
+          missingV2Count: missingVersionEmployees.length,
         },
       },
     });
