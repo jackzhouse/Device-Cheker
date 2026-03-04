@@ -138,8 +138,8 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   // ============ HEADER SECTION (70mm height) ============
   const headerHeight = 70;
 
-  // Dark background
-  doc.setFillColor(...COLORS.primaryDark);
+  // Blue background
+  doc.setFillColor(...COLORS.secondaryBlue);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
   // TKI Logo (84x40 PNG)
@@ -563,9 +563,9 @@ export async function generateEmployeeHistoryPDF(
   let yPos = 20;
   const lineHeight = 8;
 
-  // ============ HEADER SECTION ============
+  // Blue background
   const headerHeight = 60;
-  doc.setFillColor(...COLORS.primaryDark);
+  doc.setFillColor(...COLORS.secondaryBlue);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
 
   // TKI Logo (84x40 PNG)

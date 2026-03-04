@@ -122,11 +122,12 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
         { h: 'OS', w: 26 },
         { h: 'Own', w: 16 },
         { h: 'Status', w: 28 },
-        { h: 'Condition / Notes', w: 45 },
-        { h: 'Check Date', w: 22 },
-        { h: 'v', w: 10 },
+        { h: 'Condition', w: 35 },
+        { h: 'Notes', w: 35 },
+        { h: 'Check Date', w: 20 },
+        { h: 'v', w: 7 },
     ];
-    const rowH = 8, cellPad = 2;
+    const rowH = 10, cellPad = 2;
 
     const drawColHeaders = (startY: number) => {
         let x = lm;
@@ -135,6 +136,7 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
         doc.setFont('helvetica', 'bold');
         doc.setFontSize(7);
         cols.forEach(col => {
+            fill(doc, C.blue);
             doc.rect(x, startY, col.w, rowH, 'F');
             doc.text(col.h, x + cellPad, startY + 5.5);
             x += col.w;
@@ -202,7 +204,8 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
             { v: c.operatingSystem.osType, sub: c.operatingSystem.osVersion, twoLine: true },
             { v: c.deviceDetail.ownership, twoLine: false },
             { v: c.deviceCondition.deviceSuitability, color: sc, twoLine: false },
-            { v: conditionLine, sub: notesLine, twoLine: true },
+            { v: conditionLine, twoLine: false }, // Condition (special renderer will use c.deviceCondition)
+            { v: notesLine, twoLine: false },     // Notes
             { v: fmtDate(c.checkDate), twoLine: false },
             { v: `v${c.version}`, twoLine: false },
         ];
@@ -212,39 +215,37 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
             const col = cols[ci];
             const maxW = col.w - cellPad * 2;
 
-            // Special renderer for the Condition / Notes column (index 7)
+            // Special renderer for the Condition column (index 7)
             if (ci === 7) {
                 const cond = c.deviceCondition;
-                const condPairs = [
-                    ['Bat', cond.batterySuitability],
-                    ['KB', cond.keyboardCondition],
-                    ['TP', cond.touchpadCondition],
-                    ['Mon', cond.monitorCondition],
-                    ['WiFi', cond.wifiCondition],
-                ];
-                // Render 3 lines: Bat/KB, TP/Mon, WiFi
-                const lineGroups = [
-                    condPairs.slice(0, 2),
-                    condPairs.slice(2, 4),
-                    condPairs.slice(4),
-                ];
-                doc.setFontSize(5.5);
+
+                // 2 condition lines that fit within 10mm row height better
+                const line1 = `Bat:${cond.batterySuitability}  KB:${cond.keyboardCondition}`;
+                const line2 = `TP:${cond.touchpadCondition}  Mon:${cond.monitorCondition}`;
+                const line3 = `WiFi:${cond.wifiCondition}`;
+
                 doc.setFont('helvetica', 'normal');
-                let ly = yRow + 2;
-                lineGroups.forEach(group => {
-                    const lineStr = group.map(([k, v]) => `${k}: ${v}`).join('   ');
-                    txt(doc, C.black);
-                    const safe = doc.splitTextToSize(lineStr, maxW)[0] || '';
-                    doc.text(safe, x + cellPad, ly);
-                    ly += 2.2;
-                });
-                // Notes sub-line
+                doc.setFontSize(5.5);
+                txt(doc, C.black);
+                doc.text(doc.splitTextToSize(line1, maxW)[0] || '', x + cellPad, yRow + 2.5);
+                doc.text(doc.splitTextToSize(line2, maxW)[0] || '', x + cellPad, yRow + 5.0);
+                doc.text(doc.splitTextToSize(line3, maxW)[0] || '', x + cellPad, yRow + 7.5);
+
+                x += col.w;
+                return;
+            }
+
+            // Special renderer for Notes column (index 8)
+            if (ci === 8) {
                 if (notesLine) {
-                    doc.setFontSize(4.8);
+                    doc.setFontSize(5.5);
                     txt(doc, C.darkGray);
                     doc.setFont('helvetica', 'italic');
-                    const notesSafe = doc.splitTextToSize(notesLine, maxW)[0] || '';
-                    doc.text(notesSafe, x + cellPad, ly + 0.5);
+                    const splitNotes = doc.splitTextToSize(notesLine, maxW);
+                    // Show up to 3 lines of notes
+                    splitNotes.slice(0, 3).forEach((line: string, index: number) => {
+                        doc.text(line, x + cellPad, yRow + 3.0 + (index * 2.5));
+                    });
                     doc.setFont('helvetica', 'normal');
                 }
                 x += col.w;
