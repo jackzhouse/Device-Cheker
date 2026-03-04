@@ -19,23 +19,23 @@ export interface Translations {
     next: string;
     add: string;
     remove: string;
-      tooltips: {
-        deleteOption: string;
-        addItem: string;
-        viewDetails: string;
-        downloadPDF: string;
-        editCheck: string;
-        deleteCheck: string;
-        viewHistory: string;
-        editEmployee: string;
-        deleteEmployee: string;
-        addWorkApp: string;
-        addNonWorkApp: string;
-        addAntivirus: string;
-        addVPN: string;
-        addStorage: string;
-        removeItem: string;
-      };
+    tooltips: {
+      deleteOption: string;
+      addItem: string;
+      viewDetails: string;
+      downloadPDF: string;
+      editCheck: string;
+      deleteCheck: string;
+      viewHistory: string;
+      editEmployee: string;
+      deleteEmployee: string;
+      addWorkApp: string;
+      addNonWorkApp: string;
+      addAntivirus: string;
+      addVPN: string;
+      addStorage: string;
+      removeItem: string;
+    };
     select: {
       navigate: string;
       select: string;
@@ -56,6 +56,7 @@ export interface Translations {
     checkData: string;
     employeeData: string;
     documentation: string;
+    lastCheckReport: string;
     toggleTheme: string;
     toggleLanguage: string;
   };
@@ -355,6 +356,39 @@ export interface Translations {
     exportAll: string;
     noChecks: string;
   };
+  lastCheckReport: {
+    title: string;
+    description: string;
+    filters: {
+      searchPlaceholder: string;
+      allStatuses: string;
+      allDepartments: string;
+      allOwnership: string;
+      dateFrom: string;
+      dateTo: string;
+      clearFilters: string;
+    };
+    summary: {
+      totalEmployees: string;
+      suitable: string;
+      issues: string;
+      unsuitable: string;
+    };
+    table: {
+      no: string;
+      employee: string;
+      department: string;
+      device: string;
+      os: string;
+      ownership: string;
+      status: string;
+      checkDate: string;
+      version: string;
+      actions: string;
+    };
+    empty: string;
+    noResults: string;
+  };
   employee: {
     title: string;
     description: string;
@@ -544,6 +578,7 @@ export const translations: Record<Language, Translations> = {
       checkData: "Check Data",
       employeeData: "Employee Data",
       documentation: "Documentation",
+      lastCheckReport: "Last Checking Report",
       toggleTheme: "Toggle theme",
       toggleLanguage: "Toggle language",
     },
@@ -840,8 +875,41 @@ export const translations: Record<Language, Translations> = {
         companyOwned: "Company Owned",
       },
       checkHistory: "Check History",
-      exportAll: "Export All",
-      noChecks: "No device checks found",
+      exportAll: "Export All Data",
+      noChecks: "No checking records found for this employee.",
+    },
+    lastCheckReport: {
+      title: "Last Checking Report",
+      description: "Summary of the most recent device check for each employee.",
+      filters: {
+        searchPlaceholder: "Search employee, ID, or device...",
+        allStatuses: "All Statuses",
+        allDepartments: "All Departments",
+        allOwnership: "All Ownership",
+        dateFrom: "Date From",
+        dateTo: "Date To",
+        clearFilters: "Clear Filters",
+      },
+      summary: {
+        totalEmployees: "Total Employees",
+        suitable: "Suitable",
+        issues: "Issues Found",
+        unsuitable: "Unsuitable",
+      },
+      table: {
+        no: "No",
+        employee: "Employee",
+        department: "Department",
+        device: "Device",
+        os: "OS",
+        ownership: "Ownership",
+        status: "Status",
+        checkDate: "Check Date",
+        version: "Version",
+        actions: "Actions",
+      },
+      empty: "No device check records found in the system.",
+      noResults: "No results match your current filters.",
     },
     employee: {
       title: "Employee Data",
@@ -932,8 +1000,8 @@ export const translations: Record<Language, Translations> = {
     },
     createEmployee: {
       title: "Create New Employee",
-        description:
-          "Add a new employee to the system. This will allow you to create device checks for them.",
+      description:
+        "Add a new employee to the system. This will allow you to create device checks for them.",
       formTitle: "Employee Information",
       formDescription:
         "Fill in required fields marked with *. Contact information and status are optional.",
@@ -1032,6 +1100,7 @@ export const translations: Record<Language, Translations> = {
       checkData: "Data Pengecekan",
       employeeData: "Data Karyawan",
       documentation: "Dokumentasi",
+      lastCheckReport: "Laporan Terakhir",
       toggleTheme: "Ganti tema",
       toggleLanguage: "Ganti bahasa",
     },
@@ -1335,6 +1404,39 @@ export const translations: Record<Language, Translations> = {
       exportAll: "Ekspor Semua",
       noChecks: "Tidak ada pengecekan perangkat ditemukan",
     },
+    lastCheckReport: {
+      title: "Laporan Pengecekan Terakhir",
+      description: "Ringkasan pengecekan perangkat terbaru untuk setiap karyawan.",
+      filters: {
+        searchPlaceholder: "Cari karyawan, ID, atau perangkat...",
+        allStatuses: "Semua Status",
+        allDepartments: "Semua Departemen",
+        allOwnership: "Semua Kepemilikan",
+        dateFrom: "Tanggal Dari",
+        dateTo: "Tanggal Ke",
+        clearFilters: "Hapus Filter",
+      },
+      summary: {
+        totalEmployees: "Total Karyawan",
+        suitable: "Layak",
+        issues: "Masalah Ditemukan",
+        unsuitable: "Tidak Layak",
+      },
+      table: {
+        no: "No",
+        employee: "Karyawan",
+        department: "Departemen",
+        device: "Perangkat",
+        os: "OS",
+        ownership: "Kepemilikan",
+        status: "Status",
+        checkDate: "Tanggal Cek",
+        version: "Versi",
+        actions: "Aksi",
+      },
+      empty: "Tidak ada catatan pengecekan perangkat yang ditemukan dalam sistem.",
+      noResults: "Tidak ada hasil yang cocok dengan filter Anda saat ini.",
+    },
     employee: {
       title: "Data Karyawan",
       description: "Lihat dan kelola semua catatan karyawan",
@@ -1425,8 +1527,8 @@ export const translations: Record<Language, Translations> = {
     },
     createEmployee: {
       title: "Tambah Karyawan Baru",
-        description:
-          "Tambahkan karyawan baru ke sistem. Ini akan memungkinkan Anda membuat pengecekan perangkat untuk mereka.",
+      description:
+        "Tambahkan karyawan baru ke sistem. Ini akan memungkinkan Anda membuat pengecekan perangkat untuk mereka.",
       formTitle: "Informasi Karyawan",
       formDescription:
         "Isi bidang wajib ditandai dengan *. Informasi kontak dan status adalah opsional.",

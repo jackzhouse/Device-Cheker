@@ -44,10 +44,10 @@ export interface DeviceCheck {
   };
   deviceCondition: {
     deviceSuitability:
-      | "Suitable"
-      | "Limited Suitability"
-      | "Needs Repair"
-      | "Unsuitable";
+    | "Suitable"
+    | "Limited Suitability"
+    | "Needs Repair"
+    | "Unsuitable";
     batterySuitability: string;
     keyboardCondition: string;
     touchpadCondition: string;
@@ -102,6 +102,26 @@ export interface DeviceCheckParams extends PaginationParams {
   dateTo?: string;
   version?: string;
   missingVersion?: string;
+}
+
+export interface LastCheckReportParams {
+  search?: string;
+  suitability?: string;
+  ownership?: string;
+  department?: string;
+  dateFrom?: string;
+  dateTo?: string;
+}
+
+export interface LastCheckReportData {
+  data: DeviceCheck[];
+  summary: {
+    total: number;
+    suitable: number;
+    limitedSuitability: number;
+    needsRepair: number;
+    unsuitable: number;
+  };
 }
 
 export async function getDeviceChecks(
@@ -223,6 +243,22 @@ export async function getEmployeeChecks(
   if (!response.ok) {
     const error = await response.json();
     throw new Error(error.error || "Failed to fetch employee checks");
+  }
+
+  return response.json();
+}
+
+export async function getLastCheckReport(
+  params: LastCheckReportParams = {},
+): Promise<APIResponse<LastCheckReportData>> {
+  const queryString = new URLSearchParams(params as any).toString();
+  const response = await fetch(`/api/device-checks/last-check-report?${queryString}`, {
+    cache: "no-store",
+  });
+
+  if (!response.ok) {
+    const error = await response.json();
+    throw new Error(error.error || "Failed to fetch last check report");
   }
 
   return response.json();
