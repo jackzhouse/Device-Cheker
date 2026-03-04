@@ -116,13 +116,14 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
     // ── Column definitions ─────────────────────────────────────────────────────
     const cols = [
         { h: 'No', w: 8 },
-        { h: 'Employee', w: 42 },
-        { h: 'Dept', w: 26 },
-        { h: 'Device', w: 44 },
-        { h: 'OS', w: 30 },
-        { h: 'Ownership', w: 20 },
-        { h: 'Status', w: 32 },
-        { h: 'Check Date', w: 24 },
+        { h: 'Employee', w: 38 },
+        { h: 'Dept', w: 24 },
+        { h: 'Device', w: 40 },
+        { h: 'OS', w: 26 },
+        { h: 'Own', w: 16 },
+        { h: 'Status', w: 28 },
+        { h: 'Condition / Notes', w: 45 },
+        { h: 'Check Date', w: 22 },
         { h: 'v', w: 10 },
     ];
     const rowH = 8, cellPad = 2;
@@ -180,7 +181,17 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
         cols.forEach(col => { doc.rect(x, yRow, col.w, rowH, 'S'); x += col.w; });
 
         const sc = statusColor(c.deviceCondition.deviceSuitability);
-        const cells = [
+
+        const conditionLine = [
+            `Bat:${c.deviceCondition.batterySuitability}`,
+            `KB:${c.deviceCondition.keyboardCondition}`,
+            `TP:${c.deviceCondition.touchpadCondition}`,
+            `Mon:${c.deviceCondition.monitorCondition}`,
+            `WiFi:${c.deviceCondition.wifiCondition}`,
+        ].join('  ');
+        const notesLine = c.additionalInfo?.otherNotes || '';
+
+        const cells: Array<{ v: string; sub?: string; twoLine: boolean; color?: [number, number, number] }> = [
             { v: String(i + 1), twoLine: false },
             { v: c.employeeSnapshot.fullName, sub: c.employeeSnapshot.employeeId, twoLine: true },
             { v: c.employeeSnapshot.department || '-', twoLine: false },
@@ -191,6 +202,7 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
             { v: c.operatingSystem.osType, sub: c.operatingSystem.osVersion, twoLine: true },
             { v: c.deviceDetail.ownership, twoLine: false },
             { v: c.deviceCondition.deviceSuitability, color: sc, twoLine: false },
+            { v: conditionLine, sub: notesLine, twoLine: true },
             { v: fmtDate(c.checkDate), twoLine: false },
             { v: `v${c.version}`, twoLine: false },
         ];
@@ -199,6 +211,45 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
         cells.forEach((cell, ci) => {
             const col = cols[ci];
             const maxW = col.w - cellPad * 2;
+
+            // Special renderer for the Condition / Notes column (index 7)
+            if (ci === 7) {
+                const cond = c.deviceCondition;
+                const condPairs = [
+                    ['Bat', cond.batterySuitability],
+                    ['KB', cond.keyboardCondition],
+                    ['TP', cond.touchpadCondition],
+                    ['Mon', cond.monitorCondition],
+                    ['WiFi', cond.wifiCondition],
+                ];
+                // Render 3 lines: Bat/KB, TP/Mon, WiFi
+                const lineGroups = [
+                    condPairs.slice(0, 2),
+                    condPairs.slice(2, 4),
+                    condPairs.slice(4),
+                ];
+                doc.setFontSize(5.5);
+                doc.setFont('helvetica', 'normal');
+                let ly = yRow + 2;
+                lineGroups.forEach(group => {
+                    const lineStr = group.map(([k, v]) => `${k}: ${v}`).join('   ');
+                    txt(doc, C.black);
+                    const safe = doc.splitTextToSize(lineStr, maxW)[0] || '';
+                    doc.text(safe, x + cellPad, ly);
+                    ly += 2.2;
+                });
+                // Notes sub-line
+                if (notesLine) {
+                    doc.setFontSize(4.8);
+                    txt(doc, C.darkGray);
+                    doc.setFont('helvetica', 'italic');
+                    const notesSafe = doc.splitTextToSize(notesLine, maxW)[0] || '';
+                    doc.text(notesSafe, x + cellPad, ly + 0.5);
+                    doc.setFont('helvetica', 'normal');
+                }
+                x += col.w;
+                return;
+            }
 
             if (cell.color) {
                 txt(doc, cell.color);

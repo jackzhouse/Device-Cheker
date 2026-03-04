@@ -54,7 +54,7 @@ function drawLabelValue(doc: jsPDF, label: string, value: string, x: number, y: 
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text(label + ':', x, y);
-  
+
   const valColor = valueColor || COLORS.darkGray;
   doc.setTextColor(valColor[0], valColor[1], valColor[2]);
   doc.setFont('helvetica', 'normal');
@@ -78,12 +78,12 @@ function addPageFooter(
   doc.setTextColor(...COLORS.darkGray);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  
+
   const generatedTime = `Generated: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`;
   doc.text(generatedTime, leftMargin, footerY);
-  
+
   doc.text('Teknologi Kartu Indonesia - Device Checking System', pageWidth / 2, footerY, { align: 'center' });
-  
+
   const pageCount = doc.getNumberOfPages();
   // doc.text(`Page ${pageCount}`, pageWidth - rightMargin, footerY, { align: 'right' });
 }
@@ -104,21 +104,21 @@ function checkAndAddPage(
   rightMargin: number
 ): { yPos: number; pageAdded: boolean } {
   const availableSpace = pageHeight - bottomMargin - currentYPos;
-  
+
   if (availableSpace < requiredSpace) {
     // Add footer to current page
     addPageFooter(doc, pageWidth, pageHeight, leftMargin, rightMargin);
-    
+
     // Add new page
     doc.addPage();
-    
+
     // Add header bar to new page
     doc.setFillColor(...COLORS.primaryDark);
     doc.rect(0, 0, pageWidth, 20, 'F');
-    
+
     return { yPos: topMargin + 20, pageAdded: true };
   }
-  
+
   return { yPos: currentYPos, pageAdded: false };
 }
 
@@ -137,7 +137,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   // ============ HEADER SECTION (70mm height) ============
   const headerHeight = 70;
-  
+
   // Dark background
   doc.setFillColor(...COLORS.primaryDark);
   doc.rect(0, 0, pageWidth, headerHeight, 'F');
@@ -151,7 +151,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   doc.setFontSize(22);
   doc.setFont('helvetica', 'bold');
   doc.text('Teknologi Kartu Indonesia', leftMargin + 30, 25);
-  
+
   // Subtitle
   doc.setFontSize(12);
   doc.setFont('helvetica', 'normal');
@@ -174,7 +174,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     month: 'short',
     year: 'numeric'
   });
-  
+
   doc.setTextColor(...COLORS.white);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
@@ -186,33 +186,33 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   // 1. Employee Information
   yPos = drawSectionHeader(doc, 'Employee Information', yPos, leftMargin, pageWidth);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Name', check.employeeSnapshot.fullName, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Position', check.employeeSnapshot.position, leftMargin, yPos);
   yPos += 7;
-  
+
   if (check.employeeSnapshot.department) {
     drawLabelValue(doc, 'Department', check.employeeSnapshot.department, leftMargin, yPos);
     yPos += 7;
   }
-  
+
   yPos += 8; // Section spacing
 
   // 2. Device Information
   yPos = drawSectionHeader(doc, 'Device Information', yPos, leftMargin, pageWidth);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Device Type', check.deviceDetail.deviceType, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Brand', check.deviceDetail.deviceBrand, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Model', check.deviceDetail.deviceModel, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Serial Number', check.deviceDetail.serialNumber, leftMargin, yPos);
   yPos += 7;
 
@@ -221,24 +221,24 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Ownership:', leftMargin, yPos);
-  
+
   const ownershipColor = check.deviceDetail.ownership === 'Company' ? COLORS.accentGreen : COLORS.darkGray;
   doc.setTextColor(ownershipColor[0], ownershipColor[1], ownershipColor[2]);
   doc.setFont('helvetica', 'normal');
   doc.text(check.deviceDetail.ownership, leftMargin + 45, yPos);
-  
+
   yPos += 10;
 
   // 3. Operating System
   yPos = drawSectionHeader(doc, 'Operating System', yPos, leftMargin, pageWidth);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'OS Type', check.operatingSystem.osType, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'Version', check.operatingSystem.osVersion, leftMargin, yPos);
   yPos += 7;
-  
+
   drawLabelValue(doc, 'License', check.operatingSystem.osLicense, leftMargin, yPos);
   yPos += 7;
 
@@ -247,13 +247,13 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Regular Updates:', leftMargin, yPos);
-  
+
   const updatesColor = check.operatingSystem.osRegularUpdate ? COLORS.accentGreen : COLORS.red;
   const updatesText = check.operatingSystem.osRegularUpdate ? 'Yes' : 'No';
   doc.setTextColor(updatesColor[0], updatesColor[1], updatesColor[2]);
   doc.setFont('helvetica', 'normal');
   doc.text(updatesText, leftMargin + 45, yPos);
-  
+
   yPos += 10;
 
   // 4. Check if we need new page before Specifications (move to page 2)
@@ -277,8 +277,8 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     // Render storage array format
     if (check.specification.storage && check.specification.storage.length > 0) {
       check.specification.storage.forEach((item, index) => {
-        const storageLabel = check.specification!.storage!.length > 1 
-          ? `Storage ${index + 1}` 
+        const storageLabel = check.specification!.storage!.length > 1
+          ? `Storage ${index + 1}`
           : 'Storage';
         drawLabelValue(doc, storageLabel, `${item.type} - ${item.size}`, leftColumnX, yPos);
         yPos += 7;
@@ -297,7 +297,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     // Check if we need a new page (estimate ~40mm for section)
     const result = checkAndAddPage(doc, yPos, 40, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
     yPos = result.yPos;
-    
+
     yPos = drawSectionHeader(doc, 'Work Applications', yPos, leftMargin, pageWidth);
     yPos += 7;
 
@@ -305,21 +305,21 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       // Check space for each app (~15mm)
       const spaceResult = checkAndAddPage(doc, yPos, 15, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
       yPos = spaceResult.yPos;
-      
-      const licenseColor = app.license === 'Original' ? COLORS.accentGreen : 
-                          app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
-      
+
+      const licenseColor = app.license === 'Original' ? COLORS.accentGreen :
+        app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
+
       doc.setTextColor(...COLORS.black);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text(`• ${app.applicationName}`, leftMargin, yPos);
-      
+
       // License text (colored)
       doc.setTextColor(licenseColor[0], licenseColor[1], licenseColor[2]);
       doc.setFont('helvetica', 'normal');
       doc.text(`License: ${app.license}`, leftMargin + 10, yPos + 5);
       yPos += 10;
-      
+
       if (app.notes) {
         doc.setTextColor(...COLORS.darkGray);
         doc.setFont('helvetica', 'normal');
@@ -336,7 +336,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     // Check if we need a new page (estimate ~60mm for section with buffer)
     const result = checkAndAddPage(doc, yPos, 60, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
     yPos = result.yPos;
-    
+
     yPos = drawSectionHeader(doc, 'Non-Work Applications', yPos, leftMargin, pageWidth);
     yPos += 7;
 
@@ -344,21 +344,21 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       // Check space for each app (~15mm)
       const spaceResult = checkAndAddPage(doc, yPos, 15, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
       yPos = spaceResult.yPos;
-      
-      const licenseColor = app.license === 'Original' ? COLORS.accentGreen : 
-                          app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
-      
+
+      const licenseColor = app.license === 'Original' ? COLORS.accentGreen :
+        app.license === 'Pirated' ? COLORS.red : COLORS.darkGray;
+
       doc.setTextColor(...COLORS.black);
       doc.setFontSize(10);
       doc.setFont('helvetica', 'bold');
       doc.text(`• ${app.applicationName}`, leftMargin, yPos);
-      
+
       // License text (colored)
       doc.setTextColor(licenseColor[0], licenseColor[1], licenseColor[2]);
       doc.setFont('helvetica', 'normal');
       doc.text(`License: ${app.license}`, leftMargin + 10, yPos + 5);
       yPos += 10;
-      
+
       if (app.notes) {
         doc.setTextColor(...COLORS.darkGray);
         doc.setFont('helvetica', 'normal');
@@ -374,7 +374,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   // Check if we need a new page (estimate ~50mm for section)
   let securityResult = checkAndAddPage(doc, yPos, 50, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
   yPos = securityResult.yPos;
-  
+
   yPos = drawSectionHeader(doc, 'Security', yPos, leftMargin, pageWidth);
   yPos += 7;
 
@@ -384,7 +384,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('Antivirus Status:', leftMargin, yPos);
-  
+
   doc.setTextColor(avStatusColor[0], avStatusColor[1], avStatusColor[2]);
   doc.setFont('helvetica', 'normal');
   doc.text(check.security.antivirus.status, leftMargin + 45, yPos);
@@ -395,7 +395,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       // Check space (~5mm per item)
       const avResult = checkAndAddPage(doc, yPos, 8, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
       yPos = avResult.yPos;
-      
+
       doc.setTextColor(...COLORS.darkGray);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -411,7 +411,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   doc.setFontSize(10);
   doc.setFont('helvetica', 'bold');
   doc.text('VPN Status:', leftMargin, yPos);
-  
+
   doc.setTextColor(vpnStatusColor[0], vpnStatusColor[1], vpnStatusColor[2]);
   doc.setFont('helvetica', 'normal');
   doc.text(check.security.vpn.status, leftMargin + 45, yPos);
@@ -422,7 +422,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
       // Check space (~5mm per item)
       const vpnResult = checkAndAddPage(doc, yPos, 8, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
       yPos = vpnResult.yPos;
-      
+
       doc.setTextColor(...COLORS.darkGray);
       doc.setFont('helvetica', 'normal');
       doc.setFontSize(9);
@@ -436,7 +436,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   // Check if we need a new page (estimate ~40mm for section)
   let infoResult = checkAndAddPage(doc, yPos, 40, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
   yPos = infoResult.yPos;
-  
+
   yPos = drawSectionHeader(doc, 'Additional Information', yPos, leftMargin, pageWidth);
   yPos += 7;
 
@@ -444,31 +444,31 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   yPos += 7;
 
   if (check.additionalInfo.otherNotes) {
+    const splitText = doc.splitTextToSize(check.additionalInfo.otherNotes, contentWidth - 10);
+    const notesHeight = splitText.length * 4 + 12; // label + text + padding
+
+    // Check space BEFORE writing the "Notes:" label so both stay on same page
+    let notesResult = checkAndAddPage(doc, yPos, notesHeight, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = notesResult.yPos;
+
     doc.setTextColor(...COLORS.black);
     doc.setFont('helvetica', 'bold');
     doc.setFontSize(10);
     doc.text('Notes:', leftMargin, yPos);
     yPos += 5;
-    
+
     doc.setTextColor(...COLORS.darkGray);
     doc.setFont('helvetica', 'normal');
     doc.setFontSize(9);
-    const splitText = doc.splitTextToSize(check.additionalInfo.otherNotes, contentWidth - 10);
-    
-    // Check space for notes
-    const notesHeight = splitText.length * 4 + 5;
-    let notesResult = checkAndAddPage(doc, yPos, notesHeight, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
-    yPos = notesResult.yPos;
-    
     doc.text(splitText, leftMargin + 10, yPos);
-    yPos += notesHeight;
+    yPos += splitText.length * 4 + 4;
   }
 
   if (check.additionalInfo.inspectorPICName) {
     // Check space for inspector (~10mm)
     let inspectorResult = checkAndAddPage(doc, yPos, 10, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
     yPos = inspectorResult.yPos;
-    
+
     drawLabelValue(doc, 'Inspector', check.additionalInfo.inspectorPICName, leftMargin, yPos);
     yPos += 7;
   }
@@ -482,12 +482,12 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   yPos = drawSectionHeader(doc, 'Overall Status', yPos, leftMargin, pageWidth);
   yPos += 7;
 
-  const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable' 
-    ? COLORS.accentGreen 
-    : check.deviceCondition.deviceSuitability === 'Unsuitable' 
-    ? COLORS.red 
-    : COLORS.secondaryBlue;
-  
+  const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable'
+    ? COLORS.accentGreen
+    : check.deviceCondition.deviceSuitability === 'Unsuitable'
+      ? COLORS.red
+      : COLORS.secondaryBlue;
+
   doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
   doc.setFontSize(11);
   doc.setFont('helvetica', 'bold');
@@ -513,12 +513,12 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
     const isGood = condition.value.toLowerCase().includes('good') || condition.value.toLowerCase().includes('suitable');
     drawStatusCircle(doc, leftMargin + 5, yPos + 1, isGood);
-    
+
     doc.setTextColor(...COLORS.black);
     doc.setFontSize(10);
     doc.setFont('helvetica', 'bold');
     doc.text(`${condition.label}:`, leftMargin + 10, yPos);
-    
+
     doc.setTextColor(...COLORS.darkGray);
     doc.setFont('helvetica', 'normal');
     doc.text(condition.value, leftMargin + 50, yPos);
@@ -527,7 +527,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   // Add footer to current page
   addPageFooter(doc, pageWidth, pageHeight, leftMargin, rightMargin);
-  
+
   // Update all page numbers
   const totalPages = doc.getNumberOfPages();
   for (let i = 1; i <= totalPages; i++) {
@@ -535,7 +535,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
     doc.setTextColor(...COLORS.darkGray);
     doc.setFontSize(8);
     doc.setFont('helvetica', 'normal');
-    
+
     // Draw page numbers at bottom right
     const footerY = pageHeight - 15;
     doc.text(`Page ${i} of ${totalPages}`, pageWidth - rightMargin, footerY, { align: 'right' });
@@ -591,18 +591,18 @@ export async function generateEmployeeHistoryPDF(
 
   drawLabelValue(doc, 'Name', employeeData.fullName, leftMargin, yPos);
   yPos += lineHeight;
-  
+
   drawLabelValue(doc, 'Position', employeeData.position, leftMargin, yPos);
   yPos += lineHeight;
-  
+
   if (employeeData.department) {
     drawLabelValue(doc, 'Department', employeeData.department, leftMargin, yPos);
     yPos += lineHeight;
   }
-  
+
   drawLabelValue(doc, 'Status', employeeData.status, leftMargin, yPos);
   yPos += lineHeight;
-  
+
   drawLabelValue(doc, 'Total Checks', checks.length.toString(), leftMargin, yPos);
   yPos += lineHeight * 2;
 
@@ -617,13 +617,13 @@ export async function generateEmployeeHistoryPDF(
 
   drawLabelValue(doc, 'PC Devices', pcCount.toString(), leftMargin, yPos);
   yPos += lineHeight;
-  
+
   drawLabelValue(doc, 'Laptops', laptopCount.toString(), leftMargin, yPos);
   yPos += lineHeight;
-  
+
   drawLabelValue(doc, 'Company Owned', companyCount.toString(), leftMargin, yPos);
   yPos += lineHeight;
-  
+
   drawLabelValue(doc, 'Personal', personalCount.toString(), leftMargin, yPos);
   yPos += lineHeight * 2;
 
@@ -649,10 +649,10 @@ export async function generateEmployeeHistoryPDF(
     doc.setTextColor(...COLORS.darkGray);
     doc.text(`Device: ${check.deviceDetail.deviceBrand} ${check.deviceDetail.deviceModel} (${check.deviceDetail.deviceType})`, leftMargin, yPos);
     yPos += lineHeight;
-    
+
     doc.text(`Ownership: ${check.deviceDetail.ownership}`, leftMargin, yPos);
     yPos += lineHeight;
-    
+
     doc.text(`Serial Number: ${check.deviceDetail.serialNumber}`, leftMargin, yPos);
     yPos += lineHeight;
 
@@ -661,18 +661,18 @@ export async function generateEmployeeHistoryPDF(
     yPos += lineHeight;
 
     // Overall Status with icon
-    const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable' 
-      ? COLORS.accentGreen 
-      : check.deviceCondition.deviceSuitability === 'Unsuitable' 
-      ? COLORS.red 
-      : COLORS.secondaryBlue;
-    
-    const statusIcon = check.deviceCondition.deviceSuitability === 'Suitable' 
-      ? '✓' 
-      : check.deviceCondition.deviceSuitability === 'Unsuitable' 
-      ? '✗' 
-      : '⚠';
-    
+    const statusColor: readonly number[] = check.deviceCondition.deviceSuitability === 'Suitable'
+      ? COLORS.accentGreen
+      : check.deviceCondition.deviceSuitability === 'Unsuitable'
+        ? COLORS.red
+        : COLORS.secondaryBlue;
+
+    const statusIcon = check.deviceCondition.deviceSuitability === 'Suitable'
+      ? '✓'
+      : check.deviceCondition.deviceSuitability === 'Unsuitable'
+        ? '✗'
+        : '⚠';
+
     doc.setTextColor(statusColor[0], statusColor[1], statusColor[2]);
     doc.text(`Overall: ${statusIcon} ${check.deviceCondition.deviceSuitability}`, leftMargin, yPos);
     yPos += lineHeight * 2;
@@ -691,10 +691,10 @@ export async function generateEmployeeHistoryPDF(
   doc.setTextColor(...COLORS.darkGray);
   doc.setFontSize(8);
   doc.setFont('helvetica', 'normal');
-  
+
   const generatedTime = `Generated: ${new Date().toLocaleDateString('id-ID')} ${new Date().toLocaleTimeString('id-ID')}`;
   doc.text(generatedTime, leftMargin, footerY);
-  
+
   doc.text('Teknologi Kartu Indonesia - Device Checking System', pageWidth / 2, footerY, { align: 'center' });
   doc.text('Page 1', pageWidth - rightMargin, footerY, { align: 'right' });
 
