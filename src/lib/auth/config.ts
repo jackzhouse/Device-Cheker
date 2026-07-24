@@ -30,16 +30,15 @@ async function getDefaultAppRole(): Promise<AppRole> {
 
 export async function getAuthConfig() {
   const isProd = process.env.NODE_ENV === 'production';
-  const prefix = isProd ? 'PRODUCTION' : 'DEV';
   const authValidationBaseUrl = await getRuntimeValue(
-    [`${prefix}_AUTH_VALIDATION_BASE_URL`, 'EXTERNAL_AUTH_BASE_URL']
+    ['DEV_AUTH_VALIDATION_BASE_URL', 'EXTERNAL_AUTH_BASE_URL']
   );
   const attendanceBaseUrl = await getRuntimeValue(
-    [`${prefix}_ATTENDANCE_BASE_URL`, 'EXTERNAL_AUTH_ATTENDANCE_BASE_URL', 'EXTERNAL_ATTENDANCE_BASE_URL'],
+    ['EXTERNAL_AUTH_ATTENDANCE_BASE_URL', 'EXTERNAL_ATTENDANCE_BASE_URL'],
     authValidationBaseUrl
   );
   const externalLoginBaseUrl = await getRuntimeValue(
-    [`${prefix}_AUTH_LOGIN_BASE_URL`, 'EXTERNAL_AUTH_LOGIN_BASE_URL'],
+    ['DEV_AUTH_LOGIN_BASE_URL', 'EXTERNAL_AUTH_LOGIN_BASE_URL'],
     authValidationBaseUrl
   );
   const defaultLoginPath = '/katalis/login';
@@ -48,12 +47,12 @@ export async function getAuthConfig() {
     authValidationBaseUrl,
     attendanceBaseUrl,
     externalLoginBaseUrl,
-    loginPath: await getRuntimeValue([`${prefix}_AUTH_LOGIN_PATH`, 'EXTERNAL_AUTH_LOGIN_PATH'], defaultLoginPath, true),
-    credentialCheckPath: await getRuntimeValue([`${prefix}_AUTH_CREDENTIAL_CHECK_PATH`, 'EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH'], '/katalis/user/credential/check'),
-    loginTokenSource: await getRuntimeValue([`${prefix}_AUTH_LOGIN_TOKEN_SOURCE`], 'authorization-header') as TokenSource,
-    credentialTokenSource: await getRuntimeValue([`${prefix}_AUTH_CREDENTIAL_TOKEN_SOURCE`], isProd ? 'authorization-header' : 'body') as TokenSource,
+    loginPath: await getRuntimeValue(['DEV_AUTH_LOGIN_PATH', 'EXTERNAL_AUTH_LOGIN_PATH'], defaultLoginPath, true),
+    credentialCheckPath: await getRuntimeValue(['DEV_AUTH_CREDENTIAL_CHECK_PATH', 'EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH'], '/katalis/user/credential/check'),
+    loginTokenSource: await getRuntimeValue(['DEV_AUTH_LOGIN_TOKEN_SOURCE'], 'authorization-header') as TokenSource,
+    credentialTokenSource: await getRuntimeValue(['DEV_AUTH_CREDENTIAL_TOKEN_SOURCE'], isProd ? 'authorization-header' : 'body') as TokenSource,
     attendanceUsersPath: await getRuntimeValue(['EXTERNAL_ATTENDANCE_USERS_PATH', 'EXTERNAL_AUTH_USERS_PATH'], '/api/v1/admin/employees'),
-    profilePath: await getRuntimeValue([`${prefix}_AUTH_PROFILE_PATH`, 'EXTERNAL_AUTH_PROFILE_PATH'], '/attendance/api/v1/admin/employees/account/detail'),
+    profilePath: await getRuntimeValue(['EXTERNAL_AUTH_PROFILE_PATH'], '/attendance/api/v1/admin/employees/account/detail'),
     sessionSecret: await getRuntimeValue(['APP_SESSION_SECRET'], isProd ? undefined : 'device-checking-dev-secret-change-me'),
     defaultRole: await getDefaultAppRole(),
     autoSync: (await getRuntimeValue(['APP_AUTH_AUTO_SYNC'], 'false')) === 'true',
