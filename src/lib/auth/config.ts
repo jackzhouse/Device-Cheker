@@ -5,40 +5,26 @@ export type TokenSource = 'authorization-header' | 'body.data' | 'body';
 type AppRole = 'admin' | 'pic' | 'viewer';
 const APP_ROLES: AppRole[] = ['admin', 'pic', 'viewer'];
 
-function env(name: string, fallback?: string) {
-  return process.env[name] || fallback || '';
-}
-
-function envAllowEmpty(name: string, fallback?: string) {
-  if (Object.prototype.hasOwnProperty.call(process.env, name)) {
-    return process.env[name] ?? '';
-  }
-  return fallback || '';
-}
-
-async function getRuntimeValue(name: string, fallback?: string) {
+async function getRuntimeValue(names: string[], fallback?: string, allowEmpty = false) {
   const { getSettingValue } = await import('@/lib/consul');
   const isProd = process.env.NODE_ENV === 'production';
 
-  if (!isProd) {
-    const value = process.env[name]?.trim();
-    if (value) return value;
-    if (fallback !== undefined) return fallback;
-    throw new Error(`${name} not found in environment variables for development`);
+  for (const name of names) {
+    const value = isProd
+      ? await getSettingValue(name)
+      : Object.prototype.hasOwnProperty.call(process.env, name)
+        ? process.env[name]?.trim() ?? ''
+        : null;
+
+    if (value !== null && (allowEmpty || value !== '')) return value;
   }
 
-  const consulValue = await getSettingValue(name);
-  if (consulValue) return consulValue;
-
-  const envValue = process.env[name]?.trim();
-  if (envValue) return envValue;
   if (fallback !== undefined) return fallback;
-
-  throw new Error(`${name} not found in Consul or environment variables`);
+  throw new Error(`${names.join(' or ')} not found in ${isProd ? 'Consul' : 'environment variables for development'}`);
 }
 
-function getDefaultAppRole(): AppRole {
-  const role = process.env.APP_AUTH_DEFAULT_ROLE?.trim();
+async function getDefaultAppRole(): Promise<AppRole> {
+  const role = await getRuntimeValue(['APP_AUTH_DEFAULT_ROLE'], 'viewer');
   return APP_ROLES.includes(role as AppRole) ? role as AppRole : 'viewer';
 }
 
@@ -46,19 +32,15 @@ export async function getAuthConfig() {
   const isProd = process.env.NODE_ENV === 'production';
   const prefix = isProd ? 'PRODUCTION' : 'DEV';
   const authValidationBaseUrl = await getRuntimeValue(
-    `${prefix}_AUTH_VALIDATION_BASE_URL`,
-    await getRuntimeValue('EXTERNAL_AUTH_BASE_URL')
+    [`${prefix}_AUTH_VALIDATION_BASE_URL`, 'EXTERNAL_AUTH_BASE_URL']
   );
   const attendanceBaseUrl = await getRuntimeValue(
-    `${prefix}_ATTENDANCE_BASE_URL`,
-    await getRuntimeValue(
-      'EXTERNAL_AUTH_ATTENDANCE_BASE_URL',
-      await getRuntimeValue('EXTERNAL_ATTENDANCE_BASE_URL', authValidationBaseUrl)
-    )
+    [`${prefix}_ATTENDANCE_BASE_URL`, 'EXTERNAL_AUTH_ATTENDANCE_BASE_URL', 'EXTERNAL_ATTENDANCE_BASE_URL'],
+    authValidationBaseUrl
   );
   const externalLoginBaseUrl = await getRuntimeValue(
-    `${prefix}_AUTH_LOGIN_BASE_URL`,
-    await getRuntimeValue('EXTERNAL_AUTH_LOGIN_BASE_URL', authValidationBaseUrl)
+    [`${prefix}_AUTH_LOGIN_BASE_URL`, 'EXTERNAL_AUTH_LOGIN_BASE_URL'],
+    authValidationBaseUrl
   );
   const defaultLoginPath = '/katalis/login';
 
@@ -66,19 +48,16 @@ export async function getAuthConfig() {
     authValidationBaseUrl,
     attendanceBaseUrl,
     externalLoginBaseUrl,
-    loginPath: envAllowEmpty(`${prefix}_AUTH_LOGIN_PATH`, envAllowEmpty('EXTERNAL_AUTH_LOGIN_PATH', defaultLoginPath)),
-    credentialCheckPath: env(`${prefix}_AUTH_CREDENTIAL_CHECK_PATH`, env('EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH', isProd ? '/katalis/user/credential/check' : '/katalis/user/credential/check')),
-    loginTokenSource: env(`${prefix}_AUTH_LOGIN_TOKEN_SOURCE`, 'authorization-header') as TokenSource,
-    credentialTokenSource: env(`${prefix}_AUTH_CREDENTIAL_TOKEN_SOURCE`, isProd ? 'authorization-header' : 'body') as TokenSource,
-    attendanceUsersPath: env('EXTERNAL_ATTENDANCE_USERS_PATH', '/api/v1/admin/employees'),
-    profilePath: env(
-      `${prefix}_AUTH_PROFILE_PATH`,
-      env('EXTERNAL_AUTH_PROFILE_PATH', '/attendance/api/v1/admin/employees/account/detail')
-    ),
-    sessionSecret: process.env.APP_SESSION_SECRET || 'device-checking-dev-secret-change-me',
-    defaultRole: getDefaultAppRole(),
-    autoSync: (process.env.APP_AUTH_AUTO_SYNC || 'false') === 'true',
-    requiredAccessScope: process.env.APP_AUTH_REQUIRED_ACCESS_SCOPE || 'devicechecking',
+    loginPath: await getRuntimeValue([`${prefix}_AUTH_LOGIN_PATH`, 'EXTERNAL_AUTH_LOGIN_PATH'], defaultLoginPath, true),
+    credentialCheckPath: await getRuntimeValue([`${prefix}_AUTH_CREDENTIAL_CHECK_PATH`, 'EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH'], '/katalis/user/credential/check'),
+    loginTokenSource: await getRuntimeValue([`${prefix}_AUTH_LOGIN_TOKEN_SOURCE`], 'authorization-header') as TokenSource,
+    credentialTokenSource: await getRuntimeValue([`${prefix}_AUTH_CREDENTIAL_TOKEN_SOURCE`], isProd ? 'authorization-header' : 'body') as TokenSource,
+    attendanceUsersPath: await getRuntimeValue(['EXTERNAL_ATTENDANCE_USERS_PATH', 'EXTERNAL_AUTH_USERS_PATH'], '/api/v1/admin/employees'),
+    profilePath: await getRuntimeValue([`${prefix}_AUTH_PROFILE_PATH`, 'EXTERNAL_AUTH_PROFILE_PATH'], '/attendance/api/v1/admin/employees/account/detail'),
+    sessionSecret: await getRuntimeValue(['APP_SESSION_SECRET'], isProd ? undefined : 'device-checking-dev-secret-change-me'),
+    defaultRole: await getDefaultAppRole(),
+    autoSync: (await getRuntimeValue(['APP_AUTH_AUTO_SYNC'], 'false')) === 'true',
+    requiredAccessScope: await getRuntimeValue(['APP_AUTH_REQUIRED_ACCESS_SCOPE'], 'devicechecking'),
   };
 }
 

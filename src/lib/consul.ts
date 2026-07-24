@@ -12,7 +12,7 @@ const consulClient = new Consul({
 });
 
 // Configuration interface
-interface ConsulConfig {
+export interface ConsulConfig {
   MONGODB_URI: string;
   MONGODB_DB_NAME?: string;
   EXTERNAL_AUTH_BASE_URL?: string;
@@ -20,8 +20,22 @@ interface ConsulConfig {
   EXTERNAL_AUTH_LOGIN_PATH?: string;
   EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH?: string;
   EXTERNAL_AUTH_ATTENDANCE_BASE_URL?: string;
+  EXTERNAL_ATTENDANCE_BASE_URL?: string;
   EXTERNAL_AUTH_USERS_PATH?: string;
+  EXTERNAL_ATTENDANCE_USERS_PATH?: string;
   EXTERNAL_AUTH_PROFILE_PATH?: string;
+  PRODUCTION_AUTH_VALIDATION_BASE_URL?: string;
+  PRODUCTION_ATTENDANCE_BASE_URL?: string;
+  PRODUCTION_AUTH_LOGIN_BASE_URL?: string;
+  PRODUCTION_AUTH_LOGIN_PATH?: string;
+  PRODUCTION_AUTH_CREDENTIAL_CHECK_PATH?: string;
+  PRODUCTION_AUTH_LOGIN_TOKEN_SOURCE?: string;
+  PRODUCTION_AUTH_CREDENTIAL_TOKEN_SOURCE?: string;
+  PRODUCTION_AUTH_PROFILE_PATH?: string;
+  APP_SESSION_SECRET?: string;
+  APP_AUTH_DEFAULT_ROLE?: string;
+  APP_AUTH_AUTO_SYNC?: string;
+  APP_AUTH_REQUIRED_ACCESS_SCOPE?: string;
 }
 
 // Cache for configuration
@@ -84,7 +98,7 @@ export async function getSettingValue(key: keyof ConsulConfig | string): Promise
 
 /**
  * Fetch all required configuration from Consul KV store
- * Falls back to environment variables if Consul is unavailable
+ * Development reads environment variables. Production reads Consul only.
  * @returns Configuration object
  */
 export async function getConfig(): Promise<ConsulConfig> {
@@ -111,26 +125,15 @@ export async function getConfig(): Promise<ConsulConfig> {
   } else {
     console.log('📡 Production mode: fetching MONGODB_URI from Consul...');
 
-    // Try to fetch MONGODB_URI from Consul
     const mongodbUri = await getKVValue('MONGODB_URI');
-
-    // Fallback to environment variable if Consul fetch fails
     if (!mongodbUri) {
-      const envUri = getEnvMongoUri();
-      if (envUri) {
-        console.log('📋 Production fallback: using MONGODB_URI from environment variable');
-        config.MONGODB_URI = envUri;
-      } else {
-        throw new Error('MONGODB_URI not found in Consul or environment variables');
-      }
-    } else {
-      config.MONGODB_URI = mongodbUri;
+      throw new Error('MONGODB_URI not found in Consul for production');
     }
+    config.MONGODB_URI = mongodbUri;
 
-    const envDbName = getEnvMongoDbName();
-    if (envDbName) {
-      console.log('📋 Production mode: using MONGODB_DB_NAME from environment variable');
-      config.MONGODB_DB_NAME = envDbName;
+    const dbName = await getKVValue('MONGODB_DB_NAME');
+    if (dbName) {
+      config.MONGODB_DB_NAME = dbName;
     }
   }
 
@@ -159,7 +162,7 @@ export async function isConsulAvailable(): Promise<boolean> {
     console.log('✅ Consul is accessible');
     return true;
   } catch (error) {
-    console.warn('⚠️ Consul is not accessible, will use environment variables');
+    console.warn('⚠️ Consul is not accessible');
     return false;
   }
 }

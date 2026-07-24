@@ -26,9 +26,37 @@ Minimum local values for Dev SSO:
 - `MONGODB_URI`
 - `EXTERNAL_AUTH_BASE_URL`
 
-Browser API host (when app frontend and API are separate):
-- `NEXT_PUBLIC_API_BASE_URL=https://your-app-api-host`
-- Required for browser auth requests. Restart Next server after changing it.
+Browser requests use same-origin `/api/...`; no `NEXT_PUBLIC_API_BASE_URL` is required.
+
+Production reads application configuration from Consul prefix
+`new-config/support-device-checker/setting/`. Required keys: `MONGODB_URI`,
+`APP_SESSION_SECRET`, and `PRODUCTION_AUTH_VALIDATION_BASE_URL` (or
+`EXTERNAL_AUTH_BASE_URL`). Supported optional keys:
+
+```text
+MONGODB_DB_NAME
+PRODUCTION_ATTENDANCE_BASE_URL
+PRODUCTION_AUTH_LOGIN_BASE_URL
+PRODUCTION_AUTH_LOGIN_PATH
+PRODUCTION_AUTH_CREDENTIAL_CHECK_PATH
+PRODUCTION_AUTH_LOGIN_TOKEN_SOURCE
+PRODUCTION_AUTH_CREDENTIAL_TOKEN_SOURCE
+PRODUCTION_AUTH_PROFILE_PATH
+EXTERNAL_AUTH_LOGIN_BASE_URL
+EXTERNAL_AUTH_LOGIN_PATH
+EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH
+EXTERNAL_AUTH_ATTENDANCE_BASE_URL
+EXTERNAL_ATTENDANCE_BASE_URL
+EXTERNAL_ATTENDANCE_USERS_PATH
+EXTERNAL_AUTH_USERS_PATH
+EXTERNAL_AUTH_PROFILE_PATH
+APP_AUTH_DEFAULT_ROLE
+APP_AUTH_AUTO_SYNC
+APP_AUTH_REQUIRED_ACCESS_SCOPE
+```
+
+Only `NODE_ENV` plus Consul connection bootstrap (`CONSUL_HOST`, `CONSUL_PORT`,
+`CONSUL_TOKEN`) stay in container environment variables.
 
 If Dev login must hit root host directly, keep:
 - `DEV_AUTH_LOGIN_PATH=`
