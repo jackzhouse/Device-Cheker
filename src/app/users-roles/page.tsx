@@ -346,7 +346,17 @@ export default function UsersRolesPage() {
           </div>
         ) : (
           <div className="overflow-x-auto">
-            <table className="w-full text-sm">
+            <table className="min-w-[1320px] w-full table-fixed text-sm">
+              <colgroup>
+                <col className="w-[250px]" />
+                <col className="w-[145px]" />
+                <col className="w-[190px]" />
+                <col className="w-[75px]" />
+                <col className="w-[88px]" />
+                <col className="w-[70px]" />
+                <col className="w-[125px]" />
+                <col className="w-[375px]" />
+              </colgroup>
               <thead className="border-b border-[var(--app-border)] bg-[var(--app-subtle)] text-left text-[11px] uppercase tracking-wide text-muted-foreground">
                 <tr>
                   <th className="px-3 py-2.5 font-medium">User</th>
@@ -382,15 +392,15 @@ export default function UsersRolesPage() {
                     <td className="px-3 py-2.5">{getRoleBadge(user.role)}</td>
                     <td className="px-3 py-2.5 text-muted-foreground">{formatDate(user.lastSyncedAt)}</td>
                     <td className="px-3 py-2.5">
-                      <div className="flex flex-wrap gap-1.5">
-                        <Button size="sm" variant="outline" onClick={() => openUserDetail(user)}>
+                      <div className="flex flex-nowrap gap-1.5 whitespace-nowrap">
+                        <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={() => openUserDetail(user)}>
                           <Eye className="mr-1 h-3.5 w-3.5" />
                           {copy.detail}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => toggleUserActive(user)} disabled={savingUserId === user._id}>
+                        <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={() => toggleUserActive(user)} disabled={savingUserId === user._id}>
                           {user.isActive ? copy.deactivate : copy.activate}
                         </Button>
-                        <Button size="sm" variant="outline" onClick={() => toggleDeviceCheckingAccess(user)} disabled={savingUserId === user._id}>
+                        <Button size="sm" variant="outline" className="whitespace-nowrap" onClick={() => toggleDeviceCheckingAccess(user)} disabled={savingUserId === user._id}>
                           {copy.accessAction}
                         </Button>
                         <select
