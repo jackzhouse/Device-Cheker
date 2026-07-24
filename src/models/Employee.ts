@@ -113,8 +113,6 @@ EmployeeSchema.methods.updateCheckStats = async function () {
 EmployeeSchema.index({ fullName: 'text' });
 EmployeeSchema.index({ firstName: 1, lastName: 1 });
 EmployeeSchema.index({ department: 1, status: 1 });
-EmployeeSchema.index({ status: 1 });
-EmployeeSchema.index({ employeeId: 1 }, { unique: true });
 EmployeeSchema.index({ externalUserId: 1 }, { unique: true, sparse: true });
 
 const Employee: Model<IEmployee> = mongoose.models.Employee || mongoose.model<IEmployee>('Employee', EmployeeSchema);

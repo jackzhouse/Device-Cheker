@@ -360,7 +360,6 @@ DeviceCheckSchema.index({ employeeId: 1, checkDate: -1 });
 DeviceCheckSchema.index({ employeeId: 1, version: -1 });
 DeviceCheckSchema.index({ checkDate: -1 });
 DeviceCheckSchema.index({ 'deviceDetail.ownership': 1 });
-DeviceCheckSchema.index({ 'deviceCondition.deviceSuitability': 1 });
 DeviceCheckSchema.index({ 'employeeSnapshot.department': 1 });
 
 const DeviceCheck: Model<IDeviceCheck> = mongoose.models.DeviceCheck || mongoose.model<IDeviceCheck>('DeviceCheck', DeviceCheckSchema);
