@@ -64,7 +64,11 @@ async function getKVValue(key: string): Promise<string | null> {
     const value = await consulClient.kv.get(kvPath);
     
     if (value && value.Value) {
-      const decodedValue = Buffer.from(value.Value, 'base64').toString('utf-8');
+      // `consul` package already returns the decoded KV value (string or Buffer).
+      // Decoding it as Base64 again corrupts normal URLs, paths, and secrets.
+      const decodedValue = Buffer.isBuffer(value.Value)
+        ? value.Value.toString('utf-8')
+        : String(value.Value);
       // Trim whitespace and remove newlines
       const sanitizedValue = decodedValue.trim().replace(/\n/g, '').replace(/\r/g, '');
       
