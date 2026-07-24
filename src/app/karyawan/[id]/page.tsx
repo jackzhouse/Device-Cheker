@@ -168,13 +168,13 @@ export default function EmployeeDetailPage() {
       </Card>
 
       {/* Employee Details */}
-      <div className="grid grid-cols-1 gap-6 md:grid-cols-2 mb-6">
+      <div className="mb-4 grid grid-cols-1 gap-3 md:grid-cols-2">
         {/* Personal Information */}
-        <Card>
-          <CardHeader>
+        <Card className="panel-card">
+          <CardHeader className="pb-2">
             <CardTitle className="text-lg">Personal Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <div>
               <label className="text-sm text-muted-foreground">First Name</label>
               <p className="font-medium">{employee.firstName}</p>
@@ -205,11 +205,11 @@ export default function EmployeeDetailPage() {
         </Card>
 
         {/* Work Information */}
-        <Card>
-          <CardHeader>
+        <Card className="panel-card">
+          <CardHeader className="pb-2">
             <CardTitle className="text-lg">Work Information</CardTitle>
           </CardHeader>
-          <CardContent className="space-y-4">
+          <CardContent className="space-y-3">
             <div>
               <label className="text-sm text-muted-foreground">Employee ID</label>
               <p className="font-medium">{employee.employeeId}</p>

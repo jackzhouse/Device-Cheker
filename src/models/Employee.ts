@@ -2,6 +2,7 @@ import mongoose, { Schema, Document, Model } from 'mongoose';
 
 export interface IEmployee extends Document {
   employeeId: string;
+  externalUserId?: string;
   firstName: string;
   lastName: string;
   fullName: string;
@@ -25,6 +26,10 @@ const EmployeeSchema = new Schema<IEmployee>(
       unique: true,
       trim: true,
       uppercase: true,
+    },
+    externalUserId: {
+      type: String,
+      trim: true,
     },
     firstName: {
       type: String,
@@ -110,6 +115,7 @@ EmployeeSchema.index({ firstName: 1, lastName: 1 });
 EmployeeSchema.index({ department: 1, status: 1 });
 EmployeeSchema.index({ status: 1 });
 EmployeeSchema.index({ employeeId: 1 }, { unique: true });
+EmployeeSchema.index({ externalUserId: 1 }, { unique: true, sparse: true });
 
 const Employee: Model<IEmployee> = mongoose.models.Employee || mongoose.model<IEmployee>('Employee', EmployeeSchema);
 

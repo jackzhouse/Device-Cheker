@@ -57,6 +57,8 @@ export function CreatableSelect({
   const [lastCreatedValue, setLastCreatedValue] = React.useState<string | null>(null);
   const containerRef = React.useRef<HTMLDivElement>(null);
   const inputRef = React.useRef<HTMLInputElement>(null);
+  const selectId = React.useId().replace(/:/g, '');
+  const listboxId = `${selectId}-options`;
   
   // Delete modal states
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
@@ -221,11 +223,17 @@ export function CreatableSelect({
         <div className="relative">
           <input
             ref={inputRef}
+            id={selectId}
             type="text"
             value={inputValue}
             onChange={(e) => handleInputChange(e.target.value)}
             onFocus={() => setIsOpen(true)}
             onKeyDown={handleKeyDown}
+            role="combobox"
+            aria-expanded={isOpen}
+            aria-controls={listboxId}
+            aria-autocomplete="list"
+            aria-activedescendant={isOpen && filteredOptions[highlightedIndex] ? `${listboxId}-${highlightedIndex}` : undefined}
             disabled={disabled}
             placeholder={finalPlaceholder}
             className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50 pr-20"
@@ -237,8 +245,9 @@ export function CreatableSelect({
               setInputValue('');
               inputRef.current?.focus();
             }}
+            aria-label={t('common.clear')}
             className={cn(
-              'absolute right-12 top-1/2 -translate-y-1/2 text-muted-foreground hover:text-foreground',
+              'absolute right-12 top-1/2 flex h-10 w-10 -translate-y-1/2 items-center justify-center rounded-md text-muted-foreground hover:bg-muted hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring',
               !value && 'hidden'
             )}
           >
@@ -273,7 +282,7 @@ export function CreatableSelect({
         </div>
 
         {/* Keyboard hints below input */}
-        <div className="mt-1 flex items-center gap-3 text-xs text-muted-foreground">
+        <div className="mt-1 hidden items-center gap-3 text-xs text-muted-foreground md:flex">
           <div className="flex items-center gap-1">
             <kbd className="inline-flex items-center justify-center rounded border bg-muted px-1.5 py-0.5 font-mono text-[10px]">
               ↑↓
@@ -295,10 +304,13 @@ export function CreatableSelect({
         </div>
 
         {isOpen && filteredOptions.length > 0 && (
-          <div className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
+          <div id={listboxId} role="listbox" aria-label={finalPlaceholder} className="absolute z-50 mt-1 max-h-60 w-full overflow-auto rounded-md border bg-popover p-1 text-popover-foreground shadow-md">
             {filteredOptions.map((option, index) => (
               <div
                 key={option.value}
+                id={`${listboxId}-${index}`}
+                role="option"
+                aria-selected={option.value === value}
                 onMouseEnter={() => setHighlightedIndex(index)}
                 className={cn(
                   'relative flex w-full cursor-pointer select-none items-center rounded-sm px-2 py-1.5 text-sm outline-none transition-colors',
@@ -325,7 +337,8 @@ export function CreatableSelect({
                   <button
                     type="button"
                     onClick={(e) => handleDeleteClick(e, option)}
-                    className="ml-2 text-muted-foreground hover:text-destructive hover:bg-destructive/10 p-1 rounded transition-colors"
+                    aria-label={`${t('common.delete')} ${option.label}`}
+                    className="ml-2 flex h-10 w-10 items-center justify-center rounded-md p-1 text-muted-foreground transition-colors hover:bg-destructive/10 hover:text-destructive focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring"
                     title="Delete option"
                   >
                     <Trash2 className="h-3.5 w-3.5" />
@@ -378,4 +391,3 @@ export function CreatableSelect({
     </TooltipProvider>
   );
 }
-

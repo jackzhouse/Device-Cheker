@@ -315,33 +315,36 @@ export default function EditFormPage() {
 
   if (loading) {
     return (
-      <div className="container py-8">
+      <div className="page-shell">
         <div className="text-center">Loading device check...</div>
       </div>
     );
   }
 
   return (
-    <div className="container py-8">
-      <div className="mb-8">
-        <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
+    <div className="page-shell">
+      <div className="page-hero">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Edit Check</div>
+          <h1 className="page-title">{t('form.title')}</h1>
+          <p className="page-desc mt-1.5">
+            {t('form.description')}
+          </p>
+        </div>
+        <Button variant="ghost" onClick={() => router.back()}>
           <ArrowLeft className="h-4 w-4 mr-2" />
           {t('common.back')}
         </Button>
-        <h1 className="text-3xl font-bold mb-2">{t('form.title')}</h1>
-        <p className="text-muted-foreground">
-          {t('form.description')}
-        </p>
       </div>
 
-      <div className="grid lg:grid-cols-[200px_1fr] gap-6">
+      <div className="grid gap-4 lg:grid-cols-[190px_1fr]">
         {/* Progress Indicator (Desktop) */}
-        <aside className="hidden lg:block sticky top-20 h-fit space-y-1">
+        <aside className="soft-section hidden h-fit space-y-1 lg:sticky lg:top-20 lg:block">
           {sections.map((section) => (
             <a
               key={section.id}
               href={`#${section.id}`}
-              className="flex items-center gap-2 px-3 py-2 text-sm text-muted-foreground hover:text-foreground rounded-md transition-colors"
+              className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
             >
               <section.icon className="h-4 w-4" />
               {section.title}
@@ -350,18 +353,18 @@ export default function EditFormPage() {
         </aside>
 
         {/* Form */}
-        <form onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+        <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">
           {/* Employee Section */}
           <Card id="employee">
-            <CardHeader>
+            <CardHeader className="pb-2">
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-4 w-4" />
                 {t('form.employeeInfo.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="space-y-3">
               {/* Employee selector disabled in edit mode */}
-              <div className="p-4 bg-muted/50 rounded-md">
+              <div className="rounded-md bg-muted/50 p-3">
                 <p className="text-sm text-muted-foreground mb-2">
                   Employee cannot be changed after check is created
                 </p>
@@ -374,8 +377,8 @@ export default function EditFormPage() {
               </div>
 
               {selectedEmployee && (
-                <div className="p-4 bg-muted rounded-md">
-                  <div className="grid md:grid-cols-2 gap-4">
+                <div className="rounded-md bg-muted p-3">
+                  <div className="grid gap-3 md:grid-cols-2">
                     <div>
                       <Label className="text-muted-foreground">{t('form.employeeInfo.fullName')}</Label>
                       <p className="font-medium">{selectedEmployee.fullName}</p>

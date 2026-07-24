@@ -2,6 +2,7 @@ import mongoose from 'mongoose';
 import { getConfig } from './consul';
 
 let MONGODB_URI: string;
+let MONGODB_DB_NAME: string | undefined;
 
 async function getMongoUri() {
   if (!MONGODB_URI) {
@@ -14,8 +15,12 @@ async function getMongoUri() {
     }
     
     MONGODB_URI = uri;
+    MONGODB_DB_NAME = config.MONGODB_DB_NAME;
   }
-  return MONGODB_URI;
+  return {
+    uri: MONGODB_URI,
+    dbName: MONGODB_DB_NAME,
+  };
 }
 
 /**
@@ -45,8 +50,7 @@ async function connectDB() {
 
   if (!cached.promise) {
     // Get MongoDB URI from Consul or environment
-    const uri = await getMongoUri();
-    console.log(uri,'=====')
+    const { uri, dbName } = await getMongoUri();
     if (!uri) {
       throw new Error('MONGODB_URI not found in Consul or environment variables');
     }
@@ -57,11 +61,11 @@ async function connectDB() {
       minPoolSize: 2,
       serverSelectionTimeoutMS: 5000,
       socketTimeoutMS: 45000,
+      ...(dbName ? { dbName } : {}),
     };
 
     cached.promise = mongoose.connect(uri, opts).then((mongoose) => {
         console.log('✅ MongoDB connected successfully');
-        console.log(mongoose)
       return mongoose;
     });
   }
@@ -70,7 +74,7 @@ async function connectDB() {
     cached.conn = await cached.promise;
   } catch (e:any) {
     cached.promise = null;
-    console.error('❌ MongoDB connection error: bener iki to yooo?', e.message);
+    console.error('❌ MongoDB connection error:', e.message);
     throw e;
   }
 

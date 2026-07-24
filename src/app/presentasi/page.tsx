@@ -547,10 +547,10 @@ export default function PresentationPage() {
       </button>
 
       {/* Main Content */}
-      <main className="flex-1 flex items-center justify-center p-2 sm:p-4 md:p-6 lg:p-8">
+      <main className="flex-1 flex items-center justify-center p-2 sm:p-3 md:p-4 lg:p-5">
         <div className="w-full max-w-4xl md:max-w-5xl lg:max-w-6xl">
           {/* Slide Content */}
-          <div className="bg-card border border-border rounded-lg p-3 sm:p-4 md:p-6 lg:p-8 shadow-lg">
+          <div className="rounded-xl border border-border bg-card p-3 shadow-sm sm:p-4 md:p-5 lg:p-6">
             {currentSlideData.id === 1 && (
               <div className="text-center space-y-8">
                 <h1 className="text-4xl md:text-6xl font-bold text-primary mb-4">
@@ -1035,7 +1035,7 @@ function DashboardMockup() {
 
       {/* Charts Grid */}
       <div className="grid grid-cols-1 md:grid-cols-2 gap-3 md:gap-4">
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Distribusi Tipe Perangkat</h4>
           <div className="h-32 flex items-center justify-center gap-6">
             {/* Pie Chart */}
@@ -1060,7 +1060,7 @@ function DashboardMockup() {
             </div>
           </div>
         </div>
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-3 text-gray-900 dark:text-white">Tren Pengecekan</h4>
           <div className="h-32 flex items-end justify-between px-2">
             {/* Line Chart */}
@@ -1189,7 +1189,7 @@ function ChartsGridMockup() {
       <p className="text-sm text-muted-foreground mb-4">Dashboard menampilkan 8 grafik analitik:</p>
       <div className="grid grid-cols-2 md:grid-cols-4 gap-4">
         {/* Pie Charts */}
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Distribusi Tipe</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" strokeWidth="15" strokeDasharray="125.6 188.4" transform="rotate(-90 40 40)" />
@@ -1197,7 +1197,7 @@ function ChartsGridMockup() {
           </svg>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Kepemilikan</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <circle cx="40" cy="40" r="30" fill="none" stroke="#10b981" strokeWidth="15" strokeDasharray="157 188.4" transform="rotate(-90 40 40)" />
@@ -1206,7 +1206,7 @@ function ChartsGridMockup() {
         </div>
 
         {/* Bar Charts */}
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Kesesuaian</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <rect x="10" y="20" width="15" height="50" fill="#3b82f6" rx="2" />
@@ -1215,7 +1215,7 @@ function ChartsGridMockup() {
           </svg>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Distribusi OS</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <circle cx="40" cy="40" r="30" fill="none" stroke="#3b82f6" strokeWidth="15" strokeDasharray="94.2 188.4" transform="rotate(-90 40 40)" />
@@ -1224,7 +1224,7 @@ function ChartsGridMockup() {
           </svg>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Status Lisensi</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <rect x="10" y="15" width="15" height="55" fill="#10b981" rx="2" />
@@ -1233,7 +1233,7 @@ function ChartsGridMockup() {
           </svg>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Status Keamanan</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <circle cx="40" cy="40" r="30" fill="none" stroke="#10b981" strokeWidth="15" strokeDasharray="150.7 188.4" transform="rotate(-90 40 40)" />
@@ -1242,7 +1242,7 @@ function ChartsGridMockup() {
         </div>
 
         {/* Line Chart */}
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Tren Pengecekan</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <path d="M 10 65 L 22 50 L 35 55 L 48 35 L 60 40 L 72 20" fill="none" stroke="#3b82f6" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round" />
@@ -1255,7 +1255,7 @@ function ChartsGridMockup() {
           </svg>
         </div>
 
-        <div className="bg-white dark:bg-gray-900 p-4 rounded-lg border-2 border-gray-300 dark:border-gray-700 shadow-md">
+        <div className="bg-card p-4 rounded-lg border border-border shadow-md">
           <h4 className="font-semibold mb-2 text-sm text-gray-900 dark:text-white">Breakdown Dept</h4>
           <svg width="80" height="80" viewBox="0 0 80 80" className="mx-auto">
             <rect x="10" y="20" width="15" height="50" fill="#3b82f6" rx="2" />
@@ -1336,9 +1336,9 @@ function EmployeeCardsMockup() {
       <p className="text-sm text-muted-foreground mb-4">Daftar karyawan di sistem:</p>
       <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-4">
         {employees.map((emp, idx) => (
-          <div key={idx} className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-4 shadow-md">
+          <div key={idx} className="bg-card border border-border rounded-lg p-4 shadow-md">
             <div className="flex items-center gap-3 mb-3">
-              <div className="w-12 h-12 bg-blue-500/20 rounded-full flex items-center justify-center">
+              <div className="w-12 h-12 bg-primary/15 rounded-full flex items-center justify-center">
                 <span className="text-lg font-bold text-blue-600 dark:text-blue-400">{emp.name.charAt(0)}</span>
               </div>
               <div>
@@ -1347,7 +1347,7 @@ function EmployeeCardsMockup() {
               </div>
             </div>
             <div className="flex items-center gap-2 mb-3">
-              <span className="px-2 py-1 text-xs bg-blue-500/10 text-blue-600 dark:text-blue-400 rounded-full">{emp.dept}</span>
+              <span className="px-2 py-1 text-xs bg-primary/10 text-primary rounded-full">{emp.dept}</span>
               <span className={`px-2 py-1 text-xs rounded-full ${emp.status === 'Aktif' ? 'bg-green-500/10 text-green-600 dark:text-green-400' : 'bg-yellow-500/10 text-yellow-600 dark:text-yellow-400'}`}>{emp.status}</span>
             </div>
             <div className="flex gap-2">
@@ -1438,10 +1438,10 @@ function CheckDataPageMockup() {
           <span className="text-gray-500 dark:text-gray-400">🔍</span>
           <span className="text-sm text-gray-600 dark:text-gray-400">Cari nama, ID, merk...</span>
         </div>
-        <div className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-3 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-lg p-3 flex items-center gap-2">
           <span className="text-sm text-gray-700 dark:text-gray-300">Filter Kondisi ▼</span>
         </div>
-        <div className="bg-white dark:bg-gray-900 border-2 border-gray-300 dark:border-gray-700 rounded-lg p-3 flex items-center gap-2">
+        <div className="bg-card border border-border rounded-lg p-3 flex items-center gap-2">
           <span className="text-sm text-gray-700 dark:text-gray-300">Filter Kepemilikan ▼</span>
         </div>
       </div>
@@ -1452,7 +1452,7 @@ function CheckDataPageMockup() {
           { name: "Ahmad Wijaya", device: "Dell Latitude", status: "Sesuai", color: "green" },
           { name: "Siti Aminah", device: "MacBook Pro", status: "Perlu Perbaikan", color: "red" },
         ].map((item, idx) => (
-          <div key={idx} className={`bg-white dark:bg-gray-900 border-2 ${item.color === 'red' ? 'border-red-500' : 'border-green-500'} rounded-lg p-4 shadow-md`}>
+          <div key={idx} className={`bg-card border-2 ${item.color === 'red' ? 'border-red-500' : 'border-green-500'} rounded-lg p-4 shadow-md`}>
             <div className="flex items-center justify-between mb-3">
               <div>
                 <p className="font-semibold text-sm text-gray-900 dark:text-white">{item.name}</p>

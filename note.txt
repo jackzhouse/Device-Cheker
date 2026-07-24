@@ -1,0 +1,3 @@
+
+buatkan tampilan tabel untuk data pengecekan dan data karyawan. untuk tampilan card tetap ada. cuman dibuat default tampilan table. 
+berikan tombol untuk berpindah dari table view ke card view juga.

@@ -151,28 +151,28 @@ export default function CreateEmployeePage() {
     };
 
     return (
-        <div className="space-y-6 m-3">
+        <div className="page-shell">
 
             {/* Page Header */}
-            <div className="mb-6">
-                <div className='flex justify-between'>
-                    <h1 className="text-3xl font-bold tracking-tight flex items-center gap-2">
-                        <UserPlus className="h-8 w-8" />
+            <div className="page-hero">
+                <div className="min-w-0 flex-1">
+                    <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Directory</div>
+                    <h1 className="page-title flex items-center gap-2">
+                        <UserPlus className="h-5 w-5" />
                         {t('createEmployee.title')}
                     </h1>
-                    {/* Back Button */}
-                    <Button variant="ghost" className="mb-4" onClick={() => router.back()}>
-                        <ArrowLeft className="h-4 w-4 mr-2" />
-                        {t('createEmployee.backToEmployees')}
-                    </Button>
-                </div>
-                <p className="text-muted-foreground mt-2">
+                <p className="page-desc mt-1.5">
                     {t('createEmployee.description')}
                 </p>
+                </div>
+                <Button variant="ghost" onClick={() => router.back()}>
+                    <ArrowLeft className="h-4 w-4 mr-2" />
+                    {t('createEmployee.backToEmployees')}
+                </Button>
             </div>
 
             {/* Form Card */}
-            <Card className=" mx-auto">
+            <Card className="panel-card mx-auto">
                 <form onSubmit={handleSubmit}>
                     <CardHeader>
                         <CardTitle>{t('createEmployee.formTitle')}</CardTitle>
@@ -181,7 +181,7 @@ export default function CreateEmployeePage() {
                         </CardDescription>
                     </CardHeader>
                     <CardContent>
-                        <div className="grid gap-4">
+                        <div className="grid gap-3">
                             {/* Employee ID */}
                             <div className="space-y-2">
                                 <Label htmlFor="employeeId">{t('employee.employeeId')}</Label>
@@ -197,7 +197,7 @@ export default function CreateEmployeePage() {
                             </div>
 
                             {/* Personal Information */}
-                            <div className="grid grid-cols-2 gap-4">
+                            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2">
                                 <div className="space-y-2">
                                     <Label htmlFor="firstName">{t('createEmployee.firstName')} {t('createEmployee.required')}</Label>
                                     <Input

@@ -14,10 +14,32 @@ const consulClient = new Consul({
 // Configuration interface
 interface ConsulConfig {
   MONGODB_URI: string;
+  MONGODB_DB_NAME?: string;
+  EXTERNAL_AUTH_BASE_URL?: string;
+  EXTERNAL_AUTH_LOGIN_BASE_URL?: string;
+  EXTERNAL_AUTH_LOGIN_PATH?: string;
+  EXTERNAL_AUTH_CREDENTIAL_CHECK_PATH?: string;
+  EXTERNAL_AUTH_ATTENDANCE_BASE_URL?: string;
+  EXTERNAL_AUTH_USERS_PATH?: string;
+  EXTERNAL_AUTH_PROFILE_PATH?: string;
 }
 
 // Cache for configuration
 let configCache: Partial<ConsulConfig> | null = null;
+
+function isProductionEnv(): boolean {
+  return process.env.NODE_ENV === 'production';
+}
+
+function getEnvMongoUri(): string | null {
+  const envUri = process.env.MONGODB_URI?.trim();
+  return envUri || null;
+}
+
+function getEnvMongoDbName(): string | null {
+  const envDbName = process.env.MONGODB_DB_NAME?.trim();
+  return envDbName || null;
+}
 
 /**
  * Fetch a single value from Consul KV store
@@ -28,7 +50,6 @@ async function getKVValue(key: string): Promise<string | null> {
   try {
     const kvPath = `new-config/support-device-checker/setting/${key}`;
     const value = await consulClient.kv.get(kvPath);
-    console.log(value)
     
     if (value && value.Value) {
       const decodedValue = Buffer.from(value.Value, 'base64').toString('utf-8');
@@ -36,10 +57,7 @@ async function getKVValue(key: string): Promise<string | null> {
       const sanitizedValue = decodedValue.trim().replace(/\n/g, '').replace(/\r/g, '');
       
       console.log(`✅ Fetched ${key} from Consul`);
-      console.log(`📝 Raw value (first 100 chars):`, decodedValue.substring(0, 100));
-      console.log(`📝 Sanitized value (first 100 chars):`, sanitizedValue.substring(0, 100));
-      console.log(`📝 Value length: ${sanitizedValue.length}`);
-      return value.Value
+
       // Validate MongoDB URI format
       if (key === 'MONGODB_URI' && sanitizedValue) {
         if (!sanitizedValue.startsWith('mongodb://') && !sanitizedValue.startsWith('mongodb+srv://')) {
@@ -60,6 +78,10 @@ async function getKVValue(key: string): Promise<string | null> {
   }
 }
 
+export async function getSettingValue(key: keyof ConsulConfig | string): Promise<string | null> {
+  return getKVValue(String(key));
+}
+
 /**
  * Fetch all required configuration from Consul KV store
  * Falls back to environment variables if Consul is unavailable
@@ -71,24 +93,45 @@ export async function getConfig(): Promise<ConsulConfig> {
     return configCache as ConsulConfig;
   }
 
-  console.log('📡 Fetching configuration from Consul...');
-
   const config: Partial<ConsulConfig> = {};
 
-  // Try to fetch MONGODB_URI from Consul
-  const mongodbUri = await getKVValue('MONGODB_URI');
-  
-  // Fallback to environment variable if Consul fetch fails
-  if (!mongodbUri) {
-    const envUri = process.env.MONGODB_URI;
-    if (envUri) {
-      console.log('📋 Using MONGODB_URI from environment variable');
-      config.MONGODB_URI = envUri;
-    } else {
-      throw new Error('MONGODB_URI not found in Consul or environment variables');
+  if (!isProductionEnv()) {
+    const envUri = getEnvMongoUri();
+    const envDbName = getEnvMongoDbName();
+    if (!envUri) {
+      throw new Error('MONGODB_URI not found in environment variables for development');
+    }
+
+    console.log('📋 Development mode: using MONGODB_URI from environment variable');
+    config.MONGODB_URI = envUri;
+    if (envDbName) {
+      console.log('📋 Development mode: using MONGODB_DB_NAME from environment variable');
+      config.MONGODB_DB_NAME = envDbName;
     }
   } else {
-    config.MONGODB_URI = mongodbUri;
+    console.log('📡 Production mode: fetching MONGODB_URI from Consul...');
+
+    // Try to fetch MONGODB_URI from Consul
+    const mongodbUri = await getKVValue('MONGODB_URI');
+
+    // Fallback to environment variable if Consul fetch fails
+    if (!mongodbUri) {
+      const envUri = getEnvMongoUri();
+      if (envUri) {
+        console.log('📋 Production fallback: using MONGODB_URI from environment variable');
+        config.MONGODB_URI = envUri;
+      } else {
+        throw new Error('MONGODB_URI not found in Consul or environment variables');
+      }
+    } else {
+      config.MONGODB_URI = mongodbUri;
+    }
+
+    const envDbName = getEnvMongoDbName();
+    if (envDbName) {
+      console.log('📋 Production mode: using MONGODB_DB_NAME from environment variable');
+      config.MONGODB_DB_NAME = envDbName;
+    }
   }
 
   // Cache the configuration

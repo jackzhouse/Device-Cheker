@@ -310,8 +310,8 @@ export default function EmployeeHistoryPage() {
       </div>
 
       {/* Timeline */}
-      <Card>
-        <CardHeader>
+      <Card className="panel-card">
+        <CardHeader className="pb-2">
           <div className="flex items-center justify-between">
             <CardTitle>{t('checkData.checkHistory')}</CardTitle>
             {checks.length > 0 && (
@@ -326,15 +326,15 @@ export default function EmployeeHistoryPage() {
           {checks.length === 0 ? (
             <p className="text-center py-12 text-muted-foreground">{t('checkData.noChecks')}</p>
           ) : (
-            <div className="space-y-6">
+            <div className="space-y-4">
               {checks.map((check, index) => (
-                <div key={check._id} className="relative pl-8 pb-6 border-l-2 border-muted">
+                <div key={check._id} className="relative border-l-2 border-muted pb-4 pl-6">
                   {/* Timeline Dot */}
                   <div className="absolute left-0 top-0 -translate-x-1/2 h-4 w-4 rounded-full bg-primary border-2 border-background" />
 
                   {/* Check Card */}
-                  <Card>
-                    <CardContent className="pt-6">
+                  <Card className="panel-card">
+                    <CardContent className="pt-4">
                       {/* Employee Name Section */}
                       <div className="mb-4">
                         <div className="flex items-center gap-2 mb-2">

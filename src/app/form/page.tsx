@@ -12,12 +12,13 @@ import { Label } from '@/components/ui/label';
 import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
-import { useFieldArray, useForm, type UseFormReturn } from 'react-hook-form';
+import { useFieldArray, useForm, useWatch, type UseFormReturn } from 'react-hook-form';
 import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2, HelpCircle, Keyboard, X, Check } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
   DialogDescription,
+  DialogFooter,
   DialogHeader,
   DialogTitle,
 } from '@/components/ui/dialog';
@@ -100,12 +101,18 @@ function FormContent() {
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
   const [useLastVersion, setUseLastVersion] = React.useState(false);
   const [loadingLastVersion, setLoadingLastVersion] = React.useState(false);
+  const [lastVersionPreviewOpen, setLastVersionPreviewOpen] = React.useState(false);
+  const [pendingLastVersionData, setPendingLastVersionData] = React.useState<Partial<FormData> | null>(null);
   const [helpModalOpen, setHelpModalOpen] = React.useState(false);
-  const [shortcutPanelOpen, setShortcutPanelOpen] = React.useState(true);
-  const [activeSection, setActiveSection] = React.useState('');
+  const [shortcutPanelOpen, setShortcutPanelOpen] = React.useState(false);
+  const [draftSavedAt, setDraftSavedAt] = React.useState<number | null>(null);
+  const [activeSection, setActiveSection] = React.useState('employee');
   const formRef = React.useRef<HTMLFormElement>(null);
+  const draftRestoredRef = React.useRef(false);
 
-  const { register, control, watch, handleSubmit, setValue, reset, formState: { errors } } = useForm<FormData>({
+  const { register, control, watch, handleSubmit, setValue, reset, formState: { errors, isDirty } } = useForm<FormData>({
+    mode: 'onBlur',
+    reValidateMode: 'onChange',
     defaultValues: {
       employeeId: '',
       checkDate: new Date().toISOString().split('T')[0],
@@ -154,6 +161,49 @@ function FormContent() {
       },
     },
   });
+  const watchedValues = useWatch({ control });
+  const draftStorageKey = 'device-check-form-draft';
+
+  React.useEffect(() => {
+    try {
+      const rawDraft = window.sessionStorage.getItem(draftStorageKey);
+      if (!rawDraft) {
+        draftRestoredRef.current = true;
+        return;
+      }
+      const draft = JSON.parse(rawDraft) as Partial<FormData>;
+      reset(draft as FormData);
+      setDraftSavedAt(Date.now());
+      if (draft.employeeId) {
+        getEmployeeById(draft.employeeId).then((response) => {
+          if (response.success && response.data) setSelectedEmployee(response.data);
+        }).catch(() => undefined);
+      }
+    } catch {
+      window.sessionStorage.removeItem(draftStorageKey);
+    } finally {
+      draftRestoredRef.current = true;
+    }
+  }, [reset]);
+
+  React.useEffect(() => {
+    if (!draftRestoredRef.current || !isDirty) return;
+    const timer = window.setTimeout(() => {
+      window.sessionStorage.setItem(draftStorageKey, JSON.stringify(watchedValues));
+      setDraftSavedAt(Date.now());
+    }, 400);
+    return () => window.clearTimeout(timer);
+  }, [watchedValues, isDirty]);
+
+  React.useEffect(() => {
+    const warnBeforeLeave = (event: BeforeUnloadEvent) => {
+      if (!isDirty) return;
+      event.preventDefault();
+      event.returnValue = '';
+    };
+    window.addEventListener('beforeunload', warnBeforeLeave);
+    return () => window.removeEventListener('beforeunload', warnBeforeLeave);
+  }, [isDirty]);
 
   const {
     fields: workAppFields,
@@ -250,19 +300,13 @@ function FormContent() {
       const sectionsList = ['employee', 'device', 'os', 'spec', 'condition', 'apps', 'security', 'info'];
       const scrollPosition = window.scrollY + 120; // Offset for better detection
       
-      // Find the first section that starts below the scroll position
-      let activeId = sectionsList[0]; // Default to first section
+      // Use last section already reached, keeping anchor state aligned with reading position.
+      let activeId = sectionsList[0];
       for (let i = 0; i < sectionsList.length; i++) {
         const section = document.getElementById(sectionsList[i]);
-        if (section && section.offsetTop >= scrollPosition) {
+        if (section && section.offsetTop <= scrollPosition) {
           activeId = sectionsList[i];
-          break;
         }
-      }
-      
-      // If we're past all sections, use the last one
-      if (scrollPosition >= window.scrollY + window.innerHeight) {
-        activeId = sectionsList[sectionsList.length - 1];
       }
       
       setActiveSection(activeId);
@@ -349,6 +393,8 @@ function FormContent() {
   // Handle employee selection
   const handleEmployeeSelect = async (employeeId: string) => {
     setUseLastVersion(false);
+    setPendingLastVersionData(null);
+    setLastVersionPreviewOpen(false);
 
     // Reset form to default values for new employee
     reset({
@@ -569,10 +615,8 @@ function FormContent() {
             },
           };
 
-          // Reset form with complete data object - atomic operation prevents race conditions
-          reset(formDataToSet);
-
-          toast.success(t('form.employeeInfo.lastVersionLoaded'));
+          setPendingLastVersionData(formDataToSet as Partial<FormData>);
+          setLastVersionPreviewOpen(true);
         } else {
           toast.info(t('form.employeeInfo.noPreviousRecord'));
           setUseLastVersion(false);
@@ -589,6 +633,20 @@ function FormContent() {
     fetchLastVersionData();
   }, [useLastVersion, selectedEmployee?._id, reset, t]);
 
+  const cancelLastVersionPreview = () => {
+    setLastVersionPreviewOpen(false);
+    setPendingLastVersionData(null);
+    setUseLastVersion(false);
+  };
+
+  const applyLastVersionPreview = () => {
+    if (!pendingLastVersionData) return;
+    reset(pendingLastVersionData);
+    setLastVersionPreviewOpen(false);
+    setPendingLastVersionData(null);
+    toast.success(t('form.employeeInfo.lastVersionLoaded'));
+  };
+
   const onSubmit = async (data: any) => {
     if (!data.employeeId) {
       toast.error(t('form.toast.selectEmployee'));
@@ -602,9 +660,10 @@ function FormContent() {
       const response = await createDeviceCheck(normalizedData);
       if (response.success && response.data) {
         toast.success(t('form.toast.createSuccess'));
+        window.sessionStorage.removeItem(draftStorageKey);
         router.push('/data-pengecekan');
       } else {
-        toast.error(t('form.toastm .createFailed'));
+        toast.error(t('form.toast.createFailed'));
       }
     } catch (error: any) {
       console.error('Error submitting form:', error);
@@ -621,8 +680,15 @@ function FormContent() {
     }
   };
 
+  const completedSections = sections.filter((section) => getSectionStatus(section.id) === 'complete').length;
+  const saveDraft = () => {
+    window.sessionStorage.setItem(draftStorageKey, JSON.stringify(watchedValues));
+    setDraftSavedAt(Date.now());
+    toast.success(t('common.save'));
+  };
+
   return (
-    <div className="space-y-6 m-3 relative">
+    <div className="page-shell relative">
       {/* Loading Overlay */}
       {loadingLastVersion && (
         <div className="fixed inset-0 bg-background/80 backdrop-blur-sm z-50 flex items-center justify-center">
@@ -637,28 +703,80 @@ function FormContent() {
       )}
 
       {/* Page Header */}
-      <div className="flex flex-col gap-2">
-        <div className="flex items-center justify-between gap-2">
-          <h1 className="text-2xl sm:text-3xl font-bold tracking-tight">{t('form.title')}</h1>
-          <Tooltip>
-            <TooltipTrigger asChild>
-              <Button
-                type="button"
-                variant="ghost"
-                size="icon"
-                onClick={() => setHelpModalOpen(true)}
-                className="h-8 w-8"
-              >
-                <HelpCircle className="h-5 w-5" />
-              </Button>
-            </TooltipTrigger>
-            <TooltipContent>{t('form.help.tooltip')}</TooltipContent>
-          </Tooltip>
+      <div className="page-hero">
+        <div className="min-w-0 flex-1">
+          <div className="mb-2 text-[11px] font-semibold uppercase tracking-[0.18em] text-primary">Input Check</div>
+          <h1 className="page-title">{t('form.title')}</h1>
+          <p className="page-desc mt-2">
+            {t('form.description')}
+          </p>
         </div>
-        <p className="text-muted-foreground text-sm sm:text-base">
-          {t('form.description')}
-        </p>
+        <Tooltip>
+          <TooltipTrigger asChild>
+            <Button
+              type="button"
+              variant="ghost"
+              size="icon"
+              onClick={() => setHelpModalOpen(true)}
+              className="h-8 w-8"
+            >
+              <HelpCircle className="h-5 w-5" />
+            </Button>
+          </TooltipTrigger>
+          <TooltipContent>{t('form.help.tooltip')}</TooltipContent>
+        </Tooltip>
       </div>
+
+      <nav className="form-anchor-bar" aria-label={t('form.formSections')}>
+        {sections.map((section) => {
+          const complete = getSectionStatus(section.id) === 'complete';
+          return (
+            <button
+              key={section.id}
+              type="button"
+              onClick={() => {
+                const sectionElement = document.getElementById(section.id);
+                sectionElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
+              }}
+              className={`form-anchor-item ${activeSection === section.id ? 'form-anchor-item-active' : ''} ${complete ? 'form-anchor-item-complete' : ''}`}
+              aria-current={activeSection === section.id ? 'location' : undefined}
+            >
+              <span className="form-anchor-index">{section.label}</span>
+              <section.icon className="h-3.5 w-3.5 shrink-0" />
+              <span className="min-w-0 truncate">{section.title}</span>
+              <span className="ml-auto shrink-0" aria-label={complete ? 'Complete' : 'Incomplete'}>
+                {complete ? <Check className="h-3.5 w-3.5" /> : <span className="form-anchor-dot" />}
+              </span>
+            </button>
+          );
+        })}
+      </nav>
+      <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--app-border)] bg-[var(--app-subtle)] px-3 py-2 text-xs text-muted-foreground">
+        <span>{completedSections}/8 {t('form.progress.sectionsComplete')}</span>
+        <span>{draftSavedAt ? `${t('form.progress.draftSaved')} ${new Date(draftSavedAt).toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' })}` : t('form.progress.noDraft')}</span>
+      </div>
+
+      <Dialog open={lastVersionPreviewOpen} onOpenChange={(open) => { if (!open) cancelLastVersionPreview(); }}>
+        <DialogContent>
+          <DialogHeader>
+            <DialogTitle>{language === 'id' ? 'Pratinjau versi terakhir' : 'Preview last version'}</DialogTitle>
+            <DialogDescription>
+              {language === 'id' ? 'Data berikut akan mengisi form setelah Anda memilih Terapkan. Input saat ini belum berubah.' : 'The following data will fill the form after you choose Apply. Current input is unchanged.'}
+            </DialogDescription>
+          </DialogHeader>
+          <div className="grid gap-2 rounded-lg border border-[var(--app-border)] bg-[var(--app-subtle)] p-3 text-sm">
+            <div className="flex justify-between gap-3"><span className="text-muted-foreground">{t('form.deviceDetail.deviceBrand')} / {t('form.deviceDetail.deviceModel')}</span><strong>{pendingLastVersionData?.deviceDetail?.deviceBrand || '-'} / {pendingLastVersionData?.deviceDetail?.deviceModel || '-'}</strong></div>
+            <div className="flex justify-between gap-3"><span className="text-muted-foreground">{t('form.deviceDetail.serialNumber')}</span><strong>{pendingLastVersionData?.deviceDetail?.serialNumber || '-'}</strong></div>
+            <div className="flex justify-between gap-3"><span className="text-muted-foreground">{t('form.operatingSystem.osType')} / {t('form.operatingSystem.osVersion')}</span><strong>{pendingLastVersionData?.operatingSystem?.osType || '-'} / {pendingLastVersionData?.operatingSystem?.osVersion || '-'}</strong></div>
+            <div className="flex justify-between gap-3"><span className="text-muted-foreground">{t('form.specification.processor')}</span><strong>{pendingLastVersionData?.specification?.processor || '-'}</strong></div>
+            <div className="flex justify-between gap-3"><span className="text-muted-foreground">{language === 'id' ? 'Aplikasi' : 'Applications'}</span><strong>{(pendingLastVersionData?.workApplications?.length || 0) + (pendingLastVersionData?.nonWorkApplications?.length || 0)}</strong></div>
+          </div>
+          <DialogFooter>
+            <Button type="button" variant="outline" onClick={cancelLastVersionPreview}>{t('common.cancel')}</Button>
+            <Button type="button" onClick={applyLastVersionPreview}>{language === 'id' ? 'Terapkan' : 'Apply'}</Button>
+          </DialogFooter>
+        </DialogContent>
+      </Dialog>
 
       {/* Help Modal */}
       <Dialog open={helpModalOpen} onOpenChange={setHelpModalOpen}>
@@ -673,10 +791,10 @@ function FormContent() {
             </DialogDescription>
           </DialogHeader>
 
-          <div className="space-y-6 mt-4">
+          <div className="mt-3 space-y-4">
             {/* Form Introduction */}
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg">{t('form.help.about.title')}</h3>
+              <h3 className="text-sm font-semibold">{t('form.help.about.title')}</h3>
               <p className="text-sm text-muted-foreground">
                 {t('form.help.about.description1')}
               </p>
@@ -687,8 +805,8 @@ function FormContent() {
 
             {/* Step-by-Step Instructions */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">{t('form.help.howToFill.title')}</h3>
-              <div className="space-y-4 text-sm">
+              <h3 className="text-sm font-semibold">{t('form.help.howToFill.title')}</h3>
+              <div className="space-y-2 text-sm">
                 <div className="border-l-2 border-primary pl-3">
                   <h4 className="font-medium">{t('form.help.howToFill.step1.title')}</h4>
                   <p className="text-muted-foreground mt-1">
@@ -742,7 +860,7 @@ function FormContent() {
 
             {/* Tips */}
             <div className="space-y-2">
-              <h3 className="font-semibold text-lg">{t('form.help.proTips.title')}</h3>
+              <h3 className="text-sm font-semibold">{t('form.help.proTips.title')}</h3>
               <ul className="space-y-2 text-sm text-muted-foreground list-disc list-inside">
                 <li>{t('form.help.proTips.tip1')}</li>
                 <li>{t('form.help.proTips.tip2')}</li>
@@ -753,8 +871,8 @@ function FormContent() {
 
             {/* Keyboard Shortcuts */}
             <div className="space-y-3">
-              <h3 className="font-semibold text-lg">{t('form.help.keyboardShortcuts.title')}</h3>
-              <div className="grid grid-cols-1 md:grid-cols-2 gap-3 text-sm">
+              <h3 className="text-sm font-semibold">{t('form.help.keyboardShortcuts.title')}</h3>
+              <div className="grid grid-cols-1 gap-2 text-sm md:grid-cols-2">
                 <div className="flex items-center justify-between p-2 bg-muted rounded">
                   <span className="text-muted-foreground">{t('form.help.keyboardShortcuts.saveForm')}</span>
                   <kbd className="px-2 py-1 text-xs font-mono bg-background border rounded">Ctrl/Cmd + S</kbd>
@@ -793,54 +911,17 @@ function FormContent() {
         </DialogContent>
       </Dialog>
 
-      {/* Form with Sidebar Navigation */}
-      <div className="grid lg:grid-cols-[240px_1fr] gap-6">
-        {/* Sidebar Navigation */}
-        <aside className="hidden lg:block sticky top-24 h-fit space-y-1">
-          <p className="text-sm font-medium text-muted-foreground mb-3">{t('form.formSections')}</p>
-          <nav className="space-y-1">
-            {sections.map((section) => (
-              <button
-                key={section.id}
-                type="button"
-                onClick={() => {
-                  const sectionElement = document.getElementById(section.id);
-                  if (sectionElement) {
-                    const headerOffset = 80; // Account for sticky header
-                    const elementPosition = sectionElement.getBoundingClientRect().top;
-                    const offsetPosition = elementPosition + window.pageYOffset - headerOffset;
-                    window.scrollTo({
-                      top: offsetPosition,
-                      behavior: 'smooth'
-                    });
-                  }
-                }}
-                className={`
-                  w-full flex items-center gap-3 px-3 py-2 text-sm rounded-md transition-colors text-left
-                  ${activeSection === section.id 
-                    ? 'bg-primary text-primary-foreground' 
-                    : 'text-muted-foreground hover:text-foreground hover:bg-accent'
-                  }
-                `}
-              >
-                <section.icon className="h-4 w-4" />
-                <span>{section.title}</span>
-              </button>
-            ))}
-          </nav>
-        </aside>
-
-        {/* Form Content */}
-        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-6">
+      <div className="form-workflow">
+        <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           {/* Employee Section */}
-          <Card id="employee">
-            <CardHeader>
+          <Card id="employee" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
-                <User className="h-5 w-5" />
+                <User className="h-4 w-4" />
                 {t('form.employeeInfo.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-3">
               <EmployeeAutocomplete
                 value={watch('employeeId')}
                 onChange={handleEmployeeSelect}
@@ -848,25 +929,25 @@ function FormContent() {
               />
 
               {selectedEmployee && (
-                <div className="p-4 bg-muted rounded-md">
-                  <div className="grid grid-cols-1 gap-4 sm:grid-cols-2">
+                <div className="form-identity-strip">
+                  <div className="grid grid-cols-2 gap-x-4 gap-y-2 sm:grid-cols-4">
                     <div>
-                      <Label className="text-muted-foreground">{t('form.employeeInfo.fullName')}</Label>
-                      <p className="font-medium">{selectedEmployee.fullName}</p>
+                      <Label className="data-label">{t('form.employeeInfo.fullName')}</Label>
+                      <p className="truncate text-sm font-semibold">{selectedEmployee.fullName}</p>
                     </div>
                     <div>
-                      <Label className="text-muted-foreground">{t('form.employeeInfo.position')}</Label>
-                      <p className="font-medium">{selectedEmployee.position}</p>
+                      <Label className="data-label">{t('form.employeeInfo.position')}</Label>
+                      <p className="truncate text-sm font-semibold">{selectedEmployee.position}</p>
                     </div>
                     {selectedEmployee.department && (
                       <div>
-                        <Label className="text-muted-foreground">{t('form.employeeInfo.department')}</Label>
-                        <p className="font-medium">{selectedEmployee.department}</p>
+                        <Label className="data-label">{t('form.employeeInfo.department')}</Label>
+                        <p className="truncate text-sm font-semibold">{selectedEmployee.department}</p>
                       </div>
                     )}
                     <div>
-                      <Label className="text-muted-foreground">{t('form.employeeInfo.totalChecks')}</Label>
-                      <p className="font-medium">{selectedEmployee.totalDeviceChecks}</p>
+                      <Label className="data-label">{t('form.employeeInfo.totalChecks')}</Label>
+                      <p className="text-sm font-semibold">{selectedEmployee.totalDeviceChecks}</p>
                     </div>
                   </div>
                 </div>
@@ -878,9 +959,11 @@ function FormContent() {
                   id="checkDate"
                   type="date"
                   {...register('checkDate', { required: t('form.validation.checkDateRequired') })}
+                  aria-invalid={Boolean(errors.checkDate)}
+                  aria-describedby={errors.checkDate ? 'checkDate-error' : undefined}
                 />
                 {errors.checkDate?.message && (
-                  <p className="text-sm text-destructive mt-1">{errors.checkDate.message as string}</p>
+                  <p id="checkDate-error" role="alert" className="text-sm text-destructive mt-1">{errors.checkDate.message as string}</p>
                 )}
               </div>
 
@@ -902,14 +985,14 @@ function FormContent() {
           </Card>
 
           {/* Device Detail Section */}
-          <Card id="device">
-            <CardHeader>
+          <Card id="device" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <Laptop className="h-5 w-5" />
                 {t('form.deviceDetail.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="deviceType">{t('form.deviceDetail.deviceType')} *</Label>
@@ -954,28 +1037,34 @@ function FormContent() {
                   <Input
                     id="deviceModel"
                     {...register('deviceDetail.deviceModel', { required: t('form.validation.deviceModelRequired') })}
+                    aria-invalid={Boolean(errors.deviceDetail?.deviceModel)}
+                    aria-describedby={errors.deviceDetail?.deviceModel ? 'deviceModel-error' : undefined}
                   />
+                  {errors.deviceDetail?.deviceModel?.message && <p id="deviceModel-error" role="alert" className="mt-1 text-sm text-destructive">{errors.deviceDetail.deviceModel.message as string}</p>}
                 </div>
                 <div>
                   <Label htmlFor="serialNumber">{t('form.deviceDetail.serialNumber')} *</Label>
                   <Input
                     id="serialNumber"
                     {...register('deviceDetail.serialNumber', { required: t('form.validation.serialNumberRequired') })}
+                    aria-invalid={Boolean(errors.deviceDetail?.serialNumber)}
+                    aria-describedby={errors.deviceDetail?.serialNumber ? 'serialNumber-error' : undefined}
                   />
+                  {errors.deviceDetail?.serialNumber?.message && <p id="serialNumber-error" role="alert" className="mt-1 text-sm text-destructive">{errors.deviceDetail.serialNumber.message as string}</p>}
                 </div>
               </div>
             </CardContent>
           </Card>
 
           {/* Operating System Section */}
-          <Card id="os">
-            <CardHeader>
+          <Card id="os" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <HardDrive className="h-5 w-5" />
                 {t('form.operatingSystem.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-4">
               <div className="grid grid-cols-1 gap-4 md:grid-cols-2">
                 <div>
                   <Label htmlFor="osType">{t('form.operatingSystem.osType')} *</Label>
@@ -994,8 +1083,11 @@ function FormContent() {
                   <Input
                     id="osVersion"
                     {...register('operatingSystem.osVersion', { required: t('form.validation.osVersionRequired') })}
+                    aria-invalid={Boolean(errors.operatingSystem?.osVersion)}
+                    aria-describedby={errors.operatingSystem?.osVersion ? 'osVersion-error' : undefined}
                     placeholder={t('form.placeholders.osVersion')}
                   />
+                  {errors.operatingSystem?.osVersion?.message && <p id="osVersion-error" role="alert" className="mt-1 text-sm text-destructive">{errors.operatingSystem.osVersion.message as string}</p>}
                 </div>
               </div>
 
@@ -1005,6 +1097,8 @@ function FormContent() {
                   <select
                     id="osLicense"
                     {...register('operatingSystem.osLicense', { required: t('form.validation.osLicenseRequired') })}
+                    aria-invalid={Boolean(errors.operatingSystem?.osLicense)}
+                    aria-describedby={errors.operatingSystem?.osLicense ? 'osLicense-error' : undefined}
                     className="h-10 w-full rounded-md border bg-background px-3 text-sm"
                   >
                     <option value="original">{t('form.operatingSystem.osLicenseOptions.original')}</option>
@@ -1012,6 +1106,7 @@ function FormContent() {
                     <option value="openSource">{t('form.operatingSystem.osLicenseOptions.openSource')}</option>
                     <option value="unknown">{t('form.operatingSystem.osLicenseOptions.unknown')}</option>
                   </select>
+                  {errors.operatingSystem?.osLicense?.message && <p id="osLicense-error" role="alert" className="mt-1 text-sm text-destructive">{errors.operatingSystem.osLicense.message as string}</p>}
                 </div>
                 <div className="flex items-center gap-2 pt-6">
                   <input
@@ -1029,14 +1124,14 @@ function FormContent() {
           </Card>
 
           {/* Specification Section */}
-          <Card id="spec">
-            <CardHeader>
+          <Card id="spec" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <HardDrive className="h-5 w-5" />
                 {t('form.specification.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-4">
               <div className="grid md:grid-cols-2 gap-4">
                 <div>
                   <Label htmlFor="ramCapacity">{t('form.specification.ramCapacity')}&nbsp;(GB)</Label>
@@ -1125,14 +1220,14 @@ function FormContent() {
           </Card>
 
           {/* Device Condition Section */}
-          <Card id="condition">
-            <CardHeader>
+          <Card id="condition" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 {t('form.deviceCondition.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-4">
               <div>
                 <Label htmlFor="deviceSuitability">{t('form.deviceCondition.deviceSuitability')} *</Label>
                 <select
@@ -1193,14 +1288,14 @@ function FormContent() {
           </Card>
 
           {/* Applications Section */}
-          <Card id="apps">
-            <CardHeader>
+          <Card id="apps" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 {t('form.applications.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="form-section-content space-y-5">
               {/* Work Applications */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -1318,14 +1413,14 @@ function FormContent() {
           </Card>
 
           {/* Security Section */}
-          <Card id="security">
-            <CardHeader>
+          <Card id="security" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <Shield className="h-5 w-5" />
                 {t('form.security.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-6">
+            <CardContent className="form-section-content space-y-5">
               {/* Antivirus */}
               <div>
                 <div className="flex items-center justify-between mb-3">
@@ -1463,14 +1558,14 @@ function FormContent() {
           </Card>
 
           {/* Additional Info Section */}
-          <Card id="info">
-            <CardHeader>
+          <Card id="info" className="form-section">
+            <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <Calendar className="h-5 w-5" />
                 {t('form.additionalInfo.title')}
               </CardTitle>
             </CardHeader>
-            <CardContent className="space-y-4">
+            <CardContent className="form-section-content space-y-4">
               <div>
                 <Label htmlFor="passwordUsage">{t('form.additionalInfo.passwordUsage')} *</Label>
                 <select
@@ -1513,7 +1608,7 @@ function FormContent() {
           </Card>
 
           {/* Submit Button */}
-          <div className="flex flex-col sm:flex-row gap-4">
+          <div className="form-actions sticky bottom-2 z-30 rounded-xl bg-background/95 shadow-lg backdrop-blur-sm">
             <Button
               type="button"
               variant="outline"
@@ -1522,6 +1617,7 @@ function FormContent() {
             >
               {t('common.cancel')}
             </Button>
+            <Button type="button" variant="outline" onClick={saveDraft} disabled={loading}>{t('form.progress.saveDraft')}</Button>
             <Tooltip>
               <TooltipTrigger asChild>
                 <Button type="submit" disabled={loading} className="flex-1 w-full sm:w-auto">
@@ -1537,9 +1633,9 @@ function FormContent() {
 
       {/* Floating Keyboard Shortcuts Panel */}
       {shortcutPanelOpen && (
-        <div className="fixed bottom-4 right-4 z-40 max-w-sm w-[calc(100vw-2rem)]">
-          <div className="bg-card border rounded-lg shadow-lg p-4">
-            <div className="flex items-center justify-between mb-3">
+        <div className="fixed bottom-3 right-3 z-40 w-[calc(100vw-1.5rem)] max-w-xs">
+          <div className="rounded-lg border bg-card p-3 shadow-sm">
+            <div className="mb-2 flex items-center justify-between">
               <div className="flex items-center gap-2">
                 <Keyboard className="h-4 w-4 text-primary" />
                 <span className="font-semibold text-sm">{t('form.help.floatingPanel.title')}</span>
@@ -1554,7 +1650,7 @@ function FormContent() {
                 <X className="h-3 w-3" />
               </Button>
             </div>
-            <div className="space-y-2 text-xs">
+            <div className="space-y-1.5 text-xs">
               <div className="flex items-center justify-between gap-2">
                 <span className="text-muted-foreground">{t('form.help.keyboardShortcuts.saveForm')}</span>
                 <kbd className="px-1.5 py-0.5 font-mono bg-muted border rounded">Ctrl/Cmd+S</kbd>

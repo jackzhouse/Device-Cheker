@@ -1,134 +1,252 @@
 @import "tailwindcss";
 
 @theme {
-  /* Pemetaan variabel ke Utility Class Tailwind v4 */
   --color-background: hsl(var(--background));
   --color-foreground: hsl(var(--foreground));
-
   --color-card: hsl(var(--card));
   --color-card-foreground: hsl(var(--card-foreground));
-
   --color-popover: hsl(var(--popover));
   --color-popover-foreground: hsl(var(--popover-foreground));
-
   --color-primary: hsl(var(--primary));
   --color-primary-foreground: hsl(var(--primary-foreground));
-
   --color-secondary: hsl(var(--secondary));
   --color-secondary-foreground: hsl(var(--secondary-foreground));
-
   --color-muted: hsl(var(--muted));
   --color-muted-foreground: hsl(var(--muted-foreground));
-
   --color-accent: hsl(var(--accent));
   --color-accent-foreground: hsl(var(--accent-foreground));
-
   --color-destructive: hsl(var(--destructive));
   --color-destructive-foreground: hsl(var(--destructive-foreground));
-
   --color-border: hsl(var(--border));
   --color-input: hsl(var(--input));
   --color-ring: hsl(var(--ring));
-
-  --radius-lg: var(--radius);
-  --radius-md: calc(var(--radius) - 2px);
-  --radius-sm: calc(var(--radius) - 4px);
+  --radius-lg: var(--radius-lg);
+  --radius-md: var(--radius-md);
+  --radius-sm: var(--radius-sm);
 }
 
 @layer base {
+  /* Hallmark · pre-emit critique: Philosophy 5 / Hierarchy 5 / Execution 4 / Specificity 4 / Restraint 5 / Variety 4 */
   :root {
-    --safe-area-inset-bottom: env(safe-area-inset-bottom, 0px);
-    
-    /* TailAdmin Light Style */
-    --background: 210 40% 98%; /* #F1F5F9 */
-    --foreground: 222.2 84% 4.9%;
-
+    --background: 210 20% 97%;
+    --foreground: 215 28% 13%;
     --card: 0 0% 100%;
-    --card-foreground: 222.2 84% 4.9%;
-
-    --primary: 232 71% 56%; /* TailAdmin Blue #3C50E0 */
-    --primary-foreground: 210 40% 98%;
-
-    --border: 214.3 31.8% 91.4%;
-    --input: 214.3 31.8% 91.4%;
-    --ring: 232 71% 56%;
-    --radius: 0.5rem;
-    
-    /* Variables lainnya tetap dipertahankan */
+    --card-foreground: 215 28% 13%;
     --popover: 0 0% 100%;
-    --popover-foreground: 222.2 84% 4.9%;
-    --secondary: 210 40% 96.1%;
-    --secondary-foreground: 222.2 47.4% 11.2%;
-    --muted: 210 40% 96.1%;
-    --muted-foreground: 215.4 16.3% 46.9%;
-    --accent: 210 40% 96.1%;
-    --accent-foreground: 222.2 47.4% 11.2%;
-    --destructive: 0 84.2% 60.2%;
-    --destructive-foreground: 210 40% 98%;
+    --popover-foreground: 215 28% 13%;
+    --primary: 217 82% 52%;
+    --primary-foreground: 0 0% 100%;
+    --secondary: 210 18% 93%;
+    --secondary-foreground: 215 28% 13%;
+    --muted: 210 18% 93%;
+    --muted-foreground: 215 12% 44%;
+    --accent: 193 72% 43%;
+    --accent-foreground: 0 0% 100%;
+    --destructive: 0 69% 48%;
+    --destructive-foreground: 0 0% 100%;
+    --border: 214 18% 86%;
+    --input: 214 18% 82%;
+    --ring: 217 82% 52%;
+
+    --font-sans: var(--font-plex-sans), sans-serif;
+    --font-display: var(--font-plex-sans), sans-serif;
+    --font-mono: var(--font-plex-mono), monospace;
+
+    --color-bg-base: #f5f7fa;
+    --color-bg-surface: #ffffff;
+    --color-bg-subtle: #eef2f6;
+    --color-bg-hover: #e6ebf1;
+    --color-border: #dce3eb;
+    --color-border-strong: #b9c5d2;
+    --color-text-primary: #17202a;
+    --color-text-secondary: #526170;
+    --color-text-muted: #8491a0;
+    --color-text-disabled: #D1D5DB;
+    --color-blue-50: #edf4ff;
+    --color-blue-100: #d9e8ff;
+    --color-blue-500: #4c82dc;
+    --color-blue-600: #2867c7;
+    --color-blue-700: #1b4f9f;
+    --color-green-50: #F0FDF4;
+    --color-green-500: #22C55E;
+    --color-green-600: #16A34A;
+    --color-orange-50: #fff2dc;
+    --color-orange-500: #e99a32;
+    --color-orange-600: #c77719;
+    --color-red-50: #FEF2F2;
+    --color-red-500: #EF4444;
+    --color-red-600: #DC2626;
+    --color-cyan-50: #ECFEFF;
+    --color-cyan-500: #06B6D4;
+    --color-cyan-600: #0891B2;
+    --color-purple-50: #FAF5FF;
+    --color-purple-500: #A855F7;
+    --color-purple-600: #9333EA;
+    --color-gray-100: #F3F4F6;
+    --color-gray-400: #9CA3AF;
+    --color-gray-500: #6B7280;
+
+    --space-1: 4px;
+    --space-2: 8px;
+    --space-3: 12px;
+    --space-4: 16px;
+    --space-5: 20px;
+    --space-6: 24px;
+    --space-8: 32px;
+    --space-10: 40px;
+
+    --radius-sm: 4px;
+    --radius-md: 7px;
+    --radius-lg: 10px;
+    --radius-xl: 14px;
+    --radius-full: 9999px;
+
+    --shadow-xs: 0 1px 2px rgba(31, 48, 67, .04);
+    --shadow-sm: 0 2px 8px rgba(31, 48, 67, .06);
+    --shadow-md: 0 8px 20px rgba(31, 48, 67, .08);
+    --shadow-lg: 0 16px 38px rgba(31, 48, 67, .12);
+
+    --app-bg: var(--color-bg-base);
+    --app-surface: var(--color-bg-surface);
+    --app-subtle: var(--color-bg-subtle);
+    --app-border: var(--color-border);
+    --app-border-strong: var(--color-border-strong);
+    --chrome-bg: #17212b;
+    --chrome-text: #f7f9fc;
+    --chrome-muted: #aab7c5;
+    --chrome-hover: #22303d;
+    --chrome-active: #75b7ff;
   }
 
   .dark {
-    /* TailAdmin Dark Style */
-    --background: 215 25% 14%; /* #1A222C */
+    --background: 222 47% 7%;
     --foreground: 210 40% 98%;
-
-    --card: 215 28% 19%; /* #24303F */
+    --card: 222 32% 10%;
     --card-foreground: 210 40% 98%;
-
-    --primary: 232 71% 56%;
+    --popover: 222 32% 10%;
+    --popover-foreground: 210 40% 98%;
+    --primary: 217 91% 60%;
     --primary-foreground: 210 40% 98%;
-
-    --border: 215 28% 25%;
-    --input: 215 28% 25%;
-    --ring: 232 71% 56%;
-    
-    /* Muted & Secondary untuk Dark Mode */
-    --secondary: 217.2 32.6% 17.5%;
+    --secondary: 217 24% 15%;
     --secondary-foreground: 210 40% 98%;
-    --muted: 217.2 32.6% 17.5%;
-    --muted-foreground: 215 20.2% 65.1%;
-  }
-}
+    --muted: 217 24% 15%;
+    --muted-foreground: 215 20% 72%;
+    --accent: 217 24% 15%;
+    --accent-foreground: 210 40% 98%;
+    --destructive: 0 72% 51%;
+    --destructive-foreground: 210 40% 98%;
+    --border: 217 24% 20%;
+    --input: 217 24% 20%;
+    --ring: 217 91% 60%;
 
-@layer base {
-  * {
-    /* Sekarang @apply border-border akan bekerja karena border didaftarkan di @theme */
-    @apply border-border;
+    --app-bg: #121a23;
+    --app-surface: #1a2530;
+    --app-subtle: #22313e;
+    --app-border: #30404f;
+    --app-border-strong: #526678;
+    --chrome-bg: #0f1821;
+    --chrome-text: #f4f7fb;
+    --chrome-muted: #a5b4c3;
+    --chrome-hover: #1b2937;
+    --chrome-active: #75b7ff;
   }
+
+  * { @apply border-border; }
+  html { scroll-behavior: smooth; overflow-x: clip; }
   body {
     @apply bg-background text-foreground antialiased;
-    font-feature-settings: "rlig" 1, "calt" 1;
-    padding-bottom: var(--safe-area-inset-bottom);
+    font-family: var(--font-sans);
+    font-feature-settings: "cv02" 1, "cv03" 1, "cv04" 1, "cv11" 1, "rlig" 1, "calt" 1;
+    font-synthesis: none;
+    text-rendering: optimizeLegibility;
+    overflow-x: clip;
+    background-image: none;
   }
-  
-  .safe-area-bottom {
-    padding-bottom: max(0.5rem, var(--safe-area-inset-bottom));
-  }
+  ::selection { background: hsl(var(--primary)); color: hsl(var(--primary-foreground)); }
 }
 
-/* Custom Utilities untuk Form Device Checker */
 @layer components {
-  .form-section {
-    @apply space-y-6 bg-card border border-border p-6 rounded-md mb-6;
-  }
-  
-  .header-sticky {
-    @apply sticky top-0 z-50 w-full border-b bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60;
-  }
+  .workspace-shell { @apply min-h-screen text-foreground; }
+  .workspace-topbar { @apply sticky top-0 z-50 border-b border-[var(--app-border)] text-[var(--chrome-text)]; background: var(--chrome-bg); }
+  .workspace-topbar-inner { @apply mx-auto flex min-h-14 max-w-[1480px] items-center justify-between gap-4 px-4 sm:px-6 lg:px-8; }
+  .workspace-main { @apply mx-auto w-full max-w-[1480px] px-4 py-4 sm:px-6 sm:py-5 lg:px-8 lg:py-6; }
+  .workspace-nav-item { @apply inline-flex h-8 items-center gap-2 rounded-md border border-transparent px-2.5 text-[13px] font-medium text-[var(--chrome-muted)] transition hover:bg-[var(--chrome-hover)] hover:text-[var(--chrome-text)]; }
+  .workspace-nav-item-active { @apply border-transparent text-[var(--foreground)] shadow-none; background: var(--chrome-active); }
+  .workspace-nav-item-active:hover { background: var(--chrome-active); color: var(--foreground); }
+  .page-shell { @apply space-y-4 lg:space-y-5; }
+  .page-hero { @apply relative flex flex-col gap-5 overflow-hidden rounded-[18px] border border-[var(--app-border)] bg-[var(--app-surface)] p-5 shadow-sm sm:p-7 lg:flex-row lg:items-end lg:justify-between; }
+  .page-hero::after { display: none; }
+  .page-title { @apply max-w-3xl text-[24px] leading-[1.18] font-semibold tracking-[-.025em] text-foreground lg:text-[28px]; font-family: var(--font-display); }
+  .page-desc { @apply max-w-2xl text-[13px] leading-[1.55] text-muted-foreground; }
+  .login-page { @apply flex min-h-screen items-center justify-center bg-[var(--app-bg)] px-4 py-8 sm:px-6; }
+  .login-panel { @apply w-full max-w-[440px]; }
+  .login-brand-row { @apply mb-6 flex items-center gap-3; }
+  .login-brand-mark { @apply flex h-10 w-14 items-center justify-center rounded-md border border-[var(--app-border)] bg-[var(--app-surface)] shadow-xs; }
+  .login-brand-mark img { @apply h-auto w-10; }
+  .login-brand-name { @apply text-[14px] font-semibold tracking-[-.02em] text-foreground; }
+  .login-card { @apply rounded-[12px] border-[var(--app-border)] bg-[var(--app-surface)] shadow-sm; }
+  .login-card-header { @apply space-y-2 p-5 pb-4 sm:p-7 sm:pb-5; }
+  .login-heading { @apply text-[25px] font-semibold leading-[1.12] tracking-[-.03em] text-foreground; font-family: var(--font-display); }
+  .login-card-content { @apply p-5 pt-1 sm:p-7 sm:pt-1; }
+  .login-label { @apply text-[12px] font-medium text-foreground; }
+  .login-password-toggle { @apply absolute inset-y-0 right-0 inline-flex w-10 items-center justify-center text-muted-foreground transition-colors hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-inset disabled:pointer-events-none disabled:opacity-50; }
+  .login-submit { @apply h-10 w-full rounded-md text-[13px] font-semibold; }
+  .login-message { @apply flex items-start gap-2 rounded-md px-3 py-2 text-[12px] leading-5; }
+  .login-message-info { @apply border border-primary/25 bg-primary/8 text-foreground; }
+  .login-message-error { @apply border border-red-200 bg-red-50 text-red-700 dark:border-red-900/60 dark:bg-red-950/40 dark:text-red-200; }
+  .type-mono { font-family: var(--font-mono); font-variant-numeric: tabular-nums; }
+  .type-number { font-variant-numeric: tabular-nums; }
+  .panel-card { border-radius: var(--radius-lg); border-color: var(--app-border); background: var(--app-surface); box-shadow: var(--shadow-xs); transition: border-color .16s ease, box-shadow .16s ease; }
+  .panel-card:hover { border-color: var(--app-border-strong); box-shadow: var(--shadow-sm); }
+  .filter-bar { @apply rounded-[var(--radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-2.5 shadow-xs sm:p-3; }
+  .filter-control { @apply h-10 rounded-md border border-input bg-background px-3 text-[13px] outline-none transition focus:ring-2 focus:ring-ring focus:ring-offset-2; }
+  .table-surface { @apply overflow-hidden rounded-[var(--radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] shadow-xs; }
+  .soft-section { @apply rounded-[var(--radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-3 shadow-xs lg:p-4; }
+  .empty-state { @apply flex min-h-36 flex-col items-center justify-center rounded-[var(--radius-lg)] border border-dashed border-[var(--app-border-strong)] bg-[var(--app-surface)] p-6 text-center; }
+  .status-pill { @apply inline-flex items-center gap-1.5 rounded-full px-2 py-0.5 text-[10px] font-semibold whitespace-nowrap; }
+  .eyebrow { @apply text-[10px] font-semibold uppercase tracking-[.16em] text-primary; }
+  .section-kicker { @apply text-[11px] font-semibold uppercase tracking-[.12em] text-muted-foreground; }
+  .data-label { @apply text-[10px] font-medium uppercase tracking-[.08em] text-muted-foreground; }
+  .dashboard-page { @apply space-y-3 lg:space-y-4; }
+  .dashboard-page .page-hero { @apply rounded-[12px] p-4 sm:p-5; }
+  .dashboard-page .page-title { @apply text-[23px] lg:text-[26px]; }
+  .dashboard-chart-header { @apply flex-row items-center justify-between gap-3 border-b border-[var(--app-border)] px-4 py-3; }
+  .dashboard-chart-content { @apply px-3 pb-2 pt-1; }
+  .dashboard-chart-card { @apply min-w-0; }
+  .dashboard-chart-note { @apply text-[10px] text-muted-foreground; }
+  .dashboard-focus-content { @apply px-3 pb-3 pt-2; }
+  .dashboard-mix-content { @apply px-4 pb-4 pt-4; }
+  .dashboard-urgent-card { @apply border-red-200 bg-red-50/35; }
+  .dashboard-urgent-header { @apply border-b border-red-200 bg-red-50/70 px-4 py-3; }
+  .dashboard-urgent-content { @apply px-3 pb-3 pt-3; }
+  .workspace-topbar a:focus-visible, .workspace-topbar button:focus-visible { outline: 2px solid var(--chrome-active); outline-offset: 3px; }
+
+  .form-workflow { @apply mx-auto w-full max-w-[980px] min-w-0; }
+  .form-anchor-bar { @apply grid grid-cols-2 gap-1.5 rounded-[var(--radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 shadow-xs sm:flex sm:flex-wrap; }
+  .form-anchor-item { @apply inline-flex min-w-0 items-center gap-1.5 rounded-md border border-transparent px-2.5 py-2 text-left text-[12px] font-semibold text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-subtle)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:flex-1 sm:justify-center sm:px-3; }
+  .form-anchor-item-active { @apply border-primary/30 bg-primary/10 text-foreground; }
+  .form-anchor-item-complete { @apply text-primary; }
+  .form-anchor-item-active.form-anchor-item-complete { @apply border-primary/40 bg-primary/15; }
+  .form-anchor-index { @apply inline-flex h-5 w-5 shrink-0 items-center justify-center rounded-full bg-muted text-[11px] font-bold text-muted-foreground; }
+  .form-anchor-item-active .form-anchor-index { @apply bg-primary text-primary-foreground; }
+  .form-anchor-dot { @apply h-1.5 w-1.5 rounded-full; background: var(--app-border-strong); }
+  .form-section { @apply scroll-mt-24 overflow-hidden rounded-[10px] border-[var(--app-border)] bg-[var(--app-surface)] shadow-xs; }
+  .form-section-heading { @apply flex-row items-center justify-start gap-2.5 border-b border-[var(--app-border)] px-4 py-3 sm:px-5 sm:py-3.5; }
+  .form-section-heading h3 { @apply text-[16px] font-semibold leading-6 tracking-[-.01em]; }
+  .form-section-content { @apply px-4 pb-4 !pt-5 sm:px-5 sm:pb-4 sm:!pt-5; }
+  .form-section label { @apply text-[13px] font-semibold normal-case tracking-normal leading-5 text-foreground; }
+  .form-section input:not([type="checkbox"]), .form-section select, .form-section textarea { @apply text-[14px] leading-5; }
+  .form-section input:not([type="checkbox"]), .form-section select { @apply h-10; }
+  .form-field { @apply min-w-0 space-y-1.5; }
+  .form-identity-strip { @apply rounded-md border border-[var(--app-border)] bg-[var(--app-subtle)] px-3 py-2.5; }
+  .form-identity-strip .data-label { @apply text-[10px] font-semibold uppercase tracking-[.08em] leading-4 text-muted-foreground; }
+  .form-actions { @apply flex flex-col-reverse gap-2 border-t border-[var(--app-border)] pt-4 sm:flex-row sm:justify-end; }
+  .form-actions button { @apply w-full sm:w-auto; }
 }
 
-/* Theme Toggle Animation */
 @keyframes themeToggle {
-  0% {
-    opacity: 0;
-    transform: rotate(-90deg) scale(0.5);
-  }
-  100% {
-    opacity: 1;
-    transform: rotate(0deg) scale(1);
-  }
+  0% { opacity: 0; transform: rotate(-90deg) scale(0.5); }
+  100% { opacity: 1; transform: rotate(0deg) scale(1); }
 }
 
-.animate-theme-toggle {
-  animation: themeToggle 0.3s ease-out;
-}
+.animate-theme-toggle { animation: themeToggle 0.3s ease-out; }

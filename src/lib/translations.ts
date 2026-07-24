@@ -3,6 +3,7 @@ export type Language = "en" | "id";
 export interface Translations {
   common: {
     loading: string;
+    retry: string;
     save: string;
     cancel: string;
     delete: string;
@@ -82,6 +83,9 @@ export interface Translations {
       title: string;
       complete: string;
       sectionsComplete: string;
+      saveDraft: string;
+      draftSaved: string;
+      noDraft: string;
     };
     employeeInfo: {
       title: string;
@@ -322,6 +326,7 @@ export interface Translations {
       allOwnership: string;
       clearFilters: string;
       groupByEmployee: string;
+      missingVersion: string;
     };
     empty: string;
     buttons: {
@@ -355,6 +360,7 @@ export interface Translations {
     checkHistory: string;
     exportAll: string;
     noChecks: string;
+    resultsFound: string;
   };
   lastCheckReport: {
     title: string;
@@ -404,6 +410,7 @@ export interface Translations {
     };
     empty: string;
     totalChecks: string;
+    resultsFound: string;
     confirmDelete: string;
     confirmDeleteWithChecks: string;
     toast: {
@@ -525,6 +532,7 @@ export const translations: Record<Language, Translations> = {
   en: {
     common: {
       loading: "Loading...",
+      retry: "Retry",
       save: "Save",
       cancel: "Cancel",
       delete: "Delete",
@@ -603,7 +611,10 @@ export const translations: Record<Language, Translations> = {
       progress: {
         title: "Form Progress",
         complete: "Complete",
-        sectionsComplete: "sections completed"
+        sectionsComplete: "sections completed",
+        saveDraft: "Save draft",
+        draftSaved: "Draft saved",
+        noDraft: "No draft saved",
       },
       employeeInfo: {
         title: "Employee Information",
@@ -844,6 +855,7 @@ export const translations: Record<Language, Translations> = {
         allOwnership: "All Ownership",
         clearFilters: "Clear Filters",
         groupByEmployee: "Group by Employee",
+        missingVersion: "Missing version",
       },
       empty: "No device checks found",
       buttons: {
@@ -877,6 +889,7 @@ export const translations: Record<Language, Translations> = {
       checkHistory: "Check History",
       exportAll: "Export All Data",
       noChecks: "No checking records found for this employee.",
+      resultsFound: "checks found",
     },
     lastCheckReport: {
       title: "Last Checking Report",
@@ -926,6 +939,7 @@ export const translations: Record<Language, Translations> = {
       },
       empty: "No employees found",
       totalChecks: "Total Checks",
+      resultsFound: "employees found",
       confirmDelete: "Are you sure you want to delete this employee?",
       confirmDeleteWithChecks: "This employee has {count} device check(s). Are you sure?",
       toast: {
@@ -1047,6 +1061,7 @@ export const translations: Record<Language, Translations> = {
   id: {
     common: {
       loading: "Memuat...",
+      retry: "Coba lagi",
       save: "Simpan",
       cancel: "Batal",
       delete: "Hapus",
@@ -1125,7 +1140,10 @@ export const translations: Record<Language, Translations> = {
       progress: {
         title: "Progres Formulir",
         complete: "Selesai",
-        sectionsComplete: "bagian selesai"
+        sectionsComplete: "bagian selesai",
+        saveDraft: "Simpan draft",
+        draftSaved: "Draft tersimpan",
+        noDraft: "Belum ada draft",
       },
       employeeInfo: {
         title: "Informasi Karyawan",
@@ -1369,6 +1387,7 @@ export const translations: Record<Language, Translations> = {
         allOwnership: "Semua Kepemilikan",
         clearFilters: "Hapus Filter",
         groupByEmployee: "Kelompokkan Berdasarkan Karyawan",
+        missingVersion: "Belum versi terbaru",
       },
       empty: "Tidak ada pengecekan perangkat ditemukan",
       buttons: {
@@ -1403,6 +1422,7 @@ export const translations: Record<Language, Translations> = {
       checkHistory: "Riwayat Pengecekan",
       exportAll: "Ekspor Semua",
       noChecks: "Tidak ada pengecekan perangkat ditemukan",
+      resultsFound: "pengecekan ditemukan",
     },
     lastCheckReport: {
       title: "Laporan Pengecekan Terakhir",
@@ -1452,6 +1472,7 @@ export const translations: Record<Language, Translations> = {
       },
       empty: "Tidak ada karyawan ditemukan",
       totalChecks: "Total Pengecekan",
+      resultsFound: "karyawan ditemukan",
       confirmDelete: "Apakah Anda yakin ingin menghapus karyawan ini?",
       confirmDeleteWithChecks: "Karyawan ini memiliki {count} pengecekan perangkat. Apakah Anda yakin?",
       toast: {

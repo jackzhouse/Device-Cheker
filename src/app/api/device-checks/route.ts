@@ -1,3 +1,4 @@
+import { requirePermission } from '@/lib/auth/guards';
 import { NextRequest, NextResponse } from 'next/server';
 import mongoose from 'mongoose';
 import connectDB from '@/lib/mongodb';
@@ -48,6 +49,8 @@ async function saveDropdownOptions(
 
 // GET /api/device-checks - Get all device checks with pagination and filters
 export async function GET(request: NextRequest) {
+  const denied = requirePermission(request, 'checks.view');
+  if (denied) return denied;
   try {
     await connectDB();
 
@@ -261,6 +264,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/device-checks - Create new device check
 export async function POST(request: NextRequest) {
+  const denied = requirePermission(request, 'checks.create');
+  if (denied) return denied;
   try {
     await connectDB();
 

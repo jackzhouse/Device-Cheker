@@ -9,6 +9,10 @@ import {
     type LastCheckReportData
 } from '@/lib/services/device-checks.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import PageHeader from '@/components/layout/PageHeader';
+import SummaryCard from '@/components/layout/SummaryCard';
+import FilterBar from '@/components/layout/FilterBar';
+import TableSurface from '@/components/layout/TableSurface';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -39,12 +43,14 @@ import {
 } from 'lucide-react';
 import { toast } from 'sonner';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { useAuth } from '@/components/auth/AuthProvider';
 import { generateDeviceCheckPDF } from '@/lib/utils/pdf';
 import { exportReportToExcel, exportReportToPDF } from '@/lib/utils/report-export';
 import { Skeleton } from '@/components/ui/skeleton';
 
 export default function LastCheckReportPage() {
     const { t } = useLanguage();
+    const { user } = useAuth();
     const router = useRouter();
 
     const [data, setData] = useState<DeviceCheck[]>([]);
@@ -196,48 +202,49 @@ export default function LastCheckReportPage() {
         });
     };
 
+
     return (
-        <div className="container mx-auto py-6 space-y-6 px-4">
-            {/* Page Title */}
-            <div className="flex flex-col md:flex-row md:items-center justify-between gap-4">
-                <div>
-                    <h1 className="text-3xl font-bold tracking-tight">{t('lastCheckReport.title')}</h1>
-                    <p className="text-muted-foreground">{t('lastCheckReport.description')}</p>
-                </div>
-                <div className="flex gap-2">
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExportExcel}
-                        disabled={exporting !== null || loading}
-                        className="gap-2"
-                    >
-                        {exporting === 'excel' ? (
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                            <Download className="h-4 w-4 text-green-600" />
-                        )}
-                        Export Excel
-                    </Button>
-                    <Button
-                        variant="outline"
-                        size="sm"
-                        onClick={handleExportPDF}
-                        disabled={exporting !== null || loading}
-                        className="gap-2"
-                    >
-                        {exporting === 'pdf' ? (
-                            <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
-                        ) : (
-                            <Download className="h-4 w-4 text-red-500" />
-                        )}
-                        Export PDF
-                    </Button>
-                </div>
-            </div>
+        <div className="page-shell">
+            <PageHeader
+                eyebrow="Reports"
+                title={t('lastCheckReport.title')}
+                description={t('lastCheckReport.description')}
+                actions={
+                    <div className='flex gap-2'>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportExcel}
+                            disabled={exporting !== null || loading}
+                            className="gap-2"
+                        >
+                            {exporting === 'excel' ? (
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            ) : (
+                                <Download className="h-4 w-4 text-green-600" />
+                            )}
+                            Export Excel
+                        </Button>
+                        <Button
+                            variant="outline"
+                            size="sm"
+                            onClick={handleExportPDF}
+                            disabled={exporting !== null || loading}
+                            className="gap-2"
+                        >
+                            {exporting === 'pdf' ? (
+                                <span className="h-4 w-4 animate-spin rounded-full border-2 border-current border-t-transparent" />
+                            ) : (
+                                <Download className="h-4 w-4 text-red-500" />
+                            )}
+                            Export PDF
+                        </Button>
+                    </div>
+                }
+            />
 
             {/* Summary Stats */}
-            <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+            <div className="grid grid-cols-1 gap-3 sm:grid-cols-2 xl:grid-cols-4">
                 <StatCard
                     title={t('lastCheckReport.summary.totalEmployees')}
                     value={summary?.total || 0}
@@ -265,9 +272,8 @@ export default function LastCheckReportPage() {
             </div>
 
             {/* Filters Card */}
-            <Card>
-                <CardContent className="p-6">
-                    <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6 gap-4">
+            <FilterBar>
+                <div className="grid grid-cols-1 gap-3 md:grid-cols-2 lg:grid-cols-3 xl:grid-cols-6">
                         {/* Search */}
                         <div className="space-y-1.5 flex-1">
                             <div className="relative">
@@ -283,7 +289,7 @@ export default function LastCheckReportPage() {
 
                         {/* Suitability Filter */}
                         <select
-                            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="filter-control w-full"
                             value={suitabilityFilter}
                             onChange={(e) => setSuitabilityFilter(e.target.value)}
                         >
@@ -296,7 +302,7 @@ export default function LastCheckReportPage() {
 
                         {/* Ownership Filter */}
                         <select
-                            className="h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background placeholder:text-muted-foreground focus:outline-none focus:ring-2 focus:ring-ring focus:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+                            className="filter-control w-full"
                             value={ownershipFilter}
                             onChange={(e) => setOwnershipFilter(e.target.value)}
                         >
@@ -331,17 +337,16 @@ export default function LastCheckReportPage() {
                         </div>
                     </div>
 
-                    <div className="mt-4 flex justify-end">
+                    <div className="mt-3 flex justify-end">
                         <Button variant="ghost" size="sm" onClick={clearFilters} className="text-muted-foreground hover:text-foreground">
                             <X className="mr-2 h-4 w-4" />
                             {t('lastCheckReport.filters.clearFilters')}
                         </Button>
                     </div>
-                </CardContent>
-            </Card>
+            </FilterBar>
 
             {/* Report Table */}
-            <Card className="overflow-hidden">
+            <Card className="panel-card overflow-hidden">
                 <div className="overflow-x-auto">
                     <Table>
                         <TableHeader>
@@ -388,12 +393,12 @@ export default function LastCheckReportPage() {
                                 ))
                             ) : filteredData.length === 0 ? (
                                 <TableRow>
-                                    <TableCell colSpan={9} className="h-64 text-center">
+                                    <TableCell colSpan={9} className="h-40 text-center">
                                         <div className="flex flex-col items-center justify-center space-y-2">
                                             <div className="rounded-full bg-muted p-3">
                                                 <Monitor className="h-6 w-6 text-muted-foreground" />
                                             </div>
-                                            <p className="text-lg font-medium">
+                                            <p className="text-sm font-medium">
                                                 {searchTerm || suitabilityFilter || ownershipFilter || deptFilter || dateFrom || dateTo
                                                     ? t('lastCheckReport.noResults')
                                                     : t('lastCheckReport.empty')}
@@ -493,7 +498,7 @@ export default function LastCheckReportPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 hover:bg-primary/10 hover:text-primary"
+                                                        className="h-7 w-7 hover:bg-primary/10 hover:text-primary"
                                                         onClick={() => router.push(`/data-pengecekan/${check.employeeId}`)}
                                                     >
                                                         <Eye className="h-4 w-4" />
@@ -501,7 +506,7 @@ export default function LastCheckReportPage() {
                                                     <Button
                                                         variant="ghost"
                                                         size="icon"
-                                                        className="h-8 w-8 hover:bg-blue-500/10 hover:text-blue-500"
+                                                        className="h-7 w-7 hover:bg-blue-500/10 hover:text-blue-500"
                                                         onClick={() => handleDownloadPDF(check)}
                                                     >
                                                         <Download className="h-4 w-4" />
@@ -522,8 +527,8 @@ export default function LastCheckReportPage() {
 
 function StatCard({ title, value, icon, loading }: { title: string, value: number, icon: React.ReactNode, loading: boolean }) {
     return (
-        <Card className="overflow-hidden border-none shadow-sm bg-card hover:bg-muted/20 transition-colors">
-            <CardContent className="p-5">
+        <Card className="panel-card overflow-hidden bg-card">
+            <CardContent className="p-4">
                 <div className="flex items-center justify-between">
                     <div className="space-y-1">
                         <p className="text-xs font-medium text-muted-foreground uppercase tracking-wider">{title}</p>
@@ -533,7 +538,7 @@ function StatCard({ title, value, icon, loading }: { title: string, value: numbe
                             <p className="text-2xl font-bold">{value}</p>
                         )}
                     </div>
-                    <div className="rounded-full bg-background p-2.5 shadow-sm border border-muted">
+                    <div className="rounded-xl bg-background p-2 shadow-xs border border-muted">
                         {icon}
                     </div>
                 </div>

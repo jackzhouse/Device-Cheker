@@ -21,6 +21,7 @@ export interface PaginationParams {
   search?: string;
   department?: string;
   status?: string;
+  hasChecks?: 'true' | 'false';
   sortBy?: string;
   sortOrder?: 'asc' | 'desc';
 }
@@ -37,6 +38,32 @@ export interface APIResponse<T> {
   error?: string;
 }
 
+export interface EmployeeSyncSummary {
+  created: number;
+  updated: number;
+  skipped: number;
+  failed: number;
+  errors: string[];
+}
+
+export interface EmployeeSyncJob {
+  id: string;
+  status: 'queued' | 'running' | 'completed' | 'failed' | 'cancelled';
+  page: number;
+  size: number;
+  totalPages?: number;
+  summary: EmployeeSyncSummary;
+  error?: string;
+  startedAt: string;
+  updatedAt: string;
+  completedAt?: string;
+}
+
+async function parseError(response: Response, fallback: string) {
+  const payload = await response.json().catch(() => null) as { error?: string } | null;
+  return payload?.error || fallback;
+}
+
 export async function getEmployees(
   params: PaginationParams = {}
 ): Promise<APIResponse<Employee[]>> {
@@ -48,8 +75,7 @@ export async function getEmployees(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch employees');
+    throw new Error(await parseError(response, 'Failed to fetch employees'));
   }
 
   return response.json();
@@ -65,8 +91,7 @@ export async function searchEmployees(
   );
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to search employees');
+    throw new Error(await parseError(response, 'Failed to search employees'));
   }
 
   return response.json();
@@ -84,8 +109,7 @@ export async function createEmployee(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to create employee');
+    throw new Error(await parseError(response, 'Failed to create employee'));
   }
 
   return response.json();
@@ -99,8 +123,7 @@ export async function getEmployeeById(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to fetch employee');
+    throw new Error(await parseError(response, 'Failed to fetch employee'));
   }
 
   return response.json();
@@ -119,8 +142,7 @@ export async function updateEmployee(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to update employee');
+    throw new Error(await parseError(response, 'Failed to update employee'));
   }
 
   return response.json();
@@ -134,8 +156,44 @@ export async function deleteEmployee(
   });
 
   if (!response.ok) {
-    const error = await response.json();
-    throw new Error(error.error || 'Failed to delete employee');
+    throw new Error(await parseError(response, 'Failed to delete employee'));
+  }
+
+  return response.json();
+}
+
+export async function syncEmployees(credentialToken: string): Promise<APIResponse<EmployeeSyncJob>> {
+  const response = await fetch('/api/employees/sync', {
+    method: 'POST',
+    headers: {
+      'Content-Type': 'application/json',
+      Authorization: `Bearer ${credentialToken}`,
+    },
+    body: JSON.stringify({}),
+  });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, 'Failed to sync employees'));
+  }
+
+  return response.json();
+}
+
+export async function getEmployeeSyncJob(id: string): Promise<APIResponse<EmployeeSyncJob>> {
+  const response = await fetch(`/api/employees/sync/${id}`, { cache: 'no-store' });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, 'Failed to fetch employee sync job'));
+  }
+
+  return response.json();
+}
+
+export async function cancelEmployeeSyncJob(id: string): Promise<APIResponse<EmployeeSyncJob>> {
+  const response = await fetch(`/api/employees/sync/${id}`, { method: 'DELETE' });
+
+  if (!response.ok) {
+    throw new Error(await parseError(response, 'Failed to cancel employee sync'));
   }
 
   return response.json();

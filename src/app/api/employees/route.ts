@@ -1,10 +1,14 @@
+import { requirePermission } from '@/lib/auth/guards';
 import { NextRequest, NextResponse } from 'next/server';
 import connectDB from '@/lib/mongodb';
 import Employee from '@/models/Employee';
+import DeviceCheck from '@/models/DeviceCheck';
 import { isValidObjectId } from 'mongoose';
 
 // GET /api/employees - Get all employees with pagination, search, and filters
 export async function GET(request: NextRequest) {
+  const denied = requirePermission(request, 'employees.view');
+  if (denied) return denied;
   try {
     await connectDB();
 
@@ -14,6 +18,7 @@ export async function GET(request: NextRequest) {
     const search = searchParams.get('search') || '';
     const department = searchParams.get('department') || '';
     const status = searchParams.get('status') || '';
+    const hasChecks = searchParams.get('hasChecks') || '';
     const sortBy = searchParams.get('sortBy') || 'fullName';
     const sortOrder = searchParams.get('sortOrder') || 'asc';
 
@@ -35,6 +40,11 @@ export async function GET(request: NextRequest) {
 
     if (status) {
       query.status = status;
+    }
+
+    if (hasChecks === 'false') {
+      const checkedEmployeeIds = await DeviceCheck.distinct('employeeId');
+      query._id = { $nin: checkedEmployeeIds };
     }
 
     // Build sort object
@@ -81,6 +91,8 @@ export async function GET(request: NextRequest) {
 
 // POST /api/employees - Create new employee
 export async function POST(request: NextRequest) {
+  const denied = requirePermission(request, 'employees.manage');
+  if (denied) return denied;
   try {
     await connectDB();
 

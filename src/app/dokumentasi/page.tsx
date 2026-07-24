@@ -64,42 +64,39 @@ export default function DokumentasiPage() {
   const isIndonesian = language === 'id';
 
   return (
-    <div className="min-h-screen bg-background">
+    <div className="page-shell">
       {/* Header */}
-      <div className="sticky top-16 z-40 bg-background/95 backdrop-blur supports-[backdrop-filter]:bg-background/60 border-b">
-        <div className="container mx-auto px-4 py-3 md:py-4">
-          <div className="flex justify-between items-center gap-4">
-            <div className="flex-1">
-              <h1 className="text-xl md:text-3xl font-bold">
-                {isIndonesian ? 'Panduan Pengguna' : 'User Manual'}
-              </h1>
-              <p className="text-xs md:text-sm text-muted-foreground mt-1">
-                {isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}
-              </p>
-            </div>
-            <Button onClick={handlePrint} variant="outline" className="gap-2 shrink-0">
-              <Printer className="h-4 w-4" />
-              <span className="hidden sm:inline">{isIndonesian ? 'Cetak' : 'Print'}</span>
-            </Button>
-          </div>
+      <div className="page-hero">
+        <div className="min-w-0 flex-1">
+          <div className="mb-1 text-[10px] font-semibold uppercase tracking-[0.16em] text-primary">Documentation</div>
+          <h1 className="page-title">
+            {isIndonesian ? 'Panduan Pengguna' : 'User Manual'}
+          </h1>
+          <p className="page-desc mt-1.5">
+            {isIndonesian ? 'Sistem Pengecekan Perangkat' : 'Device Checking System'}
+          </p>
         </div>
+        <Button onClick={handlePrint} variant="outline" className="gap-2 shrink-0">
+          <Printer className="h-4 w-4" />
+          <span className="hidden sm:inline">{isIndonesian ? 'Cetak' : 'Print'}</span>
+        </Button>
       </div>
 
       {/* Main Content */}
-      <div className="container mx-auto px-4 py-8">
-        <div className="flex gap-8">
+      <div>
+        <div className="flex gap-5">
           {/* Table of Contents - Desktop */}
-          <aside className="hidden lg:block w-64 shrink-0">
-            <div className="sticky top-[160px]">
-              <h2 className="font-semibold mb-4 text-sm">
+          <aside className="hidden w-56 shrink-0 lg:block">
+            <div className="sticky top-20">
+              <h2 className="mb-3 text-sm font-semibold">
                 {isIndonesian ? 'Daftar Isi' : 'Table of Contents'}
               </h2>
-              <nav className="space-y-2">
+              <nav className="space-y-1">
                 {sections.map((section, index) => (
                   <button
                     key={section.id}
                     onClick={() => scrollToSection(section.id)}
-                    className={`block w-full text-left text-sm px-3 py-2 rounded-lg transition-colors ${
+                    className={`block w-full rounded-lg px-2.5 py-1.5 text-left text-xs transition-colors ${
                       activeSection === section.id
                         ? 'bg-primary text-primary-foreground'
                         : 'hover:bg-accent hover:text-accent-foreground'
@@ -115,7 +112,7 @@ export default function DokumentasiPage() {
           {/* Content */}
           <main className="flex-1 max-w-4xl">
             {/* Version Info */}
-            <Card className="mb-8 p-4 md:p-6">
+            <Card className="panel-card mb-5 p-3 md:p-4">
               <div className="grid grid-cols-2 md:grid-cols-4 gap-3 md:gap-4 text-xs md:text-sm">
                 <div>
                   <p className="text-muted-foreground">{isIndonesian ? 'Versi' : 'Version'}</p>
@@ -137,12 +134,12 @@ export default function DokumentasiPage() {
             </Card>
 
             {/* Section 1: Pendahuluan */}
-            <section id="pendahuluan" className="mb-12 scroll-mt-24">
-              <h2 className="text-2xl font-bold mb-6">
+            <section id="pendahuluan" className="mb-8 scroll-mt-24">
+              <h2 className="mb-4 text-xl font-semibold">
                 {isIndonesian ? '1. Pendahuluan' : '1. Introduction'}
               </h2>
 
-              <div className="space-y-6">
+              <div className="space-y-4">
                 <div>
                   <h3 className="text-lg font-semibold mb-3">
                     {isIndonesian ? 'Tentang Sistem Ini' : 'About This System'}
