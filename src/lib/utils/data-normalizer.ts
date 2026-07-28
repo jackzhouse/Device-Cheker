@@ -335,5 +335,14 @@ export const normalizeDataForSubmission = (data: any) => {
     normalized.additionalInfo.passwordUsage = passwordUsageMap[normalized.additionalInfo.passwordUsage.toLowerCase()] || normalized.additionalInfo.passwordUsage;
   }
 
+  if (Array.isArray(normalized.mobileDevices)) {
+    normalized.mobileDevices = normalized.mobileDevices
+      .map((device: any) => ({
+        deviceName: device.deviceName?.trim() || '',
+        macAddress: device.macAddress?.trim().toUpperCase() || '',
+      }))
+      .filter((device: any) => device.deviceName || device.macAddress);
+  }
+
   return normalized;
 };

@@ -65,6 +65,10 @@ export interface IDeviceCheck extends Document {
       }>;
     };
   };
+  mobileDevices?: Array<{
+    deviceName?: string;
+    macAddress?: string;
+  }>;
   additionalInfo: {
     passwordUsage: 'Available' | 'Not Available';
     otherNotes?: string;
@@ -281,6 +285,17 @@ const DeviceCheckSchema = new Schema<IDeviceCheck>(
         }],
       },
     },
+    mobileDevices: [{
+      deviceName: {
+        type: String,
+        trim: true,
+      },
+      macAddress: {
+        type: String,
+        trim: true,
+        set: (value: string) => value?.trim().toUpperCase(),
+      },
+    }],
     additionalInfo: {
       passwordUsage: {
         type: String,

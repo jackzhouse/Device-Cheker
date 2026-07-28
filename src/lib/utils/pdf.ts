@@ -432,7 +432,24 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
   }
   yPos += 8;
 
-  // 8. Additional Information
+  // 8. Mobile Devices
+  if (check.mobileDevices && check.mobileDevices.length > 0) {
+    const mobileResult = checkAndAddPage(doc, yPos, 25, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+    yPos = mobileResult.yPos;
+    yPos = drawSectionHeader(doc, 'Mobile Device Check', yPos, leftMargin, pageWidth);
+    yPos += 7;
+
+    check.mobileDevices.forEach((device) => {
+      const deviceResult = checkAndAddPage(doc, yPos, 10, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
+      yPos = deviceResult.yPos;
+      drawLabelValue(doc, 'Device Name', device.deviceName || '-', leftMargin, yPos);
+      yPos += 6;
+      drawLabelValue(doc, 'MAC Address', device.macAddress || '-', leftMargin, yPos);
+      yPos += 8;
+    });
+  }
+
+  // 9. Additional Information
   // Check if we need a new page (estimate ~40mm for section)
   let infoResult = checkAndAddPage(doc, yPos, 40, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
   yPos = infoResult.yPos;
@@ -475,7 +492,7 @@ export async function generateDeviceCheckPDF(check: DeviceCheck) {
 
   yPos += 12;
 
-  // 9. Overall Status and Device Condition - Moved to last page
+  // 10. Overall Status and Device Condition - Moved to last page
   let statusResult = checkAndAddPage(doc, yPos, 70, pageHeight, bottomMargin, topMargin, pageWidth, leftMargin, rightMargin);
   yPos = statusResult.yPos;
 

@@ -76,6 +76,7 @@ export interface Translations {
       deviceCondition: string;
       applications: string;
       security: string;
+      mobileDevices: string;
       additionalInfo: string;
     };
     formSections: string;
@@ -190,6 +191,18 @@ export interface Translations {
         available: string;
         notAvailable: string;
       };
+    };
+    mobileDevices: {
+      title: string;
+      deviceName: string;
+      macAddress: string;
+      actions: string;
+      empty: string;
+      skipped: string;
+      filled: string;
+      invalidMac: string;
+      duplicateMac: string;
+      macFormat: string;
     };
     additionalInfo: {
       title: string;
@@ -322,11 +335,13 @@ export interface Translations {
     description: string;
     filters: {
       searchPlaceholder: string;
+      allSuitability: string;
       allConditions: string;
       allOwnership: string;
       clearFilters: string;
       groupByEmployee: string;
       missingVersion: string;
+      overdue: string;
     };
     empty: string;
     buttons: {
@@ -605,6 +620,7 @@ export const translations: Record<Language, Translations> = {
         deviceCondition: "Device Condition",
         applications: "Applications",
         security: "Security",
+        mobileDevices: "Mobile Devices",
         additionalInfo: "Additional Info",
       },
       formSections: "Form Sections",
@@ -719,6 +735,18 @@ export const translations: Record<Language, Translations> = {
           available: "Available",
           notAvailable: "Not Available",
         },
+      },
+      mobileDevices: {
+        title: "Mobile Device Check (Optional)",
+        deviceName: "Device Name",
+        macAddress: "Device MAC Address",
+        actions: "Actions",
+        empty: "No mobile devices added",
+        skipped: "Skipped",
+        filled: "Filled",
+        invalidMac: "Use format AA:BB:CC:DD:EE:FF",
+        duplicateMac: "This MAC address is already used",
+        macFormat: "Format: AA:BB:CC:DD:EE:FF",
       },
       additionalInfo: {
         title: "Additional Information",
@@ -851,11 +879,13 @@ export const translations: Record<Language, Translations> = {
       description: "View and manage all device checking records",
       filters: {
         searchPlaceholder: "Search by employee, device brand or model...",
+        allSuitability: "All Suitability",
         allConditions: "All Conditions",
         allOwnership: "All Ownership",
         clearFilters: "Clear Filters",
         groupByEmployee: "Group by Employee",
         missingVersion: "Missing version",
+        overdue: "Overdue >90 days",
       },
       empty: "No device checks found",
       buttons: {
@@ -1134,6 +1164,7 @@ export const translations: Record<Language, Translations> = {
         deviceCondition: "Kondisi Perangkat",
         applications: "Aplikasi",
         security: "Keamanan",
+        mobileDevices: "Perangkat Handphone",
         additionalInfo: "Info Tambahan",
       },
       formSections: "Bagian Formulir",
@@ -1249,6 +1280,18 @@ export const translations: Record<Language, Translations> = {
           available: "Tersedia",
           notAvailable: "Tidak Tersedia",
         },
+      },
+      mobileDevices: {
+        title: "Pengecekan Perangkat Handphone (Opsional)",
+        deviceName: "Nama perangkat",
+        macAddress: "Mac Address Perangkat",
+        actions: "Aksi",
+        empty: "Belum ada perangkat handphone",
+        skipped: "Dilewati",
+        filled: "Terisi",
+        invalidMac: "Gunakan format AA:BB:CC:DD:EE:FF",
+        duplicateMac: "Mac Address sudah digunakan",
+        macFormat: "Format: AA:BB:CC:DD:EE:FF",
       },
       additionalInfo: {
         title: "Informasi Tambahan",
@@ -1383,11 +1426,13 @@ export const translations: Record<Language, Translations> = {
       filters: {
         searchPlaceholder:
           "Cari berdasarkan karyawan, merk atau model perangkat...",
+        allSuitability: "Semua Kesesuaian",
         allConditions: "Semua Kondisi",
         allOwnership: "Semua Kepemilikan",
         clearFilters: "Hapus Filter",
         groupByEmployee: "Kelompokkan Berdasarkan Karyawan",
         missingVersion: "Belum versi terbaru",
+        overdue: "Terlambat >90 hari",
       },
       empty: "Tidak ada pengecekan perangkat ditemukan",
       buttons: {

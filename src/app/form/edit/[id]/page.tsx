@@ -12,11 +12,12 @@ import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm } from 'react-hook-form';
-import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, ArrowLeft } from 'lucide-react';
+import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, ArrowLeft, Smartphone } from 'lucide-react';
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { normalizeDataForForm } from '@/lib/utils/data-normalizer';
+import { getMobileDeviceMacError, normalizeMacAddress } from '@/lib/utils/mobile-devices';
 
 export default function EditFormPage() {
   const params = useParams();
@@ -70,6 +71,7 @@ export default function EditFormPage() {
           list: [] as any,
         },
       },
+      mobileDevices: [] as any,
       additionalInfo: {
         passwordUsage: 'available',
         otherNotes: '',
@@ -108,6 +110,12 @@ export default function EditFormPage() {
     remove: removeStorage,
   } = useFieldArray({ control, name: 'specification.storage' });
 
+  const {
+    fields: mobileDeviceFields,
+    append: appendMobileDevice,
+    remove: removeMobileDevice,
+  } = useFieldArray({ control, name: 'mobileDevices' });
+
   const sections = [
     { id: 'employee', title: t('form.sections.employee'), icon: User },
     { id: 'device', title: t('form.sections.deviceDetail'), icon: Laptop },
@@ -116,6 +124,7 @@ export default function EditFormPage() {
     { id: 'condition', title: t('form.sections.deviceCondition'), icon: Shield },
     { id: 'apps', title: t('form.sections.applications'), icon: Shield },
     { id: 'security', title: t('form.sections.security'), icon: Shield },
+    { id: 'mobile-devices', title: t('form.sections.mobileDevices'), icon: Smartphone },
     { id: 'info', title: t('form.sections.additionalInfo'), icon: Calendar },
   ];
 
@@ -185,6 +194,7 @@ export default function EditFormPage() {
           workApplications: normalizedCheck.workApplications,
           nonWorkApplications: normalizedCheck.nonWorkApplications,
           security: normalizedCheck.security,
+          mobileDevices: normalizedCheck.mobileDevices || [],
           additionalInfo: normalizedCheck.additionalInfo,
         });
 
@@ -921,6 +931,76 @@ export default function EditFormPage() {
             </CardContent>
           </Card>
 
+          {/* Mobile Device Section */}
+          <Card id="mobile-devices" className="form-section">
+            <CardHeader className="form-section-heading">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  {t('form.mobileDevices.title')}
+                </CardTitle>
+                <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {mobileDeviceFields.length ? t('form.mobileDevices.filled') : t('form.mobileDevices.skipped')}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="form-section-content space-y-4">
+              <div className="flex justify-end">
+                <Button
+                  type="button"
+                  variant="outline"
+                  size="sm"
+                  onClick={() => appendMobileDevice({ deviceName: '', macAddress: '' })}
+                >
+                  <Plus className="h-4 w-4 mr-1" />
+                  {t('common.add')}
+                </Button>
+              </div>
+              {mobileDeviceFields.length === 0 ? (
+                <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">{t('form.mobileDevices.empty')}</p>
+              ) : (
+                <div className="space-y-3">
+                  <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[.06em] text-muted-foreground sm:grid">
+                    <span>{t('form.mobileDevices.deviceName')}</span>
+                    <span>{t('form.mobileDevices.macAddress')}</span>
+                    <span>{t('form.mobileDevices.actions')}</span>
+                  </div>
+                  {mobileDeviceFields.map((field, index) => (
+                    <div key={field.id} className="mobile-device-row grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] sm:items-start sm:p-3">
+                      <div className="space-y-1.5">
+                        <Label className="sm:hidden" htmlFor={`mobileDeviceName-${field.id}`}>{t('form.mobileDevices.deviceName')}</Label>
+                        <Input className="mobile-device-input" id={`mobileDeviceName-${field.id}`} {...register(`mobileDevices.${index}.deviceName` as any)} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="sm:hidden" htmlFor={`mobileDeviceMac-${field.id}`}>{t('form.mobileDevices.macAddress')}</Label>
+                          <Input
+                            className="mobile-device-input"
+                          id={`mobileDeviceMac-${field.id}`}
+                          {...register(`mobileDevices.${index}.macAddress` as any, {
+                            validate: (value: string) => {
+                              const error = getMobileDeviceMacError(value, index, watch('mobileDevices'));
+                              return error === 'invalid'
+                                ? t('form.mobileDevices.invalidMac')
+                                : error === 'duplicate' ? t('form.mobileDevices.duplicateMac') : true;
+                            },
+                          })}
+                          onChange={(event) => setValue(`mobileDevices.${index}.macAddress`, normalizeMacAddress(event.target.value), { shouldDirty: true, shouldValidate: true })}
+                        />
+                        <p className="text-[11px] text-muted-foreground">{t('form.mobileDevices.macFormat')}</p>
+                        {(errors.mobileDevices as any)?.[index]?.macAddress?.message && (
+                          <p className="mt-1 text-xs text-destructive">{(errors.mobileDevices as any)[index]?.macAddress?.message as string}</p>
+                        )}
+                      </div>
+                      <Button type="button" variant="ghost" size="icon" className="h-10 w-10 self-start" onClick={() => removeMobileDevice(index)} aria-label={t('common.tooltips.removeItem')}>
+                        <Trash2 className="h-4 w-4" />
+                      </Button>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Additional Info Section */}
           <Card id="info">
             <CardHeader>
@@ -971,7 +1051,7 @@ export default function EditFormPage() {
           </Card>
 
           {/* Submit Button */}
-          <div className="flex gap-4">
+          <div className="form-actions">
             <Button
               type="button"
               variant="outline"

@@ -82,6 +82,10 @@ export interface DeviceCheck {
       }>;
     };
   };
+  mobileDevices?: Array<{
+    deviceName?: string;
+    macAddress?: string;
+  }>;
   additionalInfo: {
     passwordUsage: "Available" | "Not Available";
     otherNotes?: string;

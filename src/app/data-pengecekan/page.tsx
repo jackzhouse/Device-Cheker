@@ -335,7 +335,7 @@ export default function CheckDataPage() {
             <div className="relative">
               <Search className="absolute left-3 top-1/2 -translate-y-1/2 h-4 w-4 text-muted-foreground" />
               <Input
-                placeholder={t('checkData.searchPlaceholder')}
+                placeholder={t('checkData.filters.searchPlaceholder')}
                 value={searchTerm}
                 onChange={(e) => { setSearchTerm(e.target.value); setPage(1); }}
                 className="pl-10"
@@ -360,7 +360,7 @@ export default function CheckDataPage() {
             {t('checkData.filters.missingVersion')}
           </Button>
           <Button type="button" variant={filters.overdue ? 'default' : 'outline'} onClick={() => { setPage(1); setFilters(prev => ({ ...prev, overdue: !prev.overdue })); }}>
-            {language === 'id' ? 'Overdue >90 hari' : 'Overdue >90 days'}
+            {t('checkData.filters.overdue')}
           </Button>
           <select
             value={filters.ownership}

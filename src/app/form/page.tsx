@@ -13,7 +13,7 @@ import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm, useWatch, type UseFormReturn } from 'react-hook-form';
-import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2, HelpCircle, Keyboard, X, Check } from 'lucide-react';
+import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2, HelpCircle, Keyboard, X, Check, Smartphone } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -26,6 +26,7 @@ import { Tooltip, TooltipContent, TooltipTrigger } from '@/components/ui/tooltip
 import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-options.service';
 import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
+import { getMobileDeviceMacError, normalizeMacAddress } from '@/lib/utils/mobile-devices';
 
 type ApplicationItem = {
   applicationName?: string;
@@ -42,6 +43,11 @@ type VPNItem = {
 type StorageItem = {
   type: string;
   size: string;
+};
+
+type MobileDeviceItem = {
+  deviceName?: string;
+  macAddress?: string;
 };
 
 type FormData = {
@@ -85,6 +91,7 @@ type FormData = {
       list: VPNItem[];
     };
   };
+  mobileDevices: MobileDeviceItem[];
   additionalInfo: {
     passwordUsage: string;
     otherNotes: string;
@@ -154,6 +161,7 @@ function FormContent() {
           list: [],
         },
       },
+      mobileDevices: [],
       additionalInfo: {
         passwordUsage: 'available',
         otherNotes: '',
@@ -239,6 +247,12 @@ function FormContent() {
     remove: removeStorage,
   } = useFieldArray({ control, name: 'specification.storage' });
 
+  const {
+    fields: mobileDeviceFields,
+    append: appendMobileDevice,
+    remove: removeMobileDevice,
+  } = useFieldArray({ control, name: 'mobileDevices' });
+
   // Handle URL params for pre-filling employee
   React.useEffect(() => {
     const employeeIdFromUrl = searchParams.get('employeeId');
@@ -270,8 +284,8 @@ function FormContent() {
         setHelpModalOpen(false);
       }
 
-      // Alt + 1-8: Jump to sections
-      if (e.altKey && e.key >= '1' && e.key <= '8') {
+      // Alt + 1-9: Jump to sections
+      if (e.altKey && e.key >= '1' && e.key <= '9') {
         e.preventDefault();
         const sectionNum = parseInt(e.key);
         const sectionId = sections[sectionNum - 1]?.id;
@@ -297,7 +311,7 @@ function FormContent() {
   // Track active section for progress indicator
   React.useEffect(() => {
     const handleScroll = () => {
-      const sectionsList = ['employee', 'device', 'os', 'spec', 'condition', 'apps', 'security', 'info'];
+      const sectionsList = ['employee', 'device', 'os', 'spec', 'condition', 'apps', 'security', 'mobile-devices', 'info'];
       const scrollPosition = window.scrollY + 120; // Offset for better detection
       
       // Use last section already reached, keeping anchor state aligned with reading position.
@@ -324,11 +338,12 @@ function FormContent() {
     { id: 'condition', title: t('form.sections.deviceCondition'), icon: Shield, label: '5' },
     { id: 'apps', title: t('form.sections.applications'), icon: Shield, label: '6' },
     { id: 'security', title: t('form.sections.security'), icon: Shield, label: '7' },
-    { id: 'info', title: t('form.sections.additionalInfo'), icon: Calendar, label: '8' },
+    { id: 'mobile-devices', title: t('form.sections.mobileDevices'), icon: Smartphone, label: '8' },
+    { id: 'info', title: t('form.sections.additionalInfo'), icon: Calendar, label: '9' },
   ] as const;
 
   // Determine completed sections
-  const getSectionStatus = (sectionId: string): 'complete' | 'incomplete' => {
+  const getSectionStatus = (sectionId: string): 'complete' | 'incomplete' | 'skipped' => {
     const formData = watch();
     switch (sectionId) {
       case 'employee':
@@ -345,6 +360,8 @@ function FormContent() {
         return 'complete';
       case 'security':
         return 'complete';
+      case 'mobile-devices':
+        return formData.mobileDevices?.length ? 'complete' : 'skipped';
       case 'info':
         return formData.additionalInfo?.passwordUsage ? 'complete' : 'incomplete';
       default:
@@ -438,6 +455,7 @@ function FormContent() {
           list: [],
         },
       },
+      mobileDevices: [],
       additionalInfo: {
         passwordUsage: 'available',
         otherNotes: '',
@@ -608,6 +626,10 @@ function FormContent() {
                 })),
               },
             },
+            mobileDevices: (lastCheck.mobileDevices || []).map((device: any) => ({
+              deviceName: device.deviceName || '',
+              macAddress: device.macAddress || '',
+            })),
             additionalInfo: {
               passwordUsage: normalizeEnumValue(lastCheck.additionalInfo?.passwordUsage || 'available'),
               inspectorPICName: lastCheck.additionalInfo?.inspectorPICName || '',
@@ -680,7 +702,7 @@ function FormContent() {
     }
   };
 
-  const completedSections = sections.filter((section) => getSectionStatus(section.id) === 'complete').length;
+  const completedSections = sections.filter((section) => section.id !== 'mobile-devices' && getSectionStatus(section.id) === 'complete').length;
   const saveDraft = () => {
     window.sessionStorage.setItem(draftStorageKey, JSON.stringify(watchedValues));
     setDraftSavedAt(Date.now());
@@ -903,7 +925,7 @@ function FormContent() {
                 </div>
                 <div className="flex items-center justify-between p-2 bg-muted rounded">
                   <span className="text-muted-foreground">{t('form.help.keyboardShortcuts.jumpToSection')}</span>
-                  <kbd className="px-2 py-1 text-xs font-mono bg-background border rounded">Alt + 1-8</kbd>
+                  <kbd className="px-2 py-1 text-xs font-mono bg-background border rounded">Alt + 1-9</kbd>
                 </div>
               </div>
             </div>
@@ -1557,6 +1579,88 @@ function FormContent() {
             </CardContent>
           </Card>
 
+          {/* Mobile Device Section */}
+          <Card id="mobile-devices" className="form-section">
+            <CardHeader className="form-section-heading">
+              <div className="flex items-center justify-between gap-3">
+                <CardTitle className="flex items-center gap-2">
+                  <Smartphone className="h-5 w-5" />
+                  {t('form.mobileDevices.title')}
+                </CardTitle>
+                <span className="rounded-full bg-muted px-2.5 py-1 text-[11px] font-semibold text-muted-foreground">
+                  {mobileDeviceFields.length ? t('form.mobileDevices.filled') : t('form.mobileDevices.skipped')}
+                </span>
+              </div>
+            </CardHeader>
+            <CardContent className="form-section-content space-y-4">
+              <div className="flex items-center justify-end">
+                <Tooltip>
+                  <TooltipTrigger asChild>
+                    <Button
+                      type="button"
+                      variant="outline"
+                      size="sm"
+                      onClick={() => appendMobileDevice({ deviceName: '', macAddress: '' })}
+                    >
+                      <Plus className="h-4 w-4 mr-1" />
+                      {t('common.add')}
+                    </Button>
+                  </TooltipTrigger>
+                  <TooltipContent>{t('common.tooltips.addItem')}</TooltipContent>
+                </Tooltip>
+              </div>
+              {mobileDeviceFields.length === 0 ? (
+                <p className="rounded-md border border-dashed p-4 text-sm text-muted-foreground">
+                  {t('form.mobileDevices.empty')}
+                </p>
+              ) : (
+                <div className="space-y-3">
+                  <div className="hidden grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] gap-3 px-3 text-[11px] font-semibold uppercase tracking-[.06em] text-muted-foreground sm:grid">
+                    <span>{t('form.mobileDevices.deviceName')}</span>
+                    <span>{t('form.mobileDevices.macAddress')}</span>
+                    <span>{t('form.mobileDevices.actions')}</span>
+                  </div>
+                  {mobileDeviceFields.map((field, index) => (
+                    <div key={field.id} className="mobile-device-row grid grid-cols-1 gap-3 rounded-lg border p-3 sm:grid-cols-[minmax(0,1fr)_minmax(0,1fr)_2.5rem] sm:items-start sm:p-3">
+                      <div className="space-y-1.5">
+                        <Label className="sm:hidden" htmlFor={`mobileDeviceName-${field.id}`}>{t('form.mobileDevices.deviceName')}</Label>
+                        <Input className="mobile-device-input" id={`mobileDeviceName-${field.id}`} {...register(`mobileDevices.${index}.deviceName`)} />
+                      </div>
+                      <div className="space-y-1.5">
+                        <Label className="sm:hidden" htmlFor={`mobileDeviceMac-${field.id}`}>{t('form.mobileDevices.macAddress')}</Label>
+                          <Input
+                            className="mobile-device-input"
+                          id={`mobileDeviceMac-${field.id}`}
+                          {...register(`mobileDevices.${index}.macAddress`, {
+                            validate: (value) => {
+                              const error = getMobileDeviceMacError(value, index, watch('mobileDevices'));
+                              return error === 'invalid'
+                                ? t('form.mobileDevices.invalidMac')
+                                : error === 'duplicate' ? t('form.mobileDevices.duplicateMac') : true;
+                            },
+                          })}
+                          onChange={(event) => setValue(`mobileDevices.${index}.macAddress`, normalizeMacAddress(event.target.value), { shouldDirty: true, shouldValidate: true })}
+                        />
+                        <p className="text-[11px] text-muted-foreground">{t('form.mobileDevices.macFormat')}</p>
+                        {errors.mobileDevices?.[index]?.macAddress?.message && (
+                          <p className="mt-1 text-xs text-destructive">{errors.mobileDevices[index]?.macAddress?.message as string}</p>
+                        )}
+                      </div>
+                      <Tooltip>
+                        <TooltipTrigger asChild>
+                          <Button type="button" variant="ghost" size="icon" className="h-10 w-10 self-start" onClick={() => removeMobileDevice(index)} aria-label={t('common.tooltips.removeItem')}>
+                            <Trash2 className="h-4 w-4" />
+                          </Button>
+                        </TooltipTrigger>
+                        <TooltipContent>{t('common.tooltips.removeItem')}</TooltipContent>
+                      </Tooltip>
+                    </div>
+                  ))}
+                </div>
+              )}
+            </CardContent>
+          </Card>
+
           {/* Additional Info Section */}
           <Card id="info" className="form-section">
             <CardHeader className="form-section-heading">
@@ -1608,7 +1712,7 @@ function FormContent() {
           </Card>
 
           {/* Submit Button */}
-          <div className="form-actions sticky bottom-2 z-30 rounded-xl bg-background/95 shadow-lg backdrop-blur-sm">
+          <div className="form-actions">
             <Button
               type="button"
               variant="outline"
@@ -1661,7 +1765,7 @@ function FormContent() {
               </div>
               <div className="flex items-center justify-between gap-2">
                 <span className="text-muted-foreground">{t('form.help.keyboardShortcuts.jumpToSection')}</span>
-                <kbd className="px-1.5 py-0.5 font-mono bg-muted border rounded">Alt+1-8</kbd>
+                <kbd className="px-1.5 py-0.5 font-mono bg-muted border rounded">Alt+1-9</kbd>
               </div>
               <div className="pt-2 border-t mt-2">
                 <Button
