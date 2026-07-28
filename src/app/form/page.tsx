@@ -13,7 +13,7 @@ import { CreatableSelect, type SelectOption } from '@/components/ui/select';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { toast } from 'sonner';
 import { useFieldArray, useForm, useWatch, type UseFormReturn } from 'react-hook-form';
-import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2, HelpCircle, Keyboard, X, Check, Smartphone } from 'lucide-react';
+import { Plus, Trash2, Save, User, Laptop, HardDrive, Shield, Calendar, Loader2, HelpCircle, Keyboard, X, Smartphone } from 'lucide-react';
 import {
   Dialog,
   DialogContent,
@@ -27,6 +27,7 @@ import { getDropdownOptions, saveDropdownOption } from '@/lib/services/dropdown-
 import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { getMobileDeviceMacError, normalizeMacAddress } from '@/lib/utils/mobile-devices';
+import FormSectionNav from '@/components/form/FormSectionNav';
 
 type ApplicationItem = {
   applicationName?: string;
@@ -749,30 +750,7 @@ function FormContent() {
         </Tooltip>
       </div>
 
-      <nav className="form-anchor-bar" aria-label={t('form.formSections')}>
-        {sections.map((section) => {
-          const complete = getSectionStatus(section.id) === 'complete';
-          return (
-            <button
-              key={section.id}
-              type="button"
-              onClick={() => {
-                const sectionElement = document.getElementById(section.id);
-                sectionElement?.scrollIntoView({ behavior: 'smooth', block: 'start' });
-              }}
-              className={`form-anchor-item ${activeSection === section.id ? 'form-anchor-item-active' : ''} ${complete ? 'form-anchor-item-complete' : ''}`}
-              aria-current={activeSection === section.id ? 'location' : undefined}
-            >
-              <span className="form-anchor-index">{section.label}</span>
-              <section.icon className="h-3.5 w-3.5 shrink-0" />
-              <span className="min-w-0 truncate">{section.title}</span>
-              <span className="ml-auto shrink-0" aria-label={complete ? 'Complete' : 'Incomplete'}>
-                {complete ? <Check className="h-3.5 w-3.5" /> : <span className="form-anchor-dot" />}
-              </span>
-            </button>
-          );
-        })}
-      </nav>
+      <FormSectionNav sections={sections} activeSection={activeSection} getSectionStatus={getSectionStatus} ariaLabel={t('form.formSections')} />
       <div className="flex items-center justify-between gap-3 rounded-lg border border-[var(--app-border)] bg-[var(--app-subtle)] px-3 py-2 text-xs text-muted-foreground">
         <span>{completedSections}/8 {t('form.progress.sectionsComplete')}</span>
         <span>{draftSavedAt ? `${t('form.progress.draftSaved')} ${new Date(draftSavedAt).toLocaleTimeString(language === 'id' ? 'id-ID' : 'en-US', { hour: '2-digit', minute: '2-digit' })}` : t('form.progress.noDraft')}</span>

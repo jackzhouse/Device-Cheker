@@ -18,6 +18,7 @@ import { getEmployeeById } from '@/lib/services/employees.service';
 import { useLanguage } from '@/contexts/LanguageContext';
 import { normalizeDataForForm } from '@/lib/utils/data-normalizer';
 import { getMobileDeviceMacError, normalizeMacAddress } from '@/lib/utils/mobile-devices';
+import FormSectionNav from '@/components/form/FormSectionNav';
 
 export default function EditFormPage() {
   const params = useParams();
@@ -28,6 +29,7 @@ export default function EditFormPage() {
   const [saving, setSaving] = React.useState(false);
   const [selectedEmployee, setSelectedEmployee] = React.useState<any>(null);
   const [dropdownOptions, setDropdownOptions] = React.useState<Record<string, SelectOption[]>>({});
+  const [activeSection, setActiveSection] = React.useState('employee');
 
   const { register, control, watch, handleSubmit, setValue, formState: { errors }, reset } = useForm({
     defaultValues: {
@@ -116,7 +118,7 @@ export default function EditFormPage() {
     remove: removeMobileDevice,
   } = useFieldArray({ control, name: 'mobileDevices' });
 
-  const sections = [
+  const sections = React.useMemo(() => [
     { id: 'employee', title: t('form.sections.employee'), icon: User },
     { id: 'device', title: t('form.sections.deviceDetail'), icon: Laptop },
     { id: 'os', title: t('form.sections.operatingSystem'), icon: HardDrive },
@@ -126,12 +128,27 @@ export default function EditFormPage() {
     { id: 'security', title: t('form.sections.security'), icon: Shield },
     { id: 'mobile-devices', title: t('form.sections.mobileDevices'), icon: Smartphone },
     { id: 'info', title: t('form.sections.additionalInfo'), icon: Calendar },
-  ];
+  ], [t]);
 
   // Fetch check data on load
   React.useEffect(() => {
     fetchCheckData();
   }, [checkId]);
+
+  React.useEffect(() => {
+    const handleScroll = () => {
+      const scrollPosition = window.scrollY + 120;
+      let activeId = sections[0].id;
+      sections.forEach((section) => {
+        const element = document.getElementById(section.id);
+        if (element && element.offsetTop <= scrollPosition) activeId = section.id;
+      });
+      setActiveSection(activeId);
+    };
+    window.addEventListener('scroll', handleScroll, { passive: true });
+    handleScroll();
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, [sections]);
 
   // Fetch dropdown options
   React.useEffect(() => {
@@ -347,20 +364,9 @@ export default function EditFormPage() {
         </Button>
       </div>
 
-      <div className="grid gap-4 lg:grid-cols-[190px_1fr]">
-        {/* Progress Indicator (Desktop) */}
-        <aside className="soft-section hidden h-fit space-y-1 lg:sticky lg:top-20 lg:block">
-          {sections.map((section) => (
-            <a
-              key={section.id}
-              href={`#${section.id}`}
-              className="flex items-center gap-2 rounded-md px-2.5 py-1.5 text-xs text-muted-foreground transition-colors hover:bg-accent hover:text-foreground"
-            >
-              <section.icon className="h-4 w-4" />
-              {section.title}
-            </a>
-          ))}
-        </aside>
+      <FormSectionNav sections={sections} activeSection={activeSection} ariaLabel={t('form.formSections')} />
+
+      <div className="grid gap-4 lg:grid-cols-[1fr]">
 
         {/* Form */}
         <form onSubmit={handleSubmit(onSubmit)} className="space-y-4">

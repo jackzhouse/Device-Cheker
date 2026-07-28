@@ -111,11 +111,12 @@
     --app-subtle: var(--color-bg-subtle);
     --app-border: var(--color-border);
     --app-border-strong: var(--color-border-strong);
-    --chrome-bg: #17212b;
-    --chrome-text: #f7f9fc;
-    --chrome-muted: #aab7c5;
-    --chrome-hover: #22303d;
-    --chrome-active: #75b7ff;
+    --chrome-bg: #ffffff;
+    --chrome-text: #17202a;
+    --chrome-muted: #526170;
+    --chrome-hover: #eef2f6;
+    --chrome-active: #2867c7;
+    --chrome-active-soft: #dce9ff;
   }
 
   .dark {
@@ -149,6 +150,7 @@
     --chrome-muted: #a5b4c3;
     --chrome-hover: #1b2937;
     --chrome-active: #75b7ff;
+    --chrome-active-soft: #243a52;
   }
 
   * { @apply border-border; }
@@ -222,8 +224,22 @@
   .workspace-topbar a:focus-visible, .workspace-topbar button:focus-visible { outline: 2px solid var(--chrome-active); outline-offset: 3px; }
 
   .form-workflow { @apply mx-auto w-full max-w-[980px] min-w-0; }
-  .form-anchor-bar { @apply grid grid-cols-2 gap-1.5 rounded-[var(--radius-lg)] border border-[var(--app-border)] bg-[var(--app-surface)] p-1.5 shadow-xs sm:flex sm:flex-wrap; }
-  .form-anchor-item { @apply inline-flex min-w-0 items-center gap-1.5 rounded-md border border-transparent px-2.5 py-2 text-left text-[12px] font-semibold text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-subtle)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:flex-1 sm:justify-center sm:px-3; }
+  .form-anchor-sentinel { @apply h-px w-full; }
+  .form-anchor-shell { @apply sticky top-14 z-40 bg-transparent; width: 100vw; margin-left: calc(50% - 50vw); }
+  .form-anchor-bar { @apply relative mx-auto flex flex-nowrap gap-1.5 rounded-[var(--radius-lg)] border-0 bg-[var(--app-surface)] p-1.5 shadow-xs transition-[background-color,box-shadow,border-radius] duration-200 ease-out sm:flex-wrap; width: calc(100% - 2rem); max-width: 1416px; scrollbar-width: none; -ms-overflow-style: none; }
+  .form-anchor-bar::-webkit-scrollbar { display: none; }
+  .form-anchor-bar-stuck { animation: formAnchorLift .22s ease-out; }
+  .form-anchor-bar-stuck .form-anchor-bar { @apply rounded-t-none border-0 bg-[var(--chrome-bg)]; border-radius: 0 0 var(--radius-lg) var(--radius-lg); box-shadow: 0 8px 8px -8px rgba(31, 48, 67, .28); }
+  .form-anchor-bar-stuck .form-anchor-item { @apply rounded-md border-transparent text-[var(--chrome-muted)] hover:border-transparent hover:bg-[var(--chrome-hover)] hover:text-[var(--chrome-text)]; }
+  .form-anchor-bar-stuck .form-anchor-item-active { border-color: transparent; background: var(--chrome-active-soft); color: var(--chrome-text) !important; }
+  .form-anchor-bar-stuck .form-anchor-item-complete { color: var(--chrome-active); }
+  .form-anchor-bar-stuck .form-anchor-item-active.form-anchor-item-complete { color: var(--chrome-text) !important; }
+  .form-anchor-bar-stuck .form-anchor-index { @apply bg-[var(--chrome-hover)] text-[var(--chrome-muted)]; }
+  .form-anchor-bar-stuck .form-anchor-item-active .form-anchor-index { @apply bg-[var(--chrome-bg)] text-[var(--chrome-text)]; }
+  .form-anchor-bar-stuck .form-anchor-dot { background: var(--chrome-muted); }
+  .workspace-shell:has(.form-anchor-bar-stuck) .workspace-topbar { @apply border-b-transparent; background: var(--chrome-bg); }
+  .workspace-shell:has(.form-anchor-bar-stuck) .workspace-topbar-inner { @apply rounded-none border-0; background: transparent; }
+  .form-anchor-item { @apply inline-flex min-w-0 shrink-0 items-center gap-1.5 rounded-md border border-transparent px-2.5 py-2 text-left text-[12px] font-semibold text-muted-foreground transition-colors hover:border-[var(--app-border-strong)] hover:bg-[var(--app-subtle)] hover:text-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 sm:justify-center sm:px-3; flex: 0 0 156px; }
   .form-anchor-item-active { @apply border-primary/30 bg-primary/10 text-foreground; }
   .form-anchor-item-complete { @apply text-primary; }
   .form-anchor-item-active.form-anchor-item-complete { @apply border-primary/40 bg-primary/15; }
@@ -246,9 +262,27 @@
   .form-actions button[type="submit"] { @apply flex-1 sm:min-w-[260px] sm:flex-none; }
 }
 
+@media (min-width: 640px) {
+  .form-anchor-bar { width: calc(100% - 3rem); overflow-x: visible; }
+  .form-anchor-item { flex: 1 1 0; }
+}
+
+@media (min-width: 1024px) {
+  .form-anchor-bar { width: calc(100% - 4rem); }
+}
+
 @keyframes themeToggle {
   0% { opacity: 0; transform: rotate(-90deg) scale(0.5); }
   100% { opacity: 1; transform: rotate(0deg) scale(1); }
 }
 
 .animate-theme-toggle { animation: themeToggle 0.3s ease-out; }
+
+@keyframes formAnchorLift {
+  0% { transform: translateY(-4px); }
+  100% { transform: translateY(0); }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .form-anchor-bar-stuck { animation: none; }
+}
