@@ -2,11 +2,11 @@
 
 import * as React from 'react';
 import { useParams, useRouter } from 'next/navigation';
-import { getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-checks.service';
+import { getDeviceCheckById, getEmployeeChecks, type DeviceCheck } from '@/lib/services/device-checks.service';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { Badge } from '@/components/ui/badge';
 import { Button } from '@/components/ui/button';
-import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download, AlertTriangle } from 'lucide-react';
+import { ArrowLeft, Calendar, HardDrive, Laptop, User, Building, Edit, Trash2, Download, AlertTriangle, Eye } from 'lucide-react';
 import Link from 'next/link';
 import { toast } from 'sonner';
 import { generateDeviceCheckPDF, generateEmployeeHistoryPDF } from '@/lib/utils/pdf';
@@ -73,6 +73,9 @@ export default function EmployeeHistoryPage() {
   // Delete modal states
   const [deleteModalOpen, setDeleteModalOpen] = React.useState(false);
   const [deleteTargetId, setDeleteTargetId] = React.useState<string | null>(null);
+  const [viewCheck, setViewCheck] = React.useState<DeviceCheck | null>(null);
+  const [viewDialogOpen, setViewDialogOpen] = React.useState(false);
+  const [viewLoading, setViewLoading] = React.useState(false);
 
   // Helper to get translated device type
   const getDeviceTypeLabel = (value: string) => {
@@ -162,6 +165,22 @@ export default function EmployeeHistoryPage() {
   const handleDeleteCheckClick = (checkId: string) => {
     setDeleteTargetId(checkId);
     setDeleteModalOpen(true);
+  };
+
+  const handleViewCheck = async (checkId: string) => {
+    setViewDialogOpen(true);
+    setViewLoading(true);
+    setViewCheck(null);
+    try {
+      const response = await getDeviceCheckById(checkId);
+      if (!response.success || !response.data) throw new Error('Detail pengecekan tidak ditemukan');
+      setViewCheck(response.data);
+    } catch (error: unknown) {
+      toast.error(error instanceof Error ? error.message : 'Gagal memuat detail pengecekan');
+      setViewDialogOpen(false);
+    } finally {
+      setViewLoading(false);
+    }
   };
 
   const handleDeleteConfirm = async () => {
@@ -373,6 +392,9 @@ export default function EmployeeHistoryPage() {
                           {getSuitabilityBadge(check.deviceCondition.deviceSuitability)}
                         </div>
                         <div className="flex gap-2 flex-wrap">
+                          <Button variant="outline" size="sm" onClick={() => handleViewCheck(check._id)} aria-label={t('common.view')}>
+                            <Eye className="h-4 w-4" />
+                          </Button>
                           <Button variant="outline" size="sm" onClick={() => handleDownloadPDF(check)}>
                             <Download className="h-4 w-4" />
                           </Button>
@@ -397,6 +419,110 @@ export default function EmployeeHistoryPage() {
           )}
         </CardContent>
       </Card>
+
+      <Dialog open={viewDialogOpen} onOpenChange={setViewDialogOpen}>
+        <DialogContent className="max-h-[85vh] max-w-3xl overflow-y-auto">
+          <DialogHeader>
+            <DialogTitle>{t('common.view')} {t('checkData.checkHistory')}</DialogTitle>
+            <DialogDescription>
+              {viewCheck ? `${viewCheck.employeeSnapshot.fullName} · ${formatDate(viewCheck.checkDate)} · v${viewCheck.version}` : 'Memuat detail pengecekan...'}
+            </DialogDescription>
+          </DialogHeader>
+          {viewLoading ? (
+            <div className="py-10 text-center text-sm text-muted-foreground">Memuat detail...</div>
+          ) : viewCheck && (
+            <div className="grid gap-4 text-sm sm:grid-cols-2">
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Perangkat</CardTitle></CardHeader>
+                <CardContent className="space-y-1.5 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Tipe:</span> {getDeviceTypeLabel(viewCheck.deviceDetail.deviceType)}</p>
+                  <p><span className="font-medium text-foreground">Merk/model:</span> {viewCheck.deviceDetail.deviceBrand} {viewCheck.deviceDetail.deviceModel}</p>
+                  <p><span className="font-medium text-foreground">Serial:</span> {viewCheck.deviceDetail.serialNumber || '-'}</p>
+                  <p><span className="font-medium text-foreground">Kepemilikan:</span> {getOwnershipLabel(viewCheck.deviceDetail.ownership)}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Sistem operasi</CardTitle></CardHeader>
+                <CardContent className="space-y-1.5 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">OS:</span> {viewCheck.operatingSystem.osType} {viewCheck.operatingSystem.osVersion}</p>
+                  <p><span className="font-medium text-foreground">Lisensi:</span> {viewCheck.operatingSystem.osLicense}</p>
+                  <p><span className="font-medium text-foreground">Update rutin:</span> {viewCheck.operatingSystem.osRegularUpdate ? 'Ya' : 'Tidak'}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Spesifikasi</CardTitle></CardHeader>
+                <CardContent className="space-y-1.5 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Prosesor:</span> {viewCheck.specification?.processor || '-'}</p>
+                  <p><span className="font-medium text-foreground">RAM:</span> {viewCheck.specification?.ramCapacity || '-'}</p>
+                  <p><span className="font-medium text-foreground">Penyimpanan:</span> {viewCheck.specification?.storage?.map((storage) => `${storage.type} ${storage.size}`).join(', ') || '-'}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Kondisi perangkat</CardTitle></CardHeader>
+                <CardContent className="space-y-1.5 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Kelayakan:</span> {getSuitabilityLabel(viewCheck.deviceCondition.deviceSuitability)}</p>
+                  <p><span className="font-medium text-foreground">Baterai:</span> {viewCheck.deviceCondition.batterySuitability}</p>
+                  <p><span className="font-medium text-foreground">Keyboard:</span> {viewCheck.deviceCondition.keyboardCondition}</p>
+                  <p><span className="font-medium text-foreground">Touchpad:</span> {viewCheck.deviceCondition.touchpadCondition}</p>
+                  <p><span className="font-medium text-foreground">Monitor:</span> {viewCheck.deviceCondition.monitorCondition}</p>
+                  <p><span className="font-medium text-foreground">Wi-Fi:</span> {viewCheck.deviceCondition.wifiCondition}</p>
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none sm:col-span-2">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Aplikasi kerja</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  {viewCheck.workApplications.length ? viewCheck.workApplications.map((app, index) => (
+                    <div key={`${app.applicationName}-${index}`} className="rounded-md bg-muted/50 px-3 py-2">
+                      <span className="font-medium text-foreground">{app.applicationName}</span> · {app.license}{app.notes ? ` · ${app.notes}` : ''}
+                    </div>
+                  )) : <p>-</p>}
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none sm:col-span-2">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Aplikasi non-kerja</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  {viewCheck.nonWorkApplications.length ? viewCheck.nonWorkApplications.map((app, index) => (
+                    <div key={`${app.applicationName}-${index}`} className="rounded-md bg-muted/50 px-3 py-2">
+                      <span className="font-medium text-foreground">{app.applicationName}</span> · {app.license}{app.notes ? ` · ${app.notes}` : ''}
+                    </div>
+                  )) : <p>-</p>}
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Antivirus</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Status:</span> {viewCheck.security.antivirus.status}</p>
+                  {viewCheck.security.antivirus.list.length ? viewCheck.security.antivirus.list.map((app, index) => <p key={`${app.applicationName}-${index}`}>{app.applicationName} · {app.license}{app.notes ? ` · ${app.notes}` : ''}</p>) : <p>-</p>}
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">VPN</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Status:</span> {viewCheck.security.vpn.status}</p>
+                  {viewCheck.security.vpn.list.length ? viewCheck.security.vpn.list.map((vpn, index) => <p key={`${vpn.vpnName}-${index}`}>{vpn.vpnName} · {vpn.license}{vpn.notes ? ` · ${vpn.notes}` : ''}</p>) : <p>-</p>}
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Perangkat mobile</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  {viewCheck.mobileDevices?.length ? viewCheck.mobileDevices.map((device, index) => <p key={`${device.deviceName}-${index}`}><span className="font-medium text-foreground">{device.deviceName || '-'}</span> · {device.macAddress || '-'}</p>) : <p>-</p>}
+                </CardContent>
+              </Card>
+              <Card className="border-muted shadow-none sm:col-span-2">
+                <CardHeader className="pb-2"><CardTitle className="text-sm">Informasi tambahan</CardTitle></CardHeader>
+                <CardContent className="space-y-2 text-muted-foreground">
+                  <p><span className="font-medium text-foreground">Password:</span> {viewCheck.additionalInfo.passwordUsage}</p>
+                  <p><span className="font-medium text-foreground">PIC:</span> {viewCheck.additionalInfo.inspectorPICName || '-'}</p>
+                  <div>
+                    <p className="font-medium text-foreground">Catatan:</p>
+                    <p className="mt-1 whitespace-pre-wrap break-words">{viewCheck.additionalInfo.otherNotes || (viewCheck.additionalInfo as { notes?: string }).notes || '-'}</p>
+                  </div>
+                </CardContent>
+              </Card>
+            </div>
+          )}
+        </DialogContent>
+      </Dialog>
 
       {/* Delete Confirmation Modal */}
       <Dialog open={deleteModalOpen} onOpenChange={setDeleteModalOpen}>

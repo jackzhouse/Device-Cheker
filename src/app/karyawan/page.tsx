@@ -44,12 +44,14 @@ export default function EmployeesPage() {
   const [employees, setEmployees] = React.useState<Employee[]>([]);
   const [pagination, setPagination] = React.useState({ page: Number(searchParams.get('page') || 1), totalPages: 1, total: 0 });
   const [loading, setLoading] = React.useState(true);
+  const [refreshing, setRefreshing] = React.useState(false);
   const [error, setError] = React.useState<string | null>(null);
   const [searchTerm, setSearchTerm] = useState(searchParams.get('q') || '');
   const [filterDept, setFilterDept] = useState(searchParams.get('department') || '');
   const [filterStatus, setFilterStatus] = useState(searchParams.get('status') || '');
   const [filterNeverChecked, setFilterNeverChecked] = useState(searchParams.get('neverChecked') === '1');
   const [page, setPage] = useState(Number(searchParams.get('page') || 1));
+  const [debouncedSearchTerm, setDebouncedSearchTerm] = useState(searchParams.get('q') || '');
   const [filtersOpen, setFiltersOpen] = useState(false);
   const [viewMode, setViewMode] = useState<'table' | 'card'>('table');
   const [syncDialogOpen, setSyncDialogOpen] = useState(false);
@@ -79,11 +81,17 @@ export default function EmployeesPage() {
   const [deleteTargetChecks, setDeleteTargetChecks] = useState<number>(0);
 
   React.useEffect(() => {
+    const timer = window.setTimeout(() => setDebouncedSearchTerm(searchTerm), 300);
+    return () => window.clearTimeout(timer);
+  }, [searchTerm]);
+
+  React.useEffect(() => {
     fetchEmployees();
-  }, [page, searchTerm, filterDept, filterStatus, filterNeverChecked]);
+  }, [page, debouncedSearchTerm, filterDept, filterStatus, filterNeverChecked]);
 
   React.useEffect(() => {
     setSearchTerm(searchParams.get('q') || '');
+    setDebouncedSearchTerm(searchParams.get('q') || '');
     setFilterDept(searchParams.get('department') || '');
     setFilterStatus(searchParams.get('status') || '');
     setFilterNeverChecked(searchParams.get('neverChecked') === '1');
@@ -92,14 +100,14 @@ export default function EmployeesPage() {
 
   React.useEffect(() => {
     const query = new URLSearchParams();
-    if (searchTerm) query.set('q', searchTerm);
+    if (debouncedSearchTerm) query.set('q', debouncedSearchTerm);
     if (filterDept) query.set('department', filterDept);
     if (filterStatus) query.set('status', filterStatus);
     if (filterNeverChecked) query.set('neverChecked', '1');
     if (page > 1) query.set('page', String(page));
     const nextUrl = query.toString();
     if (searchParams.toString() !== nextUrl) router.replace(`/karyawan${nextUrl ? `?${nextUrl}` : ''}`, { scroll: false });
-  }, [filterDept, filterNeverChecked, filterStatus, page, router, searchParams, searchTerm]);
+  }, [debouncedSearchTerm, filterDept, filterNeverChecked, filterStatus, page, router, searchParams]);
 
   const handleDownloadTemplate = async () => {
     try {
@@ -183,10 +191,12 @@ export default function EmployeesPage() {
   };
 
   const fetchEmployees = async () => {
-    setLoading(true);
+    const isInitialLoad = employees.length === 0;
+    if (isInitialLoad) setLoading(true);
+    else setRefreshing(true);
     setError(null);
     try {
-      const response = await getEmployees({ page, limit: 24, search: searchTerm, department: filterDept, status: filterStatus, hasChecks: filterNeverChecked ? 'false' : undefined });
+      const response = await getEmployees({ page, limit: 24, search: debouncedSearchTerm, department: filterDept, status: filterStatus, hasChecks: filterNeverChecked ? 'false' : undefined });
       if (!response.success || !response.data) throw new Error(t('employee.toast.fetchFailed'));
       setEmployees(response.data);
       setPagination({ page: response.pagination?.page || page, totalPages: response.pagination?.totalPages || 1, total: response.pagination?.total || response.data.length });
@@ -196,6 +206,7 @@ export default function EmployeesPage() {
       toast.error(message);
     } finally {
       setLoading(false);
+      setRefreshing(false);
     }
   };
 
@@ -457,7 +468,7 @@ export default function EmployeesPage() {
           </div>
       </FilterBar>
 
-      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-muted-foreground">
+      <div className="mb-3 flex flex-wrap items-center justify-between gap-3 text-xs font-medium text-muted-foreground" aria-busy={refreshing}>
         <span>{pagination.total || filteredEmployees.length} {t('employee.resultsFound')}</span>
         <div className="flex items-center gap-2">
           <div className="flex rounded-lg border border-[var(--app-border)] p-0.5" role="group" aria-label={language === 'id' ? 'Tampilan karyawan' : 'Employee view'}>

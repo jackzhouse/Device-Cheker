@@ -914,7 +914,7 @@ function FormContent() {
       <div className="form-workflow">
         <form ref={formRef} onSubmit={handleSubmit(onSubmit)} className="space-y-3 sm:space-y-4">
           {/* Employee Section */}
-          <Card id="employee" className="form-section">
+          <Card id="employee" className="form-section !overflow-visible">
             <CardHeader className="form-section-heading">
               <CardTitle className="flex items-center gap-2">
                 <User className="h-4 w-4" />
@@ -926,6 +926,7 @@ function FormContent() {
                 value={watch('employeeId')}
                 onChange={handleEmployeeSelect}
                 error={errors.employeeId?.message as string}
+                className="z-20"
               />
 
               {selectedEmployee && (
