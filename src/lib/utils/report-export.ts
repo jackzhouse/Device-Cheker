@@ -37,6 +37,28 @@ function fmtDate(d: string) {
     return new Date(d).toLocaleDateString('id-ID', { day: '2-digit', month: 'short', year: 'numeric' });
 }
 
+function formatApplicationList(
+    items: Array<{ applicationName: string; license: string; notes?: string }> = []
+) {
+    return items
+        .map(item => [item.applicationName, item.license, item.notes].filter(Boolean).join(' — '))
+        .join('\n');
+}
+
+function formatVpnList(
+    items: Array<{ vpnName: string; license: string; notes?: string }> = []
+) {
+    return items
+        .map(item => [item.vpnName, item.license, item.notes].filter(Boolean).join(' — '))
+        .join('\n');
+}
+
+function formatMobileDevices(check: DeviceCheck) {
+    return (check.mobileDevices || [])
+        .map(device => [device.deviceName, device.macAddress].filter(Boolean).join(' — '))
+        .join('\n');
+}
+
 // ─── EXCEL EXPORT ─────────────────────────────────────────────────────────────
 export function exportReportToExcel(checks: DeviceCheck[]) {
     const rows = checks.map((c, i) => ({
@@ -62,8 +84,13 @@ export function exportReportToExcel(checks: DeviceCheck[]) {
         'Touchpad': c.deviceCondition.touchpadCondition,
         'Monitor': c.deviceCondition.monitorCondition,
         'WiFi': c.deviceCondition.wifiCondition,
+        'Work Applications': formatApplicationList(c.workApplications),
+        'Non-Work Applications': formatApplicationList(c.nonWorkApplications),
         'Antivirus': c.security.antivirus.status,
+        'Antivirus Details': formatApplicationList(c.security.antivirus.list),
         'VPN': c.security.vpn.status,
+        'VPN Details': formatVpnList(c.security.vpn.list),
+        'Mobile Devices': formatMobileDevices(c),
         'Password': c.additionalInfo.passwordUsage,
         'Inspector': c.additionalInfo.inspectorPICName || '',
         'Notes': c.additionalInfo.otherNotes || '',
@@ -123,7 +150,8 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
         { h: 'Own', w: 16 },
         { h: 'Status', w: 28 },
         { h: 'Condition', w: 35 },
-        { h: 'Notes', w: 35 },
+        { h: 'Notes', w: 25 },
+        { h: 'Mobile Devices', w: 20 },
         { h: 'Check Date', w: 20 },
         { h: 'v', w: 7 },
     ];
@@ -206,6 +234,7 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
             { v: c.deviceCondition.deviceSuitability, color: sc, twoLine: false },
             { v: conditionLine, twoLine: false }, // Condition (special renderer will use c.deviceCondition)
             { v: notesLine, twoLine: false },     // Notes
+            { v: formatMobileDevices(c), twoLine: false }, // Mobile device check
             { v: fmtDate(c.checkDate), twoLine: false },
             { v: `v${c.version}`, twoLine: false },
         ];
@@ -235,7 +264,7 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
                 return;
             }
 
-            // Special renderer for Notes column (index 8)
+            // Special renderer for Notes and Mobile Devices columns
             if (ci === 8) {
                 if (notesLine) {
                     doc.setFontSize(5.5);
@@ -247,6 +276,20 @@ export async function exportReportToPDF(checks: DeviceCheck[]) {
                         doc.text(line, x + cellPad, yRow + 3.0 + (index * 2.5));
                     });
                     doc.setFont('helvetica', 'normal');
+                }
+                x += col.w;
+                return;
+            }
+
+            if (ci === 9) {
+                const mobileLine = cell.v;
+                if (mobileLine) {
+                    doc.setFontSize(5.5);
+                    txt(doc, C.darkGray);
+                    doc.setFont('helvetica', 'normal');
+                    doc.splitTextToSize(mobileLine, maxW).slice(0, 3).forEach((line: string, index: number) => {
+                        doc.text(line, x + cellPad, yRow + 3.0 + (index * 2.5));
+                    });
                 }
                 x += col.w;
                 return;
